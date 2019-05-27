@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>13408894856-5r5jjps0862t8g6cjnm9f1is5gn2rqhs.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.13408894856-5r5jjps0862t8g6cjnm9f1is5gn2rqhs</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCKE8n37MOIcLr_XLRVT9yAHK6GU_KoiHo</string>
+	<key>GCM_SENDER_ID</key>
+	<string>13408894856</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.kevinandgiorgia.rtplaces</string>
+	<key>PROJECT_ID</key>
+	<string>realtime-places-239604</string>
+	<key>STORAGE_BUCKET</key>
+	<string>realtime-places-239604.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:13408894856:ios:e48cbfbcf82f7cf0</string>
+	<key>DATABASE_URL</key>
+	<string>https://realtime-places-239604.firebaseio.com</string>
+</dict>
+</plist>

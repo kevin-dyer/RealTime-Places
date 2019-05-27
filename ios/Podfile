@@ -1,0 +1,64 @@
+platform :ios, '9.0'
+source 'https://github.com/CocoaPods/Specs.git'
+target 'RtPlaces' do
+
+  # React Native
+  rn_path = '../node_modules/react-native'
+  rn_maps_path = '../node_modules/react-native-maps'
+
+  # Explicitly include Yoga if you are using RN >= 0.42.0 
+  pod 'yoga', :path => "#{rn_path}/ReactCommon/yoga"
+
+  pod 'React', :path => '../node_modules/react-native', :subspecs => [
+    'Core',
+    'CxxBridge', # Include this for RN >= 0.47 
+    'DevSupport', # Include this to enable In-App Devmenu if RN >= 0.43 
+    'RCTText',
+    'RCTImage',
+    'RCTLinkingIOS',
+    'RCTNetwork',
+    'RCTSettings',
+    'RCTVibration',
+    'RCTWebSocket', # Needed for debugging 
+    'RCTAnimation', # Needed for FlatList and animations running on native UI thread 
+    # Add any other subspecs you want to use in your project 
+    'RCTGeolocation'
+  ]
+
+  pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
+  pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
+  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
+ 
+  # pod 'GoogleMaps'
+  # pod 'Google-Maps-iOS-Utils', '2.1.0'
+  # pod 'GoogleUtilities', '5.3.7'
+  # pod 'GoogleAppMeasurement'
+
+  pod 'GooglePlaces'
+  pod 'GooglePlacePicker'
+ 
+  # Third party deps podspec link 
+  pod 'react-native-camera', path: '../node_modules/react-native-camera'
+
+  pod 'react-native-maps', path: rn_maps_path
+  pod 'react-native-google-maps', path: rn_maps_path  # Remove this line if you don't want to support GoogleMaps on iOS
+  pod 'GoogleMaps'  # Remove this line if you don't want to support GoogleMaps on iOS
+  pod 'Google-Maps-iOS-Utils' # Remove this line if you don't want to support GoogleMaps on iOS
+
+  pod 'Firebase/Core', '~> 5.20.1'
+  pod 'Firebase/Auth', '~> 5.20.1'
+  pod 'Firebase/Firestore', '~> 5.20.1'
+end
+
+post_install do |installer|
+    installer.pods_project.targets.each do |target|
+        if target.name == "react-native-google-maps"
+            target.build_configurations.each do |config|
+                config.build_settings['CLANG_ENABLE_MODULES'] = 'No'
+            end
+        end
+        if target.name == "React"
+          target.remove_from_project
+        end
+    end
+end
