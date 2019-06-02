@@ -7,9 +7,117 @@ import {
   View
 } from 'react-native';
 import { RNCamera } from 'react-native-camera';
+import uuidV4 from 'uuid/v4'
+import RNFS from 'react-native-fs'
+import firebase from 'react-native-firebase'
+
 
 export default class BadInstagramCloneApp extends Component {
+  takePicture = async function() {
+    const {
+      geoCollection,
+      toggleMediaUpload,
+      // imageStoreRef
+    } = this.props
+
+    console.log("take pic called! this.camera: ", this.camera)
+    if (this.camera) {
+      const options = {
+        quality: 0.5,
+        base64: true,
+        doNotSave: true
+      };
+      const data = await this.camera.takePictureAsync(options);
+      console.log("camera data: ", data);
+
+      navigator.geolocation.getCurrentPosition((location={}) => {
+        const {coords: {latitude, longitude}} = location || {}
+        const docKey = uuidV4()
+
+        console.log("lat: ", latitude, ", lng: ", longitude, ", !!data.base64: ", !!data.base64)
+
+        const doc = {
+          timestamp: Date.now(),
+          base64: data.base64,
+          coordinates: new firebase.firestore.GeoPoint(latitude,longitude),
+          imageKey: docKey,
+          type: 'image'
+        };
+
+        geoCollection.add(doc)
+        .then(docRef => {
+          console.log("added doc to geocollection. docRef: ", docRef)
+          toggleMediaUpload()
+        })
+        .catch(error => {
+          console.log("error adding doc: ", error)
+        })
+      }, (error) => {
+        console.error("error getting current position: ", error)
+      }, {
+        enableHighAccuracy: true
+      })
+    }
+  };
+
+  takeVideo = async function() {
+    const {
+      toggleMediaUpload,
+      geoCollection
+    } = this.props
+    console.log("take VIDEO called! this.camera: ", this.camera)
+    if (this.camera) {
+      const options = {
+        maxDuration: 2,
+        quality: RNCamera.Constants.VideoQuality['720p']
+
+      };
+      const data = await this.camera.recordAsync(options);
+      console.log("video data: ", data);
+
+      const fileUri = data.uri
+
+      RNFS.readFile(fileUri, 'base64')
+      .then(base64 => {
+        // console.log("video fileBlob: ", fileBlob)
+        navigator.geolocation.getCurrentPosition((location={}) => {
+          console.log("currentPostion location: ", location)
+          const {
+            coords: {
+              latitude,
+              longitude
+            }={}
+          } = location || {}
+          const docKey = uuidV4()
+
+          console.log("video lat: ", latitude, ", lng: ", longitude, ", !!data.base64: ", !!base64)
+
+          const doc = {
+            timestamp: Date.now(),
+            base64,
+            coordinates: new firebase.firestore.GeoPoint(latitude,longitude),
+            videoKey: docKey,
+            type: 'video'
+          };
+
+          console.log("adding video doc: ", doc)
+          geoCollection.add(doc)
+          .then(docRef => {
+            console.log("added doc to geocollection. docRef: ", docRef)
+            toggleMediaUpload()
+          })
+          .catch(error => {
+            console.log("error adding doc: ", error)
+          })
+        })
+      })
+
+      toggleMediaUpload()
+    }
+  }
+
   render() {
+
     return (
       <View style={styles.container}>
         <RNCamera
@@ -46,32 +154,6 @@ export default class BadInstagramCloneApp extends Component {
       </View>
     );
   }
-
-  takePicture = async function() {
-    console.log("take pic called! this.camera: ", this.camera)
-    if (this.camera) {
-      const options = {
-        quality: 0.5,
-        base64: true,
-        doNotSave: true
-      };
-      const data = await this.camera.takePictureAsync(options);
-      console.log(data);
-    }
-  };
-
-  takeVideo = async function() {
-    console.log("take VIDEO called! this.camera: ", this.camera)
-    if (this.camera) {
-      const options = {
-        maxDuration: 10,
-        quality: RNCamera.Constants.VideoQuality['720p']
-
-      };
-      const data = await this.camera.recordAsync(options);
-      console.log(data);
-    }
-  }
 }
 
 const styles = StyleSheet.create({
@@ -79,6 +161,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     backgroundColor: 'black',
+    width: '100%',
+    zIndex: 100
   },
   preview: {
     flex: 1,

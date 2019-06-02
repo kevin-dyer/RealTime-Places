@@ -34,14 +34,22 @@ import {
   GeoCollectionReference,
   GeoFirestore,
   GeoQuery,
-  GeoQuerySnapshot
+  GeoQuerySnapshot,
+  GeoDocumentReference
 } from 'geofirestore'
-import {PLACES_KEY} from 'configs'
+// import {encodeGeohash} from 'geofirestore/utils.d'
+import {PLACES_KEY} from './configs'
+import uuidV4 from 'uuid/v4'
 
+console.disableYellowBox = true;
+
+
+console.log("GeoFirestore: ", GeoFirestore)
 
 const {width, height} = Dimensions.get('window')
 const PHOTO_SIZE = 200
 
+console.log("places key: ", PLACES_KEY)
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -70,7 +78,8 @@ export default class App extends Component<Props> {
       },
       predictions: [],
       photos: [],
-      uploadMedia: false
+      uploadMedia: false,
+      queryData: []
     }
   }
 
@@ -102,6 +111,7 @@ export default class App extends Component<Props> {
         // }
       })
 
+      // console.log("geohash: ", encodeGeohash({lat: latitude, lng:}))
 
       console.log("latitude: ", latitude, ", longitude: ", longitude, ", this.state.region: ", this.state.region)
       // this.state.region.setValue({
@@ -124,17 +134,68 @@ export default class App extends Component<Props> {
 
           // Create a Firestore reference
           const firestore = firebase.firestore();
+          const imageStoreRef = firebase.storage().ref()
           // // Create a GeoFirestore reference
           const geofirestore: GeoFirestore = new GeoFirestore(firestore);
+
+          // const restaurantsGeostoreRef = db.collection('exploreMap');
+          // const restaurantsRef = new GeoFirestore(restaurantsGeostoreRef);
 
           // // Create a GeoCollection reference
           const geocollection: GeoCollectionReference = geofirestore.collection('checkins');
 
-          console.log("geofirestore: ", geofirestore, ", geocollection: ", geocollection)
+          this.setState({
+            geoFirestore: geofirestore,
+            geoCollection: geocollection,
+            user: credential.user.toJSON(),
+            imageStoreRef
+          })
+
+          //Test set
+          // console.log("geocollection: ", geocollection, ", .add: ", geocollection.add)
+
+          // console.log("GeoPoint: ", firebase.firestore.GeoPoint)
+          // console.log("GeoDocumentReference: ", GeoDocumentReference)
+          // console.log("encodeGeohash: ", encodeGeohash)
+          // interface GeoDocument {
+          //   g: string; //geohash
+          //   l: GeoPoint;
+          //   d: DocumentData;
+          // }
+          // const testDoc: GeoDocument = {
+          //   g: firebase.firestore.GeoPoint(10, 20)
+          // }
+
+          // const doc = {
+          //   timestamp: Date.now(),
+          //   base64: 'testdata',
+          //   coordinates: new firebase.firestore.GeoPoint(11,22),
+          // };
+
+          // console.log("sending doc: ", doc)
+
+          // geocollection.add(doc)
+          // .then(docRef => {
+          //   console.log("added doc to geocollection. docRef: ", docRef)
+          // })
+          // .catch(error => {
+          //   console.log("error adding doc: ", error)
+          // })
+          // geofirestore.setWithDocument('test', firebase.firestore.GeoPoint(10,20), {
+          //   timestamp: Date.now(),
+          //   type: 'image',
+          //   base64: 'testdata'
+          // }).then(() => {
+          //   console.log('TEST Provided key has been added to GeoFirestore');
+          // }, (error) => {
+          //   console.log('Error: ' + error);
+          // });
+
+          // console.log("geofirestore: ", geofirestore, ", geocollection: ", geocollection)
         }
       })
       .catch(error => {
-        console.log("error authenticating user. error: ", error)
+        console.log("error: ", error)
       })
 
           
@@ -229,10 +290,71 @@ export default class App extends Component<Props> {
     this.state.region.setValue(region);
   }
 
-  _renderPhoto = (uri, i) => {
+  //TODO: Need to throttle
+  //TODO: Need to adjust the query radius based on latitude delta 
+  getNearbyCheckins = (region) => {
+    const {
+      latitude,
+      longitude,
+      latitudeDelta
+    } = region
+    const {
+      geoCollection
+    } = this.state
+
+    if (!latitude || !longitude) {
+      return
+    }
+    const query: GeoQuery = geoCollection.near({
+      center: new firebase.firestore.GeoPoint(latitude, longitude),
+      radius: 1000 // TODO: adjust based on latitudeDelta
+    });
+
+    // Get query (as Promise)
+    query.get().then((value: GeoQuerySnapshot) => {
+      // console.log("geoQuery value.docs: ", value.docs); // All docs returned by GeoQuery
+      const {docs=[]} = value || {}
+      const queryData = docs.map(doc => {
+        // console.log("doc data: ", doc.data())
+        return doc.data()
+      })
+      
+       // console.log("setState queryData: ", queryData)
+      this.setState({
+        queryData
+      })
+    });
+  }
+
+  _renderPhoto = (photo, i) => {
+    if (typeof(photo.item) === 'object' && !!photo.item.base64) {
+      // if (photo.item.type === 'image') {
+      if (!!photo.item.imageKey) {
+        return this._renderQueryPhoto(photo.item, i)
+      } else if (!!photo.item.videoKey) {
+        console.log("need to render video")
+      }
+    } else {
+      return <Image
+          key={i}
+          source={{photo: photo.item}}
+          height={PHOTO_SIZE}
+          style={{
+            marginTop: 2,
+            marginBottom: 2,
+            borderColor: 'black',
+            borderWidth: 3
+          }}
+        />
+    }
+  }
+
+  _renderQueryPhoto = ({base64=''}={}, i) => {
+
+    console.log("renderQueryPhoto! base64: ", base64.length, ", i: ", i)
     return <Image
-        key={i}
-        source={{uri: uri.item}}
+        key={`queryPhoto-${i}`}
+        source={{uri: `data:image/jpeg;base64,${base64}`}}
         height={PHOTO_SIZE}
         style={{
           marginTop: 2,
@@ -256,23 +378,33 @@ export default class App extends Component<Props> {
       currentLocation={latitude: 0, longitude: 0},
       selectedPlace,
       photos=[],
-      uploadMedia
+      queryData=[],
+      uploadMedia,
+      geoFirestore,
+      geoCollection
     } = this.state
+    const allPhotos = [...queryData.filter(doc => {
+      return !!doc.imageKey
+    }).sort((a, b) => {
+      if (a.timestamp < b.timestamp) {
+        return 1
+      } else if (a.timestamp > b.timestamp) {
+        return -1
+      } else {
+        return 0
+      }
+    }), ...photos]
 
-    //Crude routing
-    if (uploadMedia) {
-      return <MediaUpload/>
-    }
+    console.log("queryData: ", queryData)
 
     return (
       <View style={styles.container}>
-        
-
         <Animated
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           region={region}
           onRegionChange={this.onRegionChange}
+          onRegionChangeComplete={this.getNearbyCheckins}
         >
 
         {!!currentLocation &&
@@ -291,6 +423,17 @@ export default class App extends Component<Props> {
             coordinate={selectedPlace}
           />
         }
+
+        {queryData && queryData.map(doc => {
+          return <Marker
+            title={"Selected Place"}
+            description={"Selected Place"}
+            coordinate={{
+              latitude: doc.coordinates.latitude,
+              longitude: doc.coordinates.longitude
+            }}
+          />
+        })}
         
         </Animated>
 
@@ -377,9 +520,9 @@ export default class App extends Component<Props> {
           />
         </View>
 
-        {photos && photos.length > 0 &&
+        {allPhotos && allPhotos.length > 0 &&
           <FlatList
-            data={photos}
+            data={allPhotos}
             renderItem={this._renderPhoto}
             horizontal={true}
             style={styles.swiperWrapper}
@@ -401,6 +544,14 @@ export default class App extends Component<Props> {
         >
           <Text style={{color: 'white'}}>Upload</Text>
         </TouchableOpacity>
+
+        {uploadMedia && !!geoCollection &&
+          <MediaUpload
+            geoFirestore={geoFirestore}
+            geoCollection={geoCollection}
+            toggleMediaUpload={this.toggleMediaUpload}
+          />
+        }
       </View>
     );
   }

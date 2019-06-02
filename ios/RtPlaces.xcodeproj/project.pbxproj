@@ -23,10 +23,11 @@
 		140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		1982B64B229B9C25008E11AC /* libreact-native-maps.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19941B86229B55570031B3AB /* libreact-native-maps.a */; };
-		19EC3BD22290CC4200355359 /* libRNGooglePlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19EC3BD12290CC3600355359 /* libRNGooglePlaces.a */; };
+		1982B7A922A1E08F008E11AC /* libRNGooglePlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1982B7A822A1E053008E11AC /* libRNGooglePlaces.a */; };
+		1982B7AA22A1EE79008E11AC /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19941AB02297A1D60031B3AB /* libRNFirebase.a */; };
+		19D0ECD122A2F4DD005440D7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 19D0ECD022A2F4DD005440D7 /* GoogleService-Info.plist */; };
 		19EC3BFF2290CF1800355359 /* libPods-RtPlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19EC3BE62290CEDF00355359 /* libPods-RtPlaces.a */; };
 		19EC3C002290CF2B00355359 /* libyoga.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19EC3BEC2290CEDF00355359 /* libyoga.a */; };
-		19EC3DDF2296760700355359 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 19EC3D9E2296760700355359 /* GoogleService-Info.plist */; };
 		2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -39,12 +40,11 @@
 		2D02E4C81E0B4AEC006451C7 /* libRCTWebSocket-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD3E991DF850E9000B6D8A /* libRCTWebSocket-tvOS.a */; };
 		2D16E6881FA4F8E400B85C8A /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D16E6891FA4F8E400B85C8A /* libReact.a */; };
 		2DF0FFEE2056DD460020B375 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD3EA31DF850E9000B6D8A /* libReact.a */; };
-		5D75DBF9FC5A4CCE89772F08 /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2BFE037550D64BE9B50B733F /* libRNFirebase.a */; };
-		60E92613FADF8FBC985C1B4B /* libPods-RtPlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E798A2A2CAB40865065B7E08 /* libPods-RtPlaces.a */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
 		ED297163215061F000B7C4FE /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED297162215061F000B7C4FE /* JavaScriptCore.framework */; };
 		ED2971652150620600B7C4FE /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED2971642150620600B7C4FE /* JavaScriptCore.framework */; };
+		FA00D79DF478ECE23746A92B /* libPods-RtPlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E798A2A2CAB40865065B7E08 /* libPods-RtPlaces.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -167,6 +167,125 @@
 			remoteGlobalIDString = 1282BC77C089D681ED6508D1DAD8C1C0;
 			remoteInfo = "react-native-google-maps";
 		};
+		1982B73822A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 24E7B34043C155DB2F0D2B99291EFFD0;
+			remoteInfo = "BoringSSL-GRPC";
+		};
+		1982B73A22A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F47BF40653A6C8C33BB4BD03BE0FF62E;
+			remoteInfo = FirebaseFirestore;
+		};
+		1982B73C22A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A597D880CF95B231DCED64DC60624B00;
+			remoteInfo = FirebaseStorage;
+		};
+		1982B73E22A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4C4FCB1764AF17FD98D0D8F1667A6E4F;
+			remoteInfo = "gRPC-C++";
+		};
+		1982B74022A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 47D7CCC87B6CA8694007C1F13BA00318;
+			remoteInfo = "gRPC-C++-gRPCCertificates";
+		};
+		1982B74222A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 616D1D055BDA3A180DB8ABAC321ADB1A;
+			remoteInfo = "gRPC-Core";
+		};
+		1982B74422A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 065D93DA93054923EDB403DECCB5797C;
+			remoteInfo = Protobuf;
+		};
+		1982B74622A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C20761531AC75C9EFA2D4BD137C836E0;
+			remoteInfo = RNFS;
+		};
+		1982B76822A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 24E7B34043C155DB2F0D2B99291EFFD0;
+			remoteInfo = "BoringSSL-GRPC";
+		};
+		1982B76A22A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F47BF40653A6C8C33BB4BD03BE0FF62E;
+			remoteInfo = FirebaseFirestore;
+		};
+		1982B76C22A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A597D880CF95B231DCED64DC60624B00;
+			remoteInfo = FirebaseStorage;
+		};
+		1982B76E22A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4C4FCB1764AF17FD98D0D8F1667A6E4F;
+			remoteInfo = "gRPC-C++";
+		};
+		1982B77022A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 47D7CCC87B6CA8694007C1F13BA00318;
+			remoteInfo = "gRPC-C++-gRPCCertificates";
+		};
+		1982B77222A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 616D1D055BDA3A180DB8ABAC321ADB1A;
+			remoteInfo = "gRPC-Core";
+		};
+		1982B77422A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 065D93DA93054923EDB403DECCB5797C;
+			remoteInfo = Protobuf;
+		};
+		1982B77622A1DD57008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C20761531AC75C9EFA2D4BD137C836E0;
+			remoteInfo = RNFS;
+		};
+		1982B7A722A1E053008E11AC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNGooglePlaces;
+		};
 		199419492296FC6E0031B3AB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
@@ -244,13 +363,6 @@
 			remoteGlobalIDString = 907068DCF31426511CD62223DD8AABD3;
 			remoteInfo = FirebaseAuth;
 		};
-		19941B7F229B55570031B3AB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 64CF47AEED19C1226D466234C52ECD32;
-			remoteInfo = FirebaseDatabase;
-		};
 		19941B81229B55570031B3AB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
@@ -278,13 +390,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 907068DCF31426511CD62223DD8AABD3;
 			remoteInfo = FirebaseAuth;
-		};
-		19941BA0229B55570031B3AB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 64CF47AEED19C1226D466234C52ECD32;
-			remoteInfo = FirebaseDatabase;
 		};
 		19941BA2229B55570031B3AB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -320,13 +425,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 4107012F1ACB723B00C6AA39;
 			remoteInfo = RNCamera;
-		};
-		19EC3BD02290CC3600355359 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 19EC3BCC2290CC3600355359 /* RNGooglePlaces.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RNGooglePlaces;
 		};
 		19EC3BE52290CEDF00355359 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -615,12 +713,12 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = RtPlaces/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = RtPlaces/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
+		1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNGooglePlaces.xcodeproj; path = "../node_modules/react-native-google-places/ios/RNGooglePlaces.xcodeproj"; sourceTree = "<group>"; };
+		19D0ECD022A2F4DD005440D7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		19EC3B772290BE8700355359 /* RNCamera.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
 		19EC3B8E2290C66000355359 /* RNCamera.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
-		19EC3BCC2290CC3600355359 /* RNGooglePlaces.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNGooglePlaces.xcodeproj; path = "../node_modules/react-native-google-places/ios/RNGooglePlaces.xcodeproj"; sourceTree = "<group>"; };
 		19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
 		19EC3BED2290CEFA00355359 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
-		19EC3D9E2296760700355359 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "RtPlaces/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		23712C50095F473395E74AF6 /* RNFirebase.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNFirebase.xcodeproj; path = "../node_modules/react-native-firebase/ios/RNFirebase.xcodeproj"; sourceTree = "<group>"; };
 		2BFE037550D64BE9B50B733F /* libRNFirebase.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNFirebase.a; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* RtPlaces-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RtPlaces-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -664,13 +762,13 @@
 				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
-				19EC3BD22290CC4200355359 /* libRNGooglePlaces.a in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
 				19EC3BFF2290CF1800355359 /* libPods-RtPlaces.a in Frameworks */,
 				19EC3C002290CF2B00355359 /* libyoga.a in Frameworks */,
-				60E92613FADF8FBC985C1B4B /* libPods-RtPlaces.a in Frameworks */,
-				5D75DBF9FC5A4CCE89772F08 /* libRNFirebase.a in Frameworks */,
 				1982B64B229B9C25008E11AC /* libreact-native-maps.a in Frameworks */,
+				1982B7A922A1E08F008E11AC /* libRNGooglePlaces.a in Frameworks */,
+				1982B7AA22A1EE79008E11AC /* libRNFirebase.a in Frameworks */,
+				FA00D79DF478ECE23746A92B /* libPods-RtPlaces.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -766,7 +864,7 @@
 		13B07FAE1A68108700A75B9A /* RtPlaces */ = {
 			isa = PBXGroup;
 			children = (
-				19EC3D9E2296760700355359 /* GoogleService-Info.plist */,
+				19D0ECD022A2F4DD005440D7 /* GoogleService-Info.plist */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -806,6 +904,14 @@
 				191C1028227EA6DB00820B46 /* libjsiexecutor.a */,
 				191C102A227EA6DB00820B46 /* libjsi-tvOS.a */,
 				191C102C227EA6DB00820B46 /* libjsiexecutor-tvOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1982B7A422A1E052008E11AC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1982B7A822A1E053008E11AC /* libRNGooglePlaces.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -852,33 +958,32 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		19EC3BCD2290CC3600355359 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				19EC3BD12290CC3600355359 /* libRNGooglePlaces.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		19EC3BDC2290CEDE00355359 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				1982B73922A1DD57008E11AC /* libBoringSSL-GRPC.a */,
 				19EC3C7A229629BF00355359 /* libDoubleConversion.a */,
 				19941B7E229B55570031B3AB /* libFirebaseAuth.a */,
 				1994194A2296FC6E0031B3AB /* libFirebaseCore.a */,
-				19941B80229B55570031B3AB /* libFirebaseDatabase.a */,
+				1982B73B22A1DD57008E11AC /* libFirebaseFirestore.a */,
 				1994194C2296FC6E0031B3AB /* libFirebaseInstanceID.a */,
+				1982B73D22A1DD57008E11AC /* libFirebaseStorage.a */,
 				19EC3C7C229629BF00355359 /* libFolly.a */,
 				19EC3C7E229629BF00355359 /* libglog.a */,
 				1982B648229B9C24008E11AC /* libGoogle-Maps-iOS-Utils.a */,
 				1994194E2296FC6E0031B3AB /* libGoogleUtilities.a */,
+				1982B73F22A1DD57008E11AC /* libgRPC-C++.a */,
+				1982B74122A1DD57008E11AC /* gRPCCertificates.bundle */,
+				1982B74322A1DD57008E11AC /* libgRPC-Core.a */,
 				19941B82229B55570031B3AB /* libGTMSessionFetcher.a */,
 				19941B84229B55570031B3AB /* libleveldb-library.a */,
 				199419502296FC6E0031B3AB /* libnanopb.a */,
 				19EC3BE62290CEDF00355359 /* libPods-RtPlaces.a */,
+				1982B74522A1DD57008E11AC /* libProtobuf.a */,
 				19EC3BEA2290CEDF00355359 /* libreact-native-camera.a */,
 				1982B64A229B9C24008E11AC /* libreact-native-google-maps.a */,
 				19941B86229B55570031B3AB /* libreact-native-maps.a */,
+				1982B74722A1DD57008E11AC /* libRNFS.a */,
 				19EC3BEC2290CEDF00355359 /* libyoga.a */,
 			);
 			name = Products;
@@ -887,22 +992,29 @@
 		19EC3BEE2290CEFA00355359 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				1982B76922A1DD57008E11AC /* libBoringSSL-GRPC.a */,
 				19EC3C8B229629BF00355359 /* libDoubleConversion.a */,
 				19941B9F229B55570031B3AB /* libFirebaseAuth.a */,
 				199419642296FC6E0031B3AB /* libFirebaseCore.a */,
-				19941BA1229B55570031B3AB /* libFirebaseDatabase.a */,
+				1982B76B22A1DD57008E11AC /* libFirebaseFirestore.a */,
 				199419662296FC6E0031B3AB /* libFirebaseInstanceID.a */,
+				1982B76D22A1DD57008E11AC /* libFirebaseStorage.a */,
 				19EC3C8D229629BF00355359 /* libFolly.a */,
 				19EC3C8F229629BF00355359 /* libglog.a */,
 				1982B666229B9C25008E11AC /* libGoogle-Maps-iOS-Utils.a */,
 				199419682296FC6E0031B3AB /* libGoogleUtilities.a */,
+				1982B76F22A1DD57008E11AC /* libgRPC-C++.a */,
+				1982B77122A1DD57008E11AC /* gRPCCertificates.bundle */,
+				1982B77322A1DD57008E11AC /* libgRPC-Core.a */,
 				19941BA3229B55570031B3AB /* libGTMSessionFetcher.a */,
 				19941BA5229B55570031B3AB /* libleveldb-library.a */,
 				1994196A2296FC6E0031B3AB /* libnanopb.a */,
 				19EC3BF82290CEFA00355359 /* libPods-RtPlaces.a */,
+				1982B77522A1DD57008E11AC /* libProtobuf.a */,
 				19EC3BFC2290CEFA00355359 /* libreact-native-camera.a */,
 				1982B668229B9C25008E11AC /* libreact-native-google-maps.a */,
 				19941BA7229B55570031B3AB /* libreact-native-maps.a */,
+				1982B77722A1DD57008E11AC /* libRNFS.a */,
 				19EC3BFE2290CEFA00355359 /* libyoga.a */,
 			);
 			name = Products;
@@ -941,8 +1053,8 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */,
 				19EC3BED2290CEFA00355359 /* Pods.xcodeproj */,
-				19EC3BCC2290CC3600355359 /* RNGooglePlaces.xcodeproj */,
 				19EC3B8E2290C66000355359 /* RNCamera.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
@@ -1197,8 +1309,8 @@
 					ProjectRef = 23712C50095F473395E74AF6 /* RNFirebase.xcodeproj */;
 				},
 				{
-					ProductGroup = 19EC3BCD2290CC3600355359 /* Products */;
-					ProjectRef = 19EC3BCC2290CC3600355359 /* RNGooglePlaces.xcodeproj */;
+					ProductGroup = 1982B7A422A1E052008E11AC /* Products */;
+					ProjectRef = 1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -1324,6 +1436,125 @@
 			remoteRef = 1982B667229B9C25008E11AC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		1982B73922A1DD57008E11AC /* libBoringSSL-GRPC.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libBoringSSL-GRPC.a";
+			remoteRef = 1982B73822A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B73B22A1DD57008E11AC /* libFirebaseFirestore.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libFirebaseFirestore.a;
+			remoteRef = 1982B73A22A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B73D22A1DD57008E11AC /* libFirebaseStorage.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libFirebaseStorage.a;
+			remoteRef = 1982B73C22A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B73F22A1DD57008E11AC /* libgRPC-C++.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libgRPC-C++.a";
+			remoteRef = 1982B73E22A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B74122A1DD57008E11AC /* gRPCCertificates.bundle */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = gRPCCertificates.bundle;
+			remoteRef = 1982B74022A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B74322A1DD57008E11AC /* libgRPC-Core.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libgRPC-Core.a";
+			remoteRef = 1982B74222A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B74522A1DD57008E11AC /* libProtobuf.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libProtobuf.a;
+			remoteRef = 1982B74422A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B74722A1DD57008E11AC /* libRNFS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNFS.a;
+			remoteRef = 1982B74622A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B76922A1DD57008E11AC /* libBoringSSL-GRPC.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libBoringSSL-GRPC.a";
+			remoteRef = 1982B76822A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B76B22A1DD57008E11AC /* libFirebaseFirestore.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libFirebaseFirestore.a;
+			remoteRef = 1982B76A22A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B76D22A1DD57008E11AC /* libFirebaseStorage.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libFirebaseStorage.a;
+			remoteRef = 1982B76C22A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B76F22A1DD57008E11AC /* libgRPC-C++.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libgRPC-C++.a";
+			remoteRef = 1982B76E22A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B77122A1DD57008E11AC /* gRPCCertificates.bundle */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = gRPCCertificates.bundle;
+			remoteRef = 1982B77022A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B77322A1DD57008E11AC /* libgRPC-Core.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libgRPC-Core.a";
+			remoteRef = 1982B77222A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B77522A1DD57008E11AC /* libProtobuf.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libProtobuf.a;
+			remoteRef = 1982B77422A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B77722A1DD57008E11AC /* libRNFS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNFS.a;
+			remoteRef = 1982B77622A1DD57008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1982B7A822A1E053008E11AC /* libRNGooglePlaces.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNGooglePlaces.a;
+			remoteRef = 1982B7A722A1E053008E11AC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		1994194A2296FC6E0031B3AB /* libFirebaseCore.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1401,13 +1632,6 @@
 			remoteRef = 19941B7D229B55570031B3AB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		19941B80229B55570031B3AB /* libFirebaseDatabase.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libFirebaseDatabase.a;
-			remoteRef = 19941B7F229B55570031B3AB /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		19941B82229B55570031B3AB /* libGTMSessionFetcher.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1434,13 +1658,6 @@
 			fileType = archive.ar;
 			path = libFirebaseAuth.a;
 			remoteRef = 19941B9E229B55570031B3AB /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		19941BA1229B55570031B3AB /* libFirebaseDatabase.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libFirebaseDatabase.a;
-			remoteRef = 19941BA0229B55570031B3AB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		19941BA3229B55570031B3AB /* libGTMSessionFetcher.a */ = {
@@ -1476,13 +1693,6 @@
 			fileType = archive.ar;
 			path = libRNCamera.a;
 			remoteRef = 19EC3BBB2290C66000355359 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		19EC3BD12290CC3600355359 /* libRNGooglePlaces.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRNGooglePlaces.a;
-			remoteRef = 19EC3BD02290CC3600355359 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		19EC3BE62290CEDF00355359 /* libPods-RtPlaces.a */ = {
@@ -1760,7 +1970,7 @@
 			files = (
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
-				19EC3DDF2296760700355359 /* GoogleService-Info.plist in Resources */,
+				19D0ECD122A2F4DD005440D7 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

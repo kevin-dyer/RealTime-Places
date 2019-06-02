@@ -18,6 +18,9 @@ PODS:
   - Firebase/Firestore (5.20.2):
     - Firebase/CoreOnly
     - FirebaseFirestore (= 1.2.1)
+  - Firebase/Storage (5.20.2):
+    - Firebase/CoreOnly
+    - FirebaseStorage (= 3.1.1)
   - FirebaseAnalytics (5.8.1):
     - FirebaseCore (~> 5.4)
     - FirebaseInstanceID (~> 3.8)
@@ -55,6 +58,10 @@ PODS:
     - FirebaseCore (~> 5.2)
     - GoogleUtilities/Environment (~> 5.2)
     - GoogleUtilities/UserDefaults (~> 5.2)
+  - FirebaseStorage (3.1.1):
+    - FirebaseAuthInterop (~> 1.0)
+    - FirebaseCore (~> 5.2)
+    - GTMSessionFetcher/Core (~> 1.1)
   - Folly (2018.10.22.00):
     - boost-for-react-native
     - DoubleConversion
@@ -133,7 +140,7 @@ PODS:
     - nanopb/encode (= 0.3.901)
   - nanopb/decode (0.3.901)
   - nanopb/encode (0.3.901)
-  - Protobuf (3.7.0)
+  - Protobuf (3.8.0)
   - React (0.59.5):
     - React/Core (= 0.59.5)
   - react-native-camera (2.9.0):
@@ -201,6 +208,8 @@ PODS:
     - React/Core
     - React/fishhook
     - React/RCTBlob
+  - RNFS (2.13.3):
+    - React
   - yoga (0.59.5.React)
 
 DEPENDENCIES:
@@ -208,6 +217,7 @@ DEPENDENCIES:
   - Firebase/Auth (~> 5.20.1)
   - Firebase/Core (~> 5.20.1)
   - Firebase/Firestore (~> 5.20.1)
+  - Firebase/Storage (~> 5.20.1)
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - Google-Maps-iOS-Utils
@@ -229,6 +239,7 @@ DEPENDENCIES:
   - React/RCTText (from `../node_modules/react-native`)
   - React/RCTVibration (from `../node_modules/react-native`)
   - React/RCTWebSocket (from `../node_modules/react-native`)
+  - RNFS (from `../node_modules/react-native-fs`)
   - yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -242,6 +253,7 @@ SPEC REPOS:
     - FirebaseCore
     - FirebaseFirestore
     - FirebaseInstanceID
+    - FirebaseStorage
     - Google-Maps-iOS-Utils
     - GoogleAppMeasurement
     - GoogleMaps
@@ -270,6 +282,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-maps"
   react-native-maps:
     :path: "../node_modules/react-native-maps"
+  RNFS:
+    :path: "../node_modules/react-native-fs"
   yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -284,6 +298,7 @@ SPEC CHECKSUMS:
   FirebaseCore: f1a9a8be1aee4bf71a2fc0f4096df6788bdfda61
   FirebaseFirestore: faca891c0f0d1d6c10c793473e2f6a29d75014b5
   FirebaseInstanceID: a122b0c258720cf250551bb2bedf48c699f80d90
+  FirebaseStorage: 6162ef4322502b818d9de0ec552f5226d283de43
   Folly: de497beb10f102453a1afa9edbf8cf8a251890de
   glog: aefd1eb5dda2ab95ba0938556f34b98e2da3a60d
   Google-Maps-iOS-Utils: c32891ff472eaaa1fca032beedafa1a013af7875
@@ -297,13 +312,14 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 61bb0f61a4cb560030f1222021178008a5727a23
   leveldb-library: 08cba283675b7ed2d99629a4bc5fd052cd2bb6a5
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
-  Protobuf: 7a877b7f3e5964e3fce995e2eb323dbc6831bb5a
+  Protobuf: 3f617b9a6e73605565086864c9bc26b2bf2dd5a3
   React: 90adac468c7b72bf1fa6c64bf230650f851a8388
   react-native-camera: 571e4cfe70e7021e9077c1699a53e659db971f96
   react-native-google-maps: 568cb03d0eae7fef93626f65d05be55642404ed4
   react-native-maps: 0316ed017dbb64b33b227751fa810e2454fcfa39
+  RNFS: c9bbde46b0d59619f8e7b735991c60e0f73d22c1
   yoga: 2e571f113e8cbeb0eb752aeebc86c1bfe7a8200c
 
-PODFILE CHECKSUM: c02bf0515bb7d1565e6c434fa2c0ba0c4e278dc7
+PODFILE CHECKSUM: 94b3a9df9f39ae78ce555231925a5cb61ff9188a
 
 COCOAPODS: 1.6.1

@@ -15,10 +15,12 @@
     "react-native-autocomplete-input": "^4.0.0",
     "react-native-camera": "^2.9.0",
     "react-native-firebase": "^5.3.1",
+    "react-native-fs": "^2.13.3",
     "react-native-google-places": "^2.5.2",
     "react-native-maps": "^0.24.2",
     "react-native-scalable-image": "^0.5.1",
-    "react-native-swiper": "^1.5.14"
+    "react-native-swiper": "^1.5.14",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@babel/core": "7.4.4",
