@@ -135,6 +135,7 @@ export default class App extends Component<Props> {
           // Create a Firestore reference
           const firestore = firebase.firestore();
           const imageStoreRef = firebase.storage().ref()
+
           // // Create a GeoFirestore reference
           const geofirestore: GeoFirestore = new GeoFirestore(firestore);
 
@@ -327,11 +328,11 @@ export default class App extends Component<Props> {
   }
 
   _renderPhoto = (photo, i) => {
-    if (typeof(photo.item) === 'object' && !!photo.item.base64) {
+    if (typeof(photo.item) === 'object' && !!photo.item.downloadURL) {
       // if (photo.item.type === 'image') {
-      if (!!photo.item.imageKey) {
+      if (photo.item.type === 'image') {
         return this._renderQueryPhoto(photo.item, i)
-      } else if (!!photo.item.videoKey) {
+      } else if (photo.item.type === 'video') {
         console.log("need to render video")
       }
     } else {
@@ -349,12 +350,12 @@ export default class App extends Component<Props> {
     }
   }
 
-  _renderQueryPhoto = ({base64=''}={}, i) => {
+  _renderQueryPhoto = ({downloadURL=''}={}, i) => {
 
-    console.log("renderQueryPhoto! base64: ", base64.length, ", i: ", i)
+    // console.log("renderQueryPhoto! base64: ", base64.length, ", i: ", i)
     return <Image
         key={`queryPhoto-${i}`}
-        source={{uri: `data:image/jpeg;base64,${base64}`}}
+        source={{uri: downloadURL}}
         height={PHOTO_SIZE}
         style={{
           marginTop: 2,
@@ -381,7 +382,8 @@ export default class App extends Component<Props> {
       queryData=[],
       uploadMedia,
       geoFirestore,
-      geoCollection
+      geoCollection,
+      imageStoreRef
     } = this.state
     const allPhotos = [...queryData.filter(doc => {
       return !!doc.imageKey
@@ -394,8 +396,6 @@ export default class App extends Component<Props> {
         return 0
       }
     }), ...photos]
-
-    console.log("queryData: ", queryData)
 
     return (
       <View style={styles.container}>
@@ -549,6 +549,7 @@ export default class App extends Component<Props> {
           <MediaUpload
             geoFirestore={geoFirestore}
             geoCollection={geoCollection}
+            imageStoreRef={imageStoreRef}
             toggleMediaUpload={this.toggleMediaUpload}
           />
         }

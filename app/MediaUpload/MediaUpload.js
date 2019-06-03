@@ -17,15 +17,15 @@ export default class BadInstagramCloneApp extends Component {
     const {
       geoCollection,
       toggleMediaUpload,
-      // imageStoreRef
+      imageStoreRef
     } = this.props
 
     console.log("take pic called! this.camera: ", this.camera)
     if (this.camera) {
       const options = {
-        quality: 0.5,
-        base64: true,
-        doNotSave: true
+        quality: 0.1,
+        // base64: true,
+        // doNotSave: true
       };
       const data = await this.camera.takePictureAsync(options);
       console.log("camera data: ", data);
@@ -34,24 +34,58 @@ export default class BadInstagramCloneApp extends Component {
         const {coords: {latitude, longitude}} = location || {}
         const docKey = uuidV4()
 
-        console.log("lat: ", latitude, ", lng: ", longitude, ", !!data.base64: ", !!data.base64)
+        console.log("lat: ", latitude, ", lng: ", longitude, ", imageStoreRef: ", imageStoreRef)
 
-        const doc = {
-          timestamp: Date.now(),
-          base64: data.base64,
-          coordinates: new firebase.firestore.GeoPoint(latitude,longitude),
-          imageKey: docKey,
-          type: 'image'
-        };
+        const imgRef = imageStoreRef.child(`images/${docKey}.jpg`)
 
-        geoCollection.add(doc)
-        .then(docRef => {
-          console.log("added doc to geocollection. docRef: ", docRef)
-          toggleMediaUpload()
-        })
-        .catch(error => {
-          console.log("error adding doc: ", error)
-        })
+        console.log("imgRef: ", imgRef, ", data.uri: ", data.uri)
+
+
+
+
+        imgRef.putFile(data.uri)
+        .on(
+          firebase.storage.TaskEvent.STATE_CHANGED,
+          snapshot => {
+            let state = {};
+            state = {
+              ...state,
+              progress: (snapshot.bytesTransferred / snapshot.totalBytes) * 100 // Calculate progress percentage
+            };
+            console.log("upload progress: ", (snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+            if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
+              console.log("Successful upload!")
+              console.log('Uploaded a blob or file! snapshot.downloadURL: ', snapshot && snapshot.downloadURL);
+
+              const doc = {
+                timestamp: Date.now(),
+                coordinates: new firebase.firestore.GeoPoint(latitude,longitude),
+                imageKey: docKey,
+                type: 'image',
+                downloadURL: snapshot.downloadURL
+              };
+
+              geoCollection.add(doc)
+              .then(docRef => {
+                console.log("added doc to geocollection. docRef: ", docRef)
+                toggleMediaUpload()
+              })
+              .catch(error => {
+                console.log("error adding doc: ", error)
+              })
+            }
+            // this.setState(state);
+          },
+          error => {
+            // unsubscribe();
+            alert('Sorry, Try again. error: ', error);
+          }
+        )
+        // .then(snapshot => {
+        // })
+        // .catch(error => {
+        //   console.log("imgRef upload error: ", error)
+        // })
       }, (error) => {
         console.error("error getting current position: ", error)
       }, {
