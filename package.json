@@ -20,6 +20,7 @@
     "react-native-maps": "^0.24.2",
     "react-native-scalable-image": "^0.5.1",
     "react-native-swiper": "^1.5.14",
+    "throttle-debounce": "^2.1.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
