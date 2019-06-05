@@ -40,6 +40,8 @@ import {
 // import {encodeGeohash} from 'geofirestore/utils.d'
 import {PLACES_KEY} from './configs'
 import uuidV4 from 'uuid/v4'
+import { throttle, debounce } from 'throttle-debounce'
+
 
 console.disableYellowBox = true;
 
@@ -293,7 +295,7 @@ export default class App extends Component<Props> {
 
   //TODO: Need to throttle
   //TODO: Need to adjust the query radius based on latitude delta 
-  getNearbyCheckins = (region) => {
+  getNearbyCheckins = throttle(1000, (region) => {
     const {
       latitude,
       longitude,
@@ -303,29 +305,61 @@ export default class App extends Component<Props> {
       geoCollection
     } = this.state
 
+    const radius = ((latitudeDelta * 40008000 / 360) / 2) / 1000//not sure if I need to divide by 2
+
+    console.log("radius: ", radius)
+
+    console.log("calling getNearbyCheckins")
+
     if (!latitude || !longitude) {
       return
     }
     const query: GeoQuery = geoCollection.near({
       center: new firebase.firestore.GeoPoint(latitude, longitude),
-      radius: 1000 // TODO: adjust based on latitudeDelta
+      radius // TODO: adjust based on latitudeDelta
     });
 
+    // console.log("query: ", query)
+
     // Get query (as Promise)
-    query.get().then((value: GeoQuerySnapshot) => {
-      // console.log("geoQuery value.docs: ", value.docs); // All docs returned by GeoQuery
-      const {docs=[]} = value || {}
+    query.get()
+
+    // .then((value: GeoQuerySnapshot) => {
+    //   // console.log("geoQuery value.docs: ", value.docs); // All docs returned by GeoQuery
+    //   const {docs=[]} = value || {}
+    //   const queryData = docs.map(doc => {
+    //     // console.log("doc data: ", doc.data())
+    //     return doc.data()
+    //   })
+      
+    //    // console.log("setState queryData: ", queryData)
+    //   this.setState({
+    //     queryData
+    //   })
+    // })
+
+    query.onSnapshot((snapshot: GeoQuerySnapshot) => {
+      const {queryData: originalQueryData} = this.state
+      // console.log("query.onSnapshot. snapshot: ", snapshot)
+      const {docs=[]} = snapshot || {}
       const queryData = docs.map(doc => {
         // console.log("doc data: ", doc.data())
         return doc.data()
       })
-      
-       // console.log("setState queryData: ", queryData)
+
+      //Attempt to only update state if results have changed
+      if (queryData.length !== originalQueryData.length) {
+
+      console.log("setting queryData from snapshot: ", queryData)
       this.setState({
         queryData
       })
-    });
-  }
+      }
+    })
+    // .on("child_added", (snapshot) => {
+    //   console.log("child_added. snapshot: ", snapshot)
+    // })
+  })
 
   _renderPhoto = (photo, i) => {
     if (typeof(photo.item) === 'object' && !!photo.item.downloadURL) {
