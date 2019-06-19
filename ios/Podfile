@@ -51,6 +51,8 @@ target 'RtPlaces' do
   pod 'Firebase/Storage', '~>5.20.1'
 
   pod 'RNFS', :path => '../node_modules/react-native-fs'
+
+  pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'
 end
 
 post_install do |installer|

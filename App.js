@@ -28,6 +28,8 @@ import MapView, {
 import RNGooglePlaces from 'react-native-google-places';
 import Autocomplete from 'react-native-autocomplete-input'
 import Image from 'react-native-scalable-image';
+// import Video from 'react-native-video';
+import Video from './app/Video/Video'
 import MediaUpload from './app/MediaUpload/MediaUpload'
 import firebase from 'react-native-firebase'
 import {
@@ -51,7 +53,7 @@ console.log("GeoFirestore: ", GeoFirestore)
 const {width, height} = Dimensions.get('window')
 const PHOTO_SIZE = 200
 
-console.log("places key: ", PLACES_KEY)
+// console.log("places key: ", PLACES_KEY)
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -68,12 +70,20 @@ export default class App extends Component<Props> {
     this.state = {
       searchText: '',
       selectedPlace: null,
-      region: new AnimatedRegion({
+      // region: new AnimatedRegion({
+      //   latitude: 0,
+      //   longitude: 0,
+      //   latitudeDelta: .02,
+      //   longitudeDelta: .02,
+      // }),
+
+      //TODO: comment out lat and long
+      region: {
         latitude: 0,
         longitude: 0,
         latitudeDelta: .02,
         longitudeDelta: .02,
-      }),
+      },
       currentLocation: {
         latitude: 0,
         longitude: 0
@@ -81,7 +91,8 @@ export default class App extends Component<Props> {
       predictions: [],
       photos: [],
       uploadMedia: false,
-      queryData: []
+      queryData: [],
+      user: {}
     }
   }
 
@@ -111,6 +122,13 @@ export default class App extends Component<Props> {
         //   latitude: coords.latitude,
         //   longitude: coords.longitude
         // }
+
+        region: new AnimatedRegion({
+          latitude,
+          longitude,
+          latitudeDelta: .02,
+          longitudeDelta: .02,
+        })
       })
 
       // console.log("geohash: ", encodeGeohash({lat: latitude, lng:}))
@@ -120,7 +138,8 @@ export default class App extends Component<Props> {
       //   latitude,
       //   longitude
       // })
-      this.state.region.timing({latitude, longitude}).start()
+      // this.state.region.timing({latitude, longitude}).start()
+
     }, (error) => {
       console.error("error getting current position: ", error)
     }, {
@@ -237,7 +256,12 @@ export default class App extends Component<Props> {
       })
       // this.state.region.latitude.setValue(latitude)
       // this.state.region.longitude.setValue(longitude)
-      this.state.region.timing({latitude, longitude}).start()
+      this.state.region.timing({
+        latitude,
+        longitude,
+        latitudeDelta: .02,
+        longitudeDelta: .02,
+      }).start()
     })
     .catch((error) => console.log(error.message));
 
@@ -319,76 +343,60 @@ export default class App extends Component<Props> {
       radius // TODO: adjust based on latitudeDelta
     });
 
-    // console.log("query: ", query)
-
     // Get query (as Promise)
     query.get()
-
-    // .then((value: GeoQuerySnapshot) => {
-    //   // console.log("geoQuery value.docs: ", value.docs); // All docs returned by GeoQuery
-    //   const {docs=[]} = value || {}
-    //   const queryData = docs.map(doc => {
-    //     // console.log("doc data: ", doc.data())
-    //     return doc.data()
-    //   })
-      
-    //    // console.log("setState queryData: ", queryData)
-    //   this.setState({
-    //     queryData
-    //   })
-    // })
-
     query.onSnapshot((snapshot: GeoQuerySnapshot) => {
       const {queryData: originalQueryData} = this.state
       // console.log("query.onSnapshot. snapshot: ", snapshot)
       const {docs=[]} = snapshot || {}
       const queryData = docs.map(doc => {
-        // console.log("doc data: ", doc.data())
         return doc.data()
       })
 
-      //Attempt to only update state if results have changed
-      if (queryData.length !== originalQueryData.length) {
+      //BIG TODO: need to filter queryData based on if it is inside view window
 
-      console.log("setting queryData from snapshot: ", queryData)
-      this.setState({
-        queryData
-      })
+      //Attempt to only update state if results have changed
+      //TODO: improve this by checking each datum's id
+      if (queryData.length !== originalQueryData.length) {
+        console.log("setting queryData from snapshot: ", queryData)
+        this.setState({
+          queryData
+        })
       }
     })
-    // .on("child_added", (snapshot) => {
-    //   console.log("child_added. snapshot: ", snapshot)
-    // })
   })
 
-  _renderPhoto = (photo, i) => {
-    if (typeof(photo.item) === 'object' && !!photo.item.downloadURL) {
-      // if (photo.item.type === 'image') {
-      if (photo.item.type === 'image') {
-        return this._renderQueryPhoto(photo.item, i)
-      } else if (photo.item.type === 'video') {
-        console.log("need to render video")
-      }
-    } else {
-      return <Image
-          key={i}
-          source={{photo: photo.item}}
-          height={PHOTO_SIZE}
-          style={{
-            marginTop: 2,
-            marginBottom: 2,
-            borderColor: 'black',
-            borderWidth: 3
-          }}
-        />
+  _renderMedia = (media={}) => {
+    const {item: {type}={}} = media
+
+    if (typeof(item) === 'string') {
+      return this._renderPhoto(media)
+    }
+    if (type === 'image') {
+      return this._renderQueryPhoto(media)
+    } else if (type === 'video') {
+      return this._renderVideo(media)
     }
   }
-
-  _renderQueryPhoto = ({downloadURL=''}={}, i) => {
-
-    // console.log("renderQueryPhoto! base64: ", base64.length, ", i: ", i)
+  _renderPhoto = ({item, index}={}, ) => {
+    // console.log("_renderPhoto photo: ", photo)
     return <Image
-        key={`queryPhoto-${i}`}
+        key={`photo-${index}`}
+        source={{photo: item}}
+        height={PHOTO_SIZE}
+        style={{
+          marginTop: 2,
+          marginBottom: 2,
+          borderColor: 'black',
+          borderWidth: 3
+        }}
+      />
+  }
+
+  _renderQueryPhoto = ({item: {downloadURL='', docKey}={}, index}={}) => {
+    // console.log("_renderQueryPhoto downloadURL: ", downloadURL)
+    return <Image
+        key={`queryPhoto-${docKey || index}`}
         source={{uri: downloadURL}}
         height={PHOTO_SIZE}
         style={{
@@ -398,6 +406,21 @@ export default class App extends Component<Props> {
           borderWidth: 3
         }}
       />
+  }
+
+  _renderVideo = ({item: {downloadURL, docKey}={}}={}, index) => {
+    console.log("_renderVideo downloadURL: ", downloadURL)
+
+    // return <Text>Vid</Text>
+    return <Video
+      key={`video-${docKey || index}`}
+      // source={{uri: downloadURL}}   // Can be a URL or a local file.
+      // source={{uri: 'http://techslides.com/demos/sample-videos/small.mp4'}}
+      uri={downloadURL}
+      // onBuffer={this.onBuffer}                // Callback when remote video is buffering
+      // onError={this.videoError}               // Callback when video cannot be loaded
+      height={PHOTO_SIZE}
+    />
   }
 
   toggleMediaUpload=()=> {
@@ -417,11 +440,10 @@ export default class App extends Component<Props> {
       uploadMedia,
       geoFirestore,
       geoCollection,
-      imageStoreRef
+      imageStoreRef,
+      user
     } = this.state
-    const allPhotos = [...queryData.filter(doc => {
-      return !!doc.imageKey
-    }).sort((a, b) => {
+    const allPhotos = [...queryData.sort((a, b) => {
       if (a.timestamp < b.timestamp) {
         return 1
       } else if (a.timestamp > b.timestamp) {
@@ -437,6 +459,7 @@ export default class App extends Component<Props> {
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           region={region}
+          user={user}
           onRegionChange={this.onRegionChange}
           onRegionChangeComplete={this.getNearbyCheckins}
         >
@@ -557,8 +580,20 @@ export default class App extends Component<Props> {
         {allPhotos && allPhotos.length > 0 &&
           <FlatList
             data={allPhotos}
-            renderItem={this._renderPhoto}
+            renderItem={this._renderMedia}
             horizontal={true}
+            keyExtractor={(item) => {
+              return item.docKey || item.imageKey || item.videoKey
+              // console.log("keyExtractor item: ", item, ", index: ", index)
+
+              // if (item.type === 'image') {
+              //   return `queryImage-${index}`
+              // } else if (item.type === 'video') {
+              //   return `video-${index}`
+              // } else {
+              //   return `photo-${i}`
+              // }
+            }}
             style={styles.swiperWrapper}
           />
         }
