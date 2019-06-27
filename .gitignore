@@ -57,4 +57,4 @@ buck-out/
 
 ios/Pods/
 # cloud api keys and configurations
-config.js
+configs.js
