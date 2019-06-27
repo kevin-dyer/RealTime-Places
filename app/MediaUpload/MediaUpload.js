@@ -1,23 +1,42 @@
 'use strict';
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import {
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
-import { RNCamera } from 'react-native-camera';
+import { RNCamera } from 'react-native-camera'
 import uuidV4 from 'uuid/v4'
 import RNFS from 'react-native-fs'
 import firebase from 'react-native-firebase'
+import MovToMp4 from 'react-native-mov-to-mp4'
 
+function generateCheckin({
+  latitude,
+  longitude,
+  type='image',
+  docKey='',
+  url='',
+  userUid=''
+}) {
+  return {
+    timestamp: Date.now(),
+    coordinates: new firebase.firestore.GeoPoint(latitude,longitude),
+    docKey,
+    type,
+    downloadURL: url, //TODO: change downloadURL to just url
+    userUid
+  };
+}
 
 export default class BadInstagramCloneApp extends Component {
   takePicture = async function() {
     const {
       geoCollection,
       toggleMediaUpload,
-      imageStoreRef
+      imageStoreRef,
+      user: {uid=''}={}
     } = this.props
 
     console.log("take pic called! this.camera: ", this.camera)
@@ -57,13 +76,14 @@ export default class BadInstagramCloneApp extends Component {
               console.log("Successful upload!")
               console.log('Uploaded a blob or file! snapshot.downloadURL: ', snapshot && snapshot.downloadURL);
 
-              const doc = {
-                timestamp: Date.now(),
-                coordinates: new firebase.firestore.GeoPoint(latitude,longitude),
-                imageKey: docKey,
+              const doc = generateCheckin({
+                latitude,
+                longitude,
+                docKey,
                 type: 'image',
-                downloadURL: snapshot.downloadURL
-              };
+                url: snapshot.downloadURL,
+                userUid: uid
+              });
 
               geoCollection.add(doc)
               .then(docRef => {
@@ -97,7 +117,9 @@ export default class BadInstagramCloneApp extends Component {
   takeVideo = async function() {
     const {
       toggleMediaUpload,
-      geoCollection
+      geoCollection,
+      imageStoreRef,
+      user: {uid=''}={}
     } = this.props
     console.log("take VIDEO called! this.camera: ", this.camera)
     if (this.camera) {
@@ -106,14 +128,15 @@ export default class BadInstagramCloneApp extends Component {
         quality: RNCamera.Constants.VideoQuality['720p']
 
       };
+      const docKey = uuidV4()
       const data = await this.camera.recordAsync(options);
       console.log("video data: ", data);
 
-      const fileUri = data.uri
+      //TODO: test if this works!
+      MovToMp4.convertMovToMp4(data.uri, docKey + ".mp4", function (mp4Path) {
+        //here you can upload the video...
+        console.log("mp4 conversion mp4Path: ", mp4Path);
 
-      RNFS.readFile(fileUri, 'base64')
-      .then(base64 => {
-        // console.log("video fileBlob: ", fileBlob)
         navigator.geolocation.getCurrentPosition((location={}) => {
           console.log("currentPostion location: ", location)
           const {
@@ -122,29 +145,52 @@ export default class BadInstagramCloneApp extends Component {
               longitude
             }={}
           } = location || {}
-          const docKey = uuidV4()
+          const vidRef = imageStoreRef.child(`images/${docKey}.mov`)
 
-          console.log("video lat: ", latitude, ", lng: ", longitude, ", !!data.base64: ", !!base64)
+          console.log("video lat: ", latitude, ", lng: ", longitude)
+          console.log("vidRef: ", vidRef, ", data.uri: ", data.uri)
 
-          const doc = {
-            timestamp: Date.now(),
-            base64,
-            coordinates: new firebase.firestore.GeoPoint(latitude,longitude),
-            videoKey: docKey,
-            type: 'video'
-          };
+          vidRef.putFile(data.uri)
+          .on(
+            firebase.storage.TaskEvent.STATE_CHANGED,
+            snapshot => {
+              let state = {};
+              state = {
+                ...state,
+                progress: (snapshot.bytesTransferred / snapshot.totalBytes) * 100 // Calculate progress percentage
+              };
+              console.log("upload progress: ", (snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+              if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
+                console.log("Successful upload!")
+                // console.log('Uploaded a blob or file! snapshot.downloadURL: ', snapshot && snapshot.downloadURL);
 
-          console.log("adding video doc: ", doc)
-          geoCollection.add(doc)
-          .then(docRef => {
-            console.log("added doc to geocollection. docRef: ", docRef)
-            toggleMediaUpload()
-          })
-          .catch(error => {
-            console.log("error adding doc: ", error)
-          })
+                const doc = generateCheckin({
+                  latitude,
+                  longitude,
+                  docKey,
+                  type: 'video',
+                  url: snapshot.downloadURL,
+                  userUid: uid
+                });
+
+                geoCollection.add(doc)
+                .then(docRef => {
+                  console.log("added doc to geocollection. docRef: ", docRef)
+                  toggleMediaUpload()
+                })
+                .catch(error => {
+                  console.log("error adding doc: ", error)
+                })
+              }
+              // this.setState(state);
+            },
+            error => {
+              // unsubscribe();
+              alert('Sorry, Try again. error: ', error);
+            }
+          )
         })
-      })
+      });
 
       toggleMediaUpload()
     }

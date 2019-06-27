@@ -22,6 +22,7 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
+		1909750622B86562002A742B /* libmovToMp4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1909749522B8653E002A742B /* libmovToMp4.a */; };
 		1982B64B229B9C25008E11AC /* libreact-native-maps.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19941B86229B55570031B3AB /* libreact-native-maps.a */; };
 		1982B7A922A1E08F008E11AC /* libRNGooglePlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1982B7A822A1E053008E11AC /* libRNGooglePlaces.a */; };
 		1982B7AA22A1EE79008E11AC /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19941AB02297A1D60031B3AB /* libRNFirebase.a */; };
@@ -110,6 +111,27 @@
 			proxyType = 2;
 			remoteGlobalIDString = 83CBBA2E1A601D0E00E9B192;
 			remoteInfo = React;
+		};
+		1909749422B8653E002A742B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1909749022B8653D002A742B /* movToMp4.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = movToMp4;
+		};
+		190974B722B8653E002A742B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3E492B25702671595C0DDBEBF873DEDF;
+			remoteInfo = "react-native-video";
+		};
+		190974DA22B8653E002A742B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3E492B25702671595C0DDBEBF873DEDF;
+			remoteInfo = "react-native-video";
 		};
 		191C1025227EA6DB00820B46 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -713,6 +735,7 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = RtPlaces/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = RtPlaces/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
+		1909749022B8653D002A742B /* movToMp4.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = movToMp4.xcodeproj; path = "../node_modules/react-native-mov-to-mp4/movToMp4.xcodeproj"; sourceTree = "<group>"; };
 		1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNGooglePlaces.xcodeproj; path = "../node_modules/react-native-google-places/ios/RNGooglePlaces.xcodeproj"; sourceTree = "<group>"; };
 		19D0ECD022A2F4DD005440D7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		19EC3B772290BE8700355359 /* RNCamera.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
@@ -769,6 +792,7 @@
 				1982B7A922A1E08F008E11AC /* libRNGooglePlaces.a in Frameworks */,
 				1982B7AA22A1EE79008E11AC /* libRNFirebase.a in Frameworks */,
 				FA00D79DF478ECE23746A92B /* libPods-RtPlaces.a in Frameworks */,
+				1909750622B86562002A742B /* libmovToMp4.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -908,6 +932,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		1909749122B8653D002A742B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1909749522B8653E002A742B /* libmovToMp4.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		1982B7A422A1E052008E11AC /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -983,6 +1015,7 @@
 				19EC3BEA2290CEDF00355359 /* libreact-native-camera.a */,
 				1982B64A229B9C24008E11AC /* libreact-native-google-maps.a */,
 				19941B86229B55570031B3AB /* libreact-native-maps.a */,
+				190974B822B8653E002A742B /* libreact-native-video.a */,
 				1982B74722A1DD57008E11AC /* libRNFS.a */,
 				19EC3BEC2290CEDF00355359 /* libyoga.a */,
 			);
@@ -1014,6 +1047,7 @@
 				19EC3BFC2290CEFA00355359 /* libreact-native-camera.a */,
 				1982B668229B9C25008E11AC /* libreact-native-google-maps.a */,
 				19941BA7229B55570031B3AB /* libreact-native-maps.a */,
+				190974DB22B8653E002A742B /* libreact-native-video.a */,
 				1982B77722A1DD57008E11AC /* libRNFS.a */,
 				19EC3BFE2290CEFA00355359 /* libyoga.a */,
 			);
@@ -1053,6 +1087,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				1909749022B8653D002A742B /* movToMp4.xcodeproj */,
 				1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */,
 				19EC3BED2290CEFA00355359 /* Pods.xcodeproj */,
 				19EC3B8E2290C66000355359 /* RNCamera.xcodeproj */,
@@ -1237,6 +1272,10 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = 1909749122B8653D002A742B /* Products */;
+					ProjectRef = 1909749022B8653D002A742B /* movToMp4.xcodeproj */;
+				},
+				{
 					ProductGroup = 19EC3BDC2290CEDE00355359 /* Products */;
 					ProjectRef = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
 				},
@@ -1378,6 +1417,27 @@
 			fileType = archive.ar;
 			path = libReact.a;
 			remoteRef = 146834031AC3E56700842450 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1909749522B8653E002A742B /* libmovToMp4.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libmovToMp4.a;
+			remoteRef = 1909749422B8653E002A742B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		190974B822B8653E002A742B /* libreact-native-video.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libreact-native-video.a";
+			remoteRef = 190974B722B8653E002A742B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		190974DB22B8653E002A742B /* libreact-native-video.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libreact-native-video.a";
+			remoteRef = 190974DA22B8653E002A742B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		191C1026227EA6DB00820B46 /* libjsi.a */ = {

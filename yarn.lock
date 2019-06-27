@@ -4069,6 +4069,11 @@ jws@^3.1.5:
     jwa "^1.4.1"
     safe-buffer "^5.0.1"
 
+keymirror@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/keymirror/-/keymirror-0.1.1.tgz#918889ea13f8d0a42e7c557250eee713adc95c35"
+  integrity sha1-kYiJ6hP40KQufFVyUO7nE63JXDU=
+
 kind-of@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-1.1.0.tgz#140a3d2d41a36d2efcfa9377b62c24f8495a5c44"
@@ -5615,6 +5620,15 @@ react-native-swiper@^1.5.14:
   dependencies:
     prop-types "^15.5.10"
 
+react-native-video@^4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/react-native-video/-/react-native-video-4.4.1.tgz#12c6a8bfbabfa7641338a52db3d857ac3073a4fd"
+  integrity sha512-gTZKRqa4NkEBx6t6iAzTFlgxDY23IZW/8YClR0hMzhOD0/9I/AzOBBaOXDyFeKj4EQF+uZ/LUS3r+oDnz1ks5w==
+  dependencies:
+    keymirror "^0.1.1"
+    prop-types "^15.5.10"
+    shaka-player "^2.4.4"
+
 react-native@0.59.5:
   version "0.59.5"
   resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.59.5.tgz#79500d2885a3dc83216715e1fc6effa878ad6ea9"
@@ -6155,6 +6169,11 @@ setprototypeof@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/setprototypeof/-/setprototypeof-1.1.1.tgz#7e95acb24aa92f5885e0abef5ba131330d4ae683"
   integrity sha512-JvdAWfbXeIGaZ9cILp38HntZSFSo3mWg6xGcJJsd+d4aRMOqauag1C63dJfDw7OaMYwEbHMOxEZ1lqVRYP2OAw==
+
+shaka-player@^2.4.4:
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/shaka-player/-/shaka-player-2.5.2.tgz#3e639f8f5dfdb1a0afff2ff1f87cddf481f93fe4"
+  integrity sha512-gpRfXVLAZi33kw9Egop18MkZ/EVRS0soeN6ocR+Btq/J5IoCC56MxwwHzAGna+PgBW9Ox458HRefJ6HB0BoADA==
 
 shebang-command@^1.2.0:
   version "1.2.0"

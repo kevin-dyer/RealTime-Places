@@ -48,8 +48,6 @@ import { throttle, debounce } from 'throttle-debounce'
 console.disableYellowBox = true;
 
 
-console.log("GeoFirestore: ", GeoFirestore)
-
 const {width, height} = Dimensions.get('window')
 const PHOTO_SIZE = 200
 
@@ -226,60 +224,92 @@ export default class App extends Component<Props> {
   handleTextChange = (text) => {
     this.setState({searchText: text})
 
-    RNGooglePlaces.getAutocompletePredictions(text, {fields: ['photos']})
-    .then((results) => {
-      console.log("prediction results: ", results)
-      this.setState({ predictions: results })
-    })
-    .catch((error) => console.log(error.message));
-
-    
-  }
-
-  handlePlaceSelect = (place) => {
-    console.log("handlePlaceSelect. place: ", place)
-
-    this.setState({
-      // selectedPlace: place,
-      searchText: place.primaryText + place.secondaryText,
-      predictions: []
-    })
-
-    RNGooglePlaces.lookUpPlaceByID(place.placeID)
-    .then((results) => {
-      const {latitude, longitude} = results
-      console.log("place by ID: ", results)
-
-      //TODO: update selectedPlace
-      this.setState({
-        selectedPlace: results
-      })
-      // this.state.region.latitude.setValue(latitude)
-      // this.state.region.longitude.setValue(longitude)
-      this.state.region.timing({
-        latitude,
-        longitude,
-        latitudeDelta: .02,
-        longitudeDelta: .02,
-      }).start()
-    })
-    .catch((error) => console.log(error.message));
-
-
-
-    fetch(`https://maps.googleapis.com/maps/api/place/details/json?key=${PLACES_KEY}&placeid=${place.placeID}&fields=photo`)
+    fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${PLACES_KEY}`)
     .then(resp => {
       if (resp.ok) {
         return resp.json()
       }
     }).then(resp => {
-      console.log("placeDetail results: ", resp)
-      const {result: {photos=[]}={}} = resp || {}
+      console.log("prediction resp.predictions: ", resp.predictions, ', resp; ', resp)
+      this.setState({ predictions: resp.predictions })
+    })
+    .catch(error => {
+      console.log("failed to fetch predictions. error: ", error)
+    })
 
+    // RNGooglePlaces.getAutocompletePredictions(text, {fields: ['photos']})
+    // .then((results) => {
+    //   console.log("prediction results: ", results)
+    //   this.setState({ predictions: results })
+    // })
+    // .catch((error) => console.log(error.message));
 
+    
+  }
+
+  handlePlaceSelect = (place={}) => {
+    const {
+      structured_formatting: {
+        main_text: primaryText,
+        secondary_text: secondaryText
+      }={}
+    } = place
+    console.log("handlePlaceSelect. place: ", place)
+
+    this.setState({
+      // selectedPlace: place,
+      searchText: `${primaryText} ${secondaryText}`,
+      predictions: []
+    })
+
+    console.log("fetching place details placeid: ", place.place_id)
+
+    fetch(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${place.place_id}&key=${PLACES_KEY}&fields=geometry,photo`)
+    .then(resp => {
+      if (resp.ok) {
+        return resp.json()
+      }
+    }).then(resp => {
+      const {
+        result: {
+          geometry: {
+            location: {
+              lat,
+              lng
+            }={},
+            viewport: {
+              northeast={},
+              southwest={}
+            }={}
+          },
+          photos=[]
+        }={},
+        result
+      } = resp || {}
+      const latDelta = Math.abs(northeast.lat - southwest.lat)
+      const lngDelta = Math.abs(northeast.lng - southwest.lng)
+      console.log("place details result: ", result)
+      this.setState({
+        selectedPlace: result
+      })
+
+      console.log("place select lat: ", lat, ", lng: ", lng, ", northeast: ", northeast, ", southwest: ", southwest,", latDelta: ", latDelta, ", lngDelta: ", lngDelta)
+
+      //TODO: add back
+      this.state.region.timing({
+        latitude: lat,
+        longitude: lng,
+        latitudeDelta: latDelta,
+        longitudeDelta: lngDelta,
+      }).start()
+
+      console.log("places photos: ", photos)
       return this.fetchPlacePhotos(photos).then(photos => {
         this.setState({photos})
       })
+    })
+    .catch(error => {
+      console.log("failed to fetch place details. error: ", error)
     })
 
     Keyboard.dismiss()
@@ -290,27 +320,16 @@ export default class App extends Component<Props> {
       fetch(
         `https://maps.googleapis.com/maps/api/place/photo?photoreference=${photo.photo_reference}&key=${PLACES_KEY}&maxheight=${PHOTO_SIZE}`
       ).then(resp => {
-        // let json = JSON.parse(resp._bodyText);
-        // return resp.json()
-
-        // return resp.json()
         console.log("photo resp: ", resp)
         if (resp.ok) {
           return resp.url
         }
-      // }).then(resp => {
-      //   console.log("photo resp2: ", resp)
-      //   return resp
       }).catch(error => {
         console.error("error: ", error)
       })
     )
 
     return Promise.all(requests)
-    // .then(photos => {
-    //   console.log("all photos: ", photos)
-    //   this.setState({photos: photos})
-    // })
   }
 
   onRegionChange = (region) => {
@@ -367,11 +386,14 @@ export default class App extends Component<Props> {
   })
 
   _renderMedia = (media={}) => {
-    const {item: {type}={}} = media
+    const {item} = media
+
+    console.log("_renderMedia item: ", item)
 
     if (typeof(item) === 'string') {
       return this._renderPhoto(media)
     }
+    const {type} = item || {}
     if (type === 'image') {
       return this._renderQueryPhoto(media)
     } else if (type === 'video') {
@@ -379,16 +401,13 @@ export default class App extends Component<Props> {
     }
   }
   _renderPhoto = ({item, index}={}, ) => {
-    // console.log("_renderPhoto photo: ", photo)
+    console.log("_renderPhoto item: ", item)
     return <Image
         key={`photo-${index}`}
-        source={{photo: item}}
+        source={{uri: item}}
         height={PHOTO_SIZE}
         style={{
-          marginTop: 2,
-          marginBottom: 2,
-          borderColor: 'black',
-          borderWidth: 3
+          marginLeft: index > 0 ? 1 : 0
         }}
       />
   }
@@ -400,26 +419,22 @@ export default class App extends Component<Props> {
         source={{uri: downloadURL}}
         height={PHOTO_SIZE}
         style={{
-          marginTop: 2,
-          marginBottom: 2,
-          borderColor: 'black',
-          borderWidth: 3
+          marginLeft: index > 0 ? 1 : 0
         }}
       />
   }
 
   _renderVideo = ({item: {downloadURL, docKey}={}}={}, index) => {
     console.log("_renderVideo downloadURL: ", downloadURL)
-
-    // return <Text>Vid</Text>
     return <Video
       key={`video-${docKey || index}`}
-      // source={{uri: downloadURL}}   // Can be a URL or a local file.
-      // source={{uri: 'http://techslides.com/demos/sample-videos/small.mp4'}}
       uri={downloadURL}
       // onBuffer={this.onBuffer}                // Callback when remote video is buffering
       // onError={this.videoError}               // Callback when video cannot be loaded
       height={PHOTO_SIZE}
+      style={{
+        marginLeft: index > 0 ? 1 : 0
+      }}
     />
   }
 
@@ -453,6 +468,8 @@ export default class App extends Component<Props> {
       }
     }), ...photos]
 
+    console.log("render state photos: ", photos)
+
     return (
       <View style={styles.container}>
         <Animated
@@ -477,7 +494,10 @@ export default class App extends Component<Props> {
           <Marker
             title={"Selected Place"}
             description={"Selected Place"}
-            coordinate={selectedPlace}
+            coordinate={{
+              latitude: selectedPlace.geometry.location.lat,
+              longitude: selectedPlace.geometry.location.lng
+            }}
           />
         }
 
@@ -532,9 +552,11 @@ export default class App extends Component<Props> {
             }}
             renderItem={({
               item: {
-                primaryText,
-                secondaryText,
-                placeID
+                place_id: placeID,
+                structured_formatting: {
+                  main_text: primaryText,
+                  secondary_text: secondaryText
+                }
               },
               item,
               i
@@ -584,15 +606,6 @@ export default class App extends Component<Props> {
             horizontal={true}
             keyExtractor={(item) => {
               return item.docKey || item.imageKey || item.videoKey
-              // console.log("keyExtractor item: ", item, ", index: ", index)
-
-              // if (item.type === 'image') {
-              //   return `queryImage-${index}`
-              // } else if (item.type === 'video') {
-              //   return `video-${index}`
-              // } else {
-              //   return `photo-${i}`
-              // }
             }}
             style={styles.swiperWrapper}
           />
