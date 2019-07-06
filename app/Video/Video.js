@@ -48,7 +48,8 @@ export default class CVideo extends Component {
       paused
     } = this.state
 
-		console.log("Video height: ", height, ", width: ", width)
+		// console.log("Video height: ", height, ", width: ", width)
+
 
 		return <TouchableOpacity
       onPress={this.togglePause}
@@ -92,7 +93,7 @@ export default class CVideo extends Component {
         }}
       />
 
-      {paused &&
+      {(paused && width > 0) &&
         <View style={{
           position: 'absolute',
           top: 0,

@@ -41,6 +41,7 @@ import {
   GeoQuerySnapshot,
   GeoDocumentReference
 } from 'geofirestore'
+import Geolocation from '@react-native-community/geolocation'
 import {
   COLOR,
   ThemeContext,
@@ -58,7 +59,7 @@ console.disableYellowBox = true;
 
 
 const {width, height} = Dimensions.get('window')
-const PHOTO_SIZE = 200
+const PHOTO_SIZE = 140
 
 const uiTheme = {
   palette: {
@@ -130,7 +131,7 @@ export default class App extends Component<Props> {
     // })
     // .catch((error) => console.log(error.message));
 
-    navigator.geolocation.getCurrentPosition((location={}) => {
+    Geolocation.getCurrentPosition((location={}) => {
       // console.log("currentLocation: ", location)
 
       const {coords: {latitude, longitude}} = location || {}
@@ -448,8 +449,13 @@ export default class App extends Component<Props> {
   })
 
   setSelectedCheckin = (docKey) => {
+    const {selectedCheckin} = this.state
+    const nextCheckin = docKey === selectedCheckin ? null : docKey
+    console.log("setSelectedCheckin called! docKey: ", docKey)
+
+    //Unselect checkin if already selected
     this.setState({
-      selectedCheckin: docKey
+      selectedCheckin: nextCheckin
     })
   }
 
@@ -502,12 +508,17 @@ export default class App extends Component<Props> {
       height={PHOTO_SIZE}
       selected={selected}
       onPress={e => {
-        this.setSelectedCheckin(docKey)
+        console.log("calling setSelectedCheckin, docKey: ", docKey)
+        // this.setSelectedCheckin(docKey)
+        this.scrollToCheckin(docKey)
       }}
     />
   }
 
-  _renderVideo = ({item: {downloadURL, docKey}={}, index}={}, selectedCheckin) => {
+  _renderVideo = ({
+    item: {downloadURL, docKey}={},
+    index
+  }={}, selectedCheckin) => {
     const {user: {uid}={}} = this.state
     const selected = selectedCheckin === docKey
     // console.log("_renderVideo downloadURL: ", downloadURL)
@@ -518,8 +529,10 @@ export default class App extends Component<Props> {
       userUid={uid}
       selected={selected}
       onPress={e => {
-        this.setSelectedCheckin(docKey)
+        // this.setSelectedCheckin(docKey)
+        this.scrollToCheckin(docKey)
       }}
+      index={index}
     />
   }
 
@@ -547,7 +560,7 @@ export default class App extends Component<Props> {
 
   //TODO: rename this method to include selecting place
   scrollToCheckin=(docKey) => {
-    const {queryData=[]} = this.state
+    const {queryData=[], selectedCheckin} = this.state
 
 
     //FIX THIS
@@ -557,14 +570,18 @@ export default class App extends Component<Props> {
 
     console.log("scrollToCheckin docKey: ", docKey, ", index: ", index, ", queryData: ", queryData)
 
+    //NOTE: do not scroll if checkin is already selected
     if (index > -1) {
-      const place = queryData[index]
-      this.flatListRef.scrollToIndex({
-        animated: true,
-        index,
-        // viewOffset,
-        // viewPosition
-      })
+      // const place = queryData[index]
+      
+      if (selectedCheckin !== queryData[index].docKey) {
+        this.flatListRef.scrollToIndex({
+          animated: true,
+          index,
+          // viewOffset,
+          // viewPosition
+        })
+      }
 
       //TODO: need to set new variable to selectedCheckin
       this.setSelectedCheckin(docKey)
@@ -752,6 +769,7 @@ export default class App extends Component<Props> {
                 return item.docKey || item.imageKey || item.videoKey
               }}
               style={styles.swiperWrapper}
+              contentContainerStyle={styles.swiperContainer}
             />
           }
 
@@ -832,11 +850,14 @@ const styles = StyleSheet.create({
   },
   swiperWrapper: {
     width,
-    height: PHOTO_SIZE,
+    // height: PHOTO_SIZE,
     position: 'absolute',
     bottom: 0,
     left: 0,
     zIndex: 2,
-    paddingRight: 200
+  },
+  swiperContainer: {
+    alignItems: 'flex-end',
+    paddingRight: 20
   }
 });
