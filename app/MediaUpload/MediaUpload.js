@@ -6,6 +6,10 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import {
+  COLOR,
+  IconToggle
+} from 'react-native-material-ui'
 import { RNCamera } from 'react-native-camera'
 import uuidV4 from 'uuid/v4'
 import RNFS from 'react-native-fs'
@@ -197,9 +201,35 @@ export default class BadInstagramCloneApp extends Component {
   }
 
   render() {
+    const {toggleMediaUpload} = this.props
 
     return (
       <View style={styles.container}>
+        <View style={{
+          position: 'absolute',
+          top: 25,
+          right: 0,
+          zIndex: 100
+        }}>
+          <IconToggle
+            name="close"
+            size={35}
+            color={'rgba(255,255,255,0.8)'}
+            onPress={toggleMediaUpload}
+            style={{
+              container: {
+                shadowColor: '#000',
+                shadowOffset: {width: 2, height: 2},
+                shadowOpacity: 1,
+                shadowRadius: 10
+              },
+              shadowColor: '#000',
+                shadowOffset: {width: 2, height: 2},
+                shadowOpacity: 1,
+                shadowRadius: 10
+            }}
+          />
+        </View>
         <RNCamera
           ref={ref => {
             this.camera = ref;

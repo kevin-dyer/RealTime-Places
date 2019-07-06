@@ -17,7 +17,8 @@ import {
   TextInput,
   Keyboard,
   // Image,
-  FlatList
+  FlatList,
+  Alert
 } from 'react-native';
 import MapView, {
   PROVIDER_GOOGLE,
@@ -28,6 +29,7 @@ import MapView, {
 import RNGooglePlaces from 'react-native-google-places';
 import Autocomplete from 'react-native-autocomplete-input'
 import Image from 'react-native-scalable-image';
+import ImageCheckin from './app/ImageCheckin/ImageCheckin'
 // import Video from 'react-native-video';
 import Video from './app/Video/Video'
 import MediaUpload from './app/MediaUpload/MediaUpload'
@@ -39,10 +41,17 @@ import {
   GeoQuerySnapshot,
   GeoDocumentReference
 } from 'geofirestore'
-// import {encodeGeohash} from 'geofirestore/utils.d'
+import {
+  COLOR,
+  ThemeContext,
+  getTheme,
+  ActionButton,
+  IconToggle
+} from 'react-native-material-ui'
 import {PLACES_KEY} from './configs'
 import uuidV4 from 'uuid/v4'
 import { throttle, debounce } from 'throttle-debounce'
+
 
 
 console.disableYellowBox = true;
@@ -50,6 +59,17 @@ console.disableYellowBox = true;
 
 const {width, height} = Dimensions.get('window')
 const PHOTO_SIZE = 200
+
+const uiTheme = {
+  palette: {
+    primaryColor: COLOR.blue500,
+  },
+  toolbar: {
+    container: {
+      height: 50,
+    },
+  },
+};
 
 // console.log("places key: ", PLACES_KEY)
 
@@ -67,7 +87,7 @@ export default class App extends Component<Props> {
 
     this.state = {
       searchText: '',
-      selectedPlace: null,
+      selectedPlace: undefined,
       // region: new AnimatedRegion({
       //   latitude: 0,
       //   longitude: 0,
@@ -90,7 +110,8 @@ export default class App extends Component<Props> {
       photos: [],
       uploadMedia: false,
       queryData: [],
-      user: {}
+      user: {},
+      selectedCheckin: undefined //Used to highlight photo/video
     }
   }
 
@@ -247,12 +268,13 @@ export default class App extends Component<Props> {
     
   }
 
-  handlePlaceSelect = (place={}) => {
+  handlePlaceSelect = (place={}, disableRegionChange) => {
     const {
       structured_formatting: {
-        main_text: primaryText,
-        secondary_text: secondaryText
-      }={}
+        main_text: primaryText='',
+        secondary_text: secondaryText=''
+      }={},
+      place_id
     } = place
     console.log("handlePlaceSelect. place: ", place)
 
@@ -262,9 +284,9 @@ export default class App extends Component<Props> {
       predictions: []
     })
 
-    console.log("fetching place details placeid: ", place.place_id)
+    console.log("fetching place details place_id: ", place_id)
 
-    fetch(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${place.place_id}&key=${PLACES_KEY}&fields=geometry,photo`)
+    fetch(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${place_id}&key=${PLACES_KEY}&fields=geometry,photo`)
     .then(resp => {
       if (resp.ok) {
         return resp.json()
@@ -290,18 +312,23 @@ export default class App extends Component<Props> {
       const lngDelta = Math.abs(northeast.lng - southwest.lng)
       console.log("place details result: ", result)
       this.setState({
-        selectedPlace: result
+        selectedPlace: {
+          ...result,
+          title: primaryText,
+          description: secondaryText
+        }
       })
 
       console.log("place select lat: ", lat, ", lng: ", lng, ", northeast: ", northeast, ", southwest: ", southwest,", latDelta: ", latDelta, ", lngDelta: ", lngDelta)
 
-      //TODO: add back
-      this.state.region.timing({
-        latitude: lat,
-        longitude: lng,
-        latitudeDelta: latDelta,
-        longitudeDelta: lngDelta,
-      }).start()
+      if (!disableRegionChange) {
+        this.state.region.timing({
+          latitude: lat,
+          longitude: lng,
+          latitudeDelta: latDelta,
+          longitudeDelta: lngDelta,
+        }).start()
+      }
 
       console.log("places photos: ", photos)
       return this.fetchPlacePhotos(photos).then(photos => {
@@ -315,12 +342,39 @@ export default class App extends Component<Props> {
     Keyboard.dismiss()
   }
 
+  onPoiClick = ({nativeEvent}={}) => {
+    console.log("onPoiClick nativeEvent: ", nativeEvent)
+    const {
+      placeId: place_id,
+      coordinate,
+      name=''
+    } = nativeEvent
+
+    //call handlePlaceSelect with disableRegionChange = true
+    this.handlePlaceSelect({
+      place_id,
+      structured_formatting: {
+        main_text: name
+      }
+    }, true)
+
+    // this.structured_formatting: {
+    //     main_text: primaryText,
+    //     secondary_text: secondaryText
+    //   }={},
+    //   place_id
+  }
+
+  clearSearch = () => {
+    this.setState({searchText: '', predictions: []})
+  }
+
   fetchPlacePhotos = (photos) => {
     const requests = photos.map(photo => 
       fetch(
         `https://maps.googleapis.com/maps/api/place/photo?photoreference=${photo.photo_reference}&key=${PLACES_KEY}&maxheight=${PHOTO_SIZE}`
       ).then(resp => {
-        console.log("photo resp: ", resp)
+        // console.log("photo resp: ", resp)
         if (resp.ok) {
           return resp.url
         }
@@ -379,29 +433,44 @@ export default class App extends Component<Props> {
       if (queryData.length !== originalQueryData.length) {
         console.log("setting queryData from snapshot: ", queryData)
         this.setState({
-          queryData
+          queryData: queryData.sort((a, b) => {
+            if (a.timestamp < b.timestamp) {
+              return 1
+            } else if (a.timestamp > b.timestamp) {
+              return -1
+            } else {
+              return 0
+            }
+          })
         })
       }
     })
   })
 
+  setSelectedCheckin = (docKey) => {
+    this.setState({
+      selectedCheckin: docKey
+    })
+  }
+
   _renderMedia = (media={}) => {
     const {item} = media
+    const {selectedCheckin} = this.state
 
-    console.log("_renderMedia item: ", item)
+    // console.log("_renderMedia item: ", item)
 
     if (typeof(item) === 'string') {
       return this._renderPhoto(media)
     }
     const {type} = item || {}
     if (type === 'image') {
-      return this._renderQueryPhoto(media)
+      return this._renderQueryPhoto(media, selectedCheckin)
     } else if (type === 'video') {
-      return this._renderVideo(media)
+      return this._renderVideo(media, selectedCheckin)
     }
   }
   _renderPhoto = ({item, index}={}, ) => {
-    console.log("_renderPhoto item: ", item)
+    // console.log("_renderPhoto item: ", item)
     return <Image
         key={`photo-${index}`}
         source={{uri: item}}
@@ -412,36 +481,95 @@ export default class App extends Component<Props> {
       />
   }
 
-  _renderQueryPhoto = ({item: {downloadURL='', docKey}={}, index}={}) => {
-    // console.log("_renderQueryPhoto downloadURL: ", downloadURL)
-    return <Image
-        key={`queryPhoto-${docKey || index}`}
-        source={{uri: downloadURL}}
-        height={PHOTO_SIZE}
-        style={{
-          marginLeft: index > 0 ? 1 : 0
-        }}
-      />
+  _renderQueryPhoto = ({
+    item: {
+      downloadURL='',
+      docKey,
+      userUid
+    }={},
+    item,
+    index
+  }={}, selectedCheckin={}) => {
+    const {user: {uid}={}} = this.state
+    const selected = selectedCheckin === docKey
+
+    console.log("_renderQueryPhoto downloadURL: ", downloadURL)
+    
+    return <ImageCheckin
+      checkin={item}
+      index={index}
+      userUid={uid}
+      height={PHOTO_SIZE}
+      selected={selected}
+      onPress={e => {
+        this.setSelectedCheckin(docKey)
+      }}
+    />
   }
 
-  _renderVideo = ({item: {downloadURL, docKey}={}}={}, index) => {
-    console.log("_renderVideo downloadURL: ", downloadURL)
+  _renderVideo = ({item: {downloadURL, docKey}={}, index}={}, selectedCheckin) => {
+    const {user: {uid}={}} = this.state
+    const selected = selectedCheckin === docKey
+    // console.log("_renderVideo downloadURL: ", downloadURL)
     return <Video
       key={`video-${docKey || index}`}
       uri={downloadURL}
-      // onBuffer={this.onBuffer}                // Callback when remote video is buffering
-      // onError={this.videoError}               // Callback when video cannot be loaded
       height={PHOTO_SIZE}
-      style={{
-        marginLeft: index > 0 ? 1 : 0
+      userUid={uid}
+      selected={selected}
+      onPress={e => {
+        this.setSelectedCheckin(docKey)
       }}
     />
+  }
+
+  deleteCheckin = (checkin) => {
+    Alert.alert(
+      'Delete Checkin',
+      'Are you sure you want to delete this checkin?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {text: 'OK', onPress: () => {
+          console.log('TODO: delete checkin and media here')
+        }},
+      ],
+      {cancelable: true}
+    )
   }
 
   toggleMediaUpload=()=> {
     this.setState({uploadMedia: !this.state.uploadMedia})
   }
 
+  //TODO: rename this method to include selecting place
+  scrollToCheckin=(docKey) => {
+    const {queryData=[]} = this.state
+
+
+    //FIX THIS
+    const index = queryData.findIndex(checkin =>
+      checkin.docKey === docKey
+    )
+
+    console.log("scrollToCheckin docKey: ", docKey, ", index: ", index, ", queryData: ", queryData)
+
+    if (index > -1) {
+      const place = queryData[index]
+      this.flatListRef.scrollToIndex({
+        animated: true,
+        index,
+        // viewOffset,
+        // viewPosition
+      })
+
+      //TODO: need to set new variable to selectedCheckin
+      this.setSelectedCheckin(docKey)
+    }
+  }
 
   render() {
     const {
@@ -458,184 +586,217 @@ export default class App extends Component<Props> {
       imageStoreRef,
       user
     } = this.state
-    const allPhotos = [...queryData.sort((a, b) => {
-      if (a.timestamp < b.timestamp) {
-        return 1
-      } else if (a.timestamp > b.timestamp) {
-        return -1
-      } else {
-        return 0
-      }
-    }), ...photos]
+    const allPhotos = [...queryData, ...photos]
 
-    console.log("render state photos: ", photos)
+    // console.log("render state photos: ", photos)
+    console.log("selectedPlace: ", selectedPlace)
 
     return (
-      <View style={styles.container}>
-        <Animated
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
-          region={region}
-          user={user}
-          onRegionChange={this.onRegionChange}
-          onRegionChangeComplete={this.getNearbyCheckins}
-        >
+      <ThemeContext.Provider value={getTheme(uiTheme)}>
+        <View style={styles.container}>
+          <Animated
+            provider={PROVIDER_GOOGLE}
+            style={styles.map}
+            region={region}
+            user={user}
+            onRegionChange={this.onRegionChange}
+            onRegionChangeComplete={this.getNearbyCheckins}
+            onPoiClick={this.onPoiClick}
+          >
 
-        {!!currentLocation &&
-          <Marker
-            title={"Current Position"}
-            description={"Current Position"}
-            coordinate={currentLocation}
-            pinColor={'blue'}
-          />
-        }
+          {!!currentLocation &&
+            <Marker
+              title={"Current Position"}
+              description={""}
+              coordinate={currentLocation}
+              pinColor={COLOR.blue600}
+            />
+          }
 
-        {!!selectedPlace &&
-          <Marker
-            title={"Selected Place"}
-            description={"Selected Place"}
-            coordinate={{
-              latitude: selectedPlace.geometry.location.lat,
-              longitude: selectedPlace.geometry.location.lng
-            }}
-          />
-        }
+          {!!selectedPlace &&
+            <Marker
+              title={selectedPlace.title}
+              description={selectedPlace.description}
+              coordinate={{
+                latitude: selectedPlace.geometry.location.lat,
+                longitude: selectedPlace.geometry.location.lng
+              }}
+              pinColor={COLOR.yellow600}
+            />
+          }
 
-        {queryData && queryData.map(doc => {
-          return <Marker
-            title={"Selected Place"}
-            description={"Selected Place"}
-            coordinate={{
-              latitude: doc.coordinates.latitude,
-              longitude: doc.coordinates.longitude
-            }}
-          />
-        })}
-        
-        </Animated>
+          {queryData && queryData.map(doc => {
+            return <Marker
+              key={doc.docKey}
+              title={"Checkin"}
+              description={"checkin description"}
+              coordinate={{
+                latitude: doc.coordinates.latitude,
+                longitude: doc.coordinates.longitude
+              }}
+              onPress={e => this.scrollToCheckin(doc.docKey)}
+              pinColor={COLOR.red600}
+            />
+          })}
+          
+          </Animated>
 
-        <View style={{
-          position: 'absolute',
-          width,
-          height: 200,
-          top: 0,
-          left: 0,
-          padding: 20,
-          marginTop: 40
-        }}>
-          <Autocomplete
-            data={predictions}
-            value={searchText}
-            onChangeText={this.handleTextChange}
-            renderTextInput={(props) => {
-              return <TextInput
-                value={searchText}
-                autoFocus={true}
-                {...props}
-                blurOnSubmit={true}
-                style={[
-                  ...props.style,
-                  {
-                    borderRadius: 2,
-                    borderWidth: 0,
-                    marginBottom: 10,
-                    borderColor: 'rgba(0,0,0,0)',
-                    height:  45
-                   }
-                ]}
-                
-                shadowColor={'black'}
-                shadowOffset={{width: 0, height: 2}}
-                shadowOpacity={0.3}
-                shadowRadius={4}
-              />
-            }}
-            renderItem={({
-              item: {
-                place_id: placeID,
-                structured_formatting: {
-                  main_text: primaryText,
-                  secondary_text: secondaryText
-                }
-              },
-              item,
-              i
-            }) => (
-              <TouchableOpacity
-                onPress={e => this.handlePlaceSelect(item)}
-                style={{
-                  padding: 10,
-                  margin: 2,
-                  backgroundColor: 'rgba(255,255,255,1)'
-                }}
-                key={placeID}
-              >
-                <Text>{primaryText}</Text>
-                <Text style={{
-                  fontSize: 9,
-                  color: 'rgba(0,0,0,0.6)'
-                }}>{secondaryText}</Text>
-              </TouchableOpacity>
-            )}
-            containerStyle={{
-              flex: 1,
-              // width
-              borderWidth: 0
-            }}
-            listContainerStyle={{
-              backgroundColor: 'rgba(0,0,0,0)',
-              borderWidth: 0,
-
-            }}
-            listStyle={{
-              backgroundColor: 'rgba(0,0,0,0)',
-              maxHeight: 400,
-              overflow: 'scroll',
-              borderWidth: 0
-            }}
-            inputContainerStyle={{
-              borderWidth: 0
-            }}
-          />
-        </View>
-
-        {allPhotos && allPhotos.length > 0 &&
-          <FlatList
-            data={allPhotos}
-            renderItem={this._renderMedia}
-            horizontal={true}
-            keyExtractor={(item) => {
-              return item.docKey || item.imageKey || item.videoKey
-            }}
-            style={styles.swiperWrapper}
-          />
-        }
-
-        <TouchableOpacity
-          style={{
-            margin: 20,
+          <View style={{
+            position: 'absolute',
+            width,
+            height: 200,
+            top: 0,
+            left: 0,
             padding: 20,
-            borderRadius: 50,
-            backgroundColor: uploadMedia ? 'grey' : 'blue',
+            marginTop: 40
+          }}>
+            <Autocomplete
+              data={predictions}
+              value={searchText}
+              onChangeText={this.handleTextChange}
+              renderTextInput={(props) => {
+                return <View style={{
+                  position: 'relative'
+                }}>
+                  <TextInput
+                    value={searchText}
+                    autoFocus={false}
+                    {...props}
+                    blurOnSubmit={true}
+                    style={[
+                      ...props.style,
+                      {
+                        borderRadius: 2,
+                        borderWidth: 0,
+                        marginBottom: 10,
+                        borderColor: 'rgba(0,0,0,0)',
+                        height:  45,
+                        paddingRight: 50
+                       }
+                    ]}
+                    
+                    shadowColor={'black'}
+                    shadowOffset={{width: 0, height: 2}}
+                    shadowOpacity={0.3}
+                    shadowRadius={4}
+                  />
+
+                  {!!searchText &&
+                    <View style={{
+                      position: 'absolute',
+                      top: 5,
+                      right: 0,
+                    }}>
+                      <IconToggle
+                        name="close"
+                        size={18}
+                        color={'rgba(0,0,0,0.8)'}
+                        onPress={this.clearSearch}
+                      />
+                    </View>
+                  }
+                </View>
+              }}
+              renderItem={({
+                item: {
+                  place_id: placeID,
+                  structured_formatting: {
+                    main_text: primaryText,
+                    secondary_text: secondaryText
+                  }
+                },
+                item,
+                i
+              }) => (
+                <TouchableOpacity
+                  onPress={e => this.handlePlaceSelect(item)}
+                  style={{
+                    padding: 10,
+                    margin: 2,
+                    backgroundColor: 'rgba(255,255,255,1)'
+                  }}
+                  key={placeID}
+                >
+                  <Text>{primaryText}</Text>
+                  <Text style={{
+                    fontSize: 9,
+                    color: 'rgba(0,0,0,0.6)'
+                  }}>{secondaryText}</Text>
+                </TouchableOpacity>
+              )}
+              containerStyle={{
+                flex: 0
+              }}
+              listContainerStyle={{
+                backgroundColor: 'rgba(0,0,0,0)',
+              }}
+              listStyle={{
+                backgroundColor: 'rgba(0,0,0,0)',
+                maxHeight: height * 0.7,
+                overflow: 'scroll'
+              }}
+              inputContainerStyle={{
+                borderWidth: 0,
+                position: 'relative'
+              }}
+            />
+          </View>
+
+          {allPhotos && allPhotos.length > 0 &&
+            <FlatList
+              ref={(ref) => {this.flatListRef = ref}}
+              data={allPhotos}
+              renderItem={this._renderMedia}
+              horizontal={true}
+              keyExtractor={(item) => {
+                return item.docKey || item.imageKey || item.videoKey
+              }}
+              style={styles.swiperWrapper}
+            />
+          }
+
+          {/*<TouchableOpacity
+            style={{
+              margin: 20,
+              padding: 20,
+              borderRadius: 50,
+              backgroundColor: uploadMedia ? 'grey' : 'blue',
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              zIndex: 3
+            }}
+            onPress={this.toggleMediaUpload}
+          >
+            <Text style={{color: 'white'}}>Upload</Text>
+          </TouchableOpacity>*/}
+
+          <View style={{
+            // margin: 20,
+            // backgroundColor: uploadMedia ? 'grey' : 'blue',
             position: 'absolute',
             bottom: 0,
             right: 0,
             zIndex: 3
-          }}
-          onPress={this.toggleMediaUpload}
-        >
-          <Text style={{color: 'white'}}>Upload</Text>
-        </TouchableOpacity>
+          }}>
+            <IconToggle
+              name="add-circle"
+              color={COLOR.blue500}
+              size={50}
+              onPress={this.toggleMediaUpload}
+            />
+          </View>
 
-        {uploadMedia && !!geoCollection &&
-          <MediaUpload
-            geoFirestore={geoFirestore}
-            geoCollection={geoCollection}
-            imageStoreRef={imageStoreRef}
-            toggleMediaUpload={this.toggleMediaUpload}
-          />
-        }
-      </View>
+          {uploadMedia && !!geoCollection &&
+            <MediaUpload
+              geoFirestore={geoFirestore}
+              geoCollection={geoCollection}
+              imageStoreRef={imageStoreRef}
+              toggleMediaUpload={this.toggleMediaUpload}
+            />
+          }
+        </View>
+      </ThemeContext.Provider>
     );
   }
 }
@@ -675,6 +836,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     left: 0,
-    zIndex: 2
+    zIndex: 2,
+    paddingRight: 200
   }
 });

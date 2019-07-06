@@ -53,6 +53,8 @@ target 'RtPlaces' do
   pod 'RNFS', :path => '../node_modules/react-native-fs'
 
   pod 'react-native-video', :path => '../node_modules/react-native-video/react-native-video.podspec'
+  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
+
 end
 
 post_install do |installer|
