@@ -42,7 +42,9 @@ export default class BadInstagramCloneApp extends Component {
       geoCollection,
       toggleMediaUpload,
       imageStoreRef,
-      user: {uid=''}={}
+      user: {uid=''}={},
+      scrollToCheckin,
+      animateToRegion
     } = this.props
 
     console.log("take pic called! this.camera: ", this.camera)
@@ -94,7 +96,17 @@ export default class BadInstagramCloneApp extends Component {
               geoCollection.add(doc)
               .then(docRef => {
                 console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
-                toggleMediaUpload()
+                toggleMediaUpload(false)
+
+                animateToRegion({
+                  latitude,
+                  longitude,
+                  latitudeDelta: 0.04,
+                  longitudeDelta: 0.04
+                }).start()
+                setTimeout(() => {
+                  scrollToCheckin(docKey)
+                }, 1000)
               })
               .catch(error => {
                 console.log("error adding doc: ", error)
@@ -104,7 +116,7 @@ export default class BadInstagramCloneApp extends Component {
           },
           error => {
             // unsubscribe();
-            alert('Sorry, Try again. error: ', error);
+            console.alert('Sorry, Try again. error: ', error);
           }
         )
         // .then(snapshot => {
@@ -125,7 +137,8 @@ export default class BadInstagramCloneApp extends Component {
       toggleMediaUpload,
       geoCollection,
       imageStoreRef,
-      user: {uid=''}={}
+      user: {uid=''}={},
+      animateToRegion
     } = this.props
     console.log("take VIDEO called! this.camera: ", this.camera)
     if (this.camera) {
@@ -182,7 +195,17 @@ export default class BadInstagramCloneApp extends Component {
                 geoCollection.add(doc)
                 .then(docRef => {
                   console.log("added doc to geocollection. docRef: ", docRef)
-                  toggleMediaUpload()
+                  toggleMediaUpload(false)
+
+                  animateToRegion({
+                    latitude,
+                    longitude,
+                    latitudeDelta: 0.04,
+                    longitudeDelta: 0.04
+                  })
+                  setTimeout(() => {
+                    scrollToCheckin(docKey)
+                  }, 2000)
                 })
                 .catch(error => {
                   console.log("error adding doc: ", error)
@@ -192,13 +215,11 @@ export default class BadInstagramCloneApp extends Component {
             },
             error => {
               // unsubscribe();
-              alert('Sorry, Try again. error: ', error);
+              console.alert('Sorry, Try again. error: ', error);
             }
           )
         })
       });
-
-      toggleMediaUpload()
     }
   }
 
@@ -217,7 +238,7 @@ export default class BadInstagramCloneApp extends Component {
             name="close"
             size={35}
             color={'rgba(255,255,255,0.8)'}
-            onPress={toggleMediaUpload}
+            onPress={e => toggleMediaUpload(false)}
             style={{
               container: {
                 shadowColor: '#000',

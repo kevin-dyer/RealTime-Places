@@ -263,7 +263,7 @@ export default class App extends Component<Props> {
 
       if (!disableRegionChange) {
         // this.state.region.timing({
-        this.state.region.animateToRegion({
+        this.state.region.timing({
           latitude: lat,
           longitude: lng,
           latitudeDelta: latDelta,
@@ -400,15 +400,16 @@ export default class App extends Component<Props> {
         console.log("setting queryData from snapshot: ", queryData)
         this.setState({
           queryData: queryData
-          .filter(({
-            coordinates: {
-              latitude: checkinLat,
-              longitude: checkinLng
-            }}) => {
-            //NOTE: delta are degrees (111km or 69mi)
-            return Math.abs(latitude - checkinLat) < (latitudeDelta * 0.5) &&
-              Math.abs(longitude - checkinLng) < (longitudeDelta * 0.5)
-          })
+          // .filter(({
+          //   coordinates: {
+          //     latitude: checkinLat,
+          //     longitude: checkinLng
+          //   }}) => {
+          //   //NOTE: delta are degrees (111km or 69mi)
+          //   return Math.abs(latitude - checkinLat) < (latitudeDelta * 0.5) &&
+          //     Math.abs(longitude - checkinLng) < (longitudeDelta * 0.5)
+          // })
+          .filter(this.isCheckinOnScreen)
           .sort((a, b) => {
             if (a.timestamp < b.timestamp) {
               return 1
@@ -554,8 +555,11 @@ export default class App extends Component<Props> {
     )
   }
 
-  toggleMediaUpload=()=> {
-    this.setState({uploadMedia: !this.state.uploadMedia})
+  toggleMediaUpload=(show)=> {
+    this.setState({uploadMedia: typeof(show) === 'boolean'
+      ? show
+      : !this.state.uploadMedia
+    })
   }
 
   //TODO: rename this method to include selecting place
@@ -570,11 +574,10 @@ export default class App extends Component<Props> {
 
     console.log("scrollToCheckin docKey: ", docKey, ", index: ", index, ", queryData: ", queryData)
 
-    //NOTE: do not scroll if checkin is already selected
     if (index > -1) {
-      // const place = queryData[index]
-      
-      if (selectedCheckin !== queryData[index].docKey) {
+      const checkin = queryData[index]
+      //NOTE: do not scroll if checkin is already selected
+      if (selectedCheckin !== checkin.docKey) {
         this.flatListRef.scrollToIndex({
           animated: true,
           index,
@@ -583,9 +586,44 @@ export default class App extends Component<Props> {
         })
       }
 
+      if (!this.isCheckinOnScreen(checkin)) {
+        const {
+          coordinates: {latitude, longitude}={}
+        } = checkin
+        this.state.region.timing({
+          latitude,
+          longitude,
+          latitudeDelta: 0.04,
+          longitudeDelta: 0.04,
+        }).start()
+      }
+
       //TODO: need to set new variable to selectedCheckin
       this.setSelectedCheckin(docKey)
     }
+  }
+
+  isCheckinOnScreen = ({
+    coordinates: {
+      latitude: checkinLat,
+      longitude: checkinLng
+    }={}
+  }={}) => {
+    const {region} = this.state
+
+    if (!region) return false
+
+    const {
+      latitude=0,
+      longitude=0,
+      latitudeDelta=0,
+      longitudeDelta=0
+    } = (this.state.region && this.state.region.__getValue()) || {}
+
+    console.log("isCheckinOnScreen. region latitude, longitude, latitudeDelta, longitudeDelta: ", latitude, longitude, latitudeDelta, longitudeDelta, ", checkinLat, checkinLng: ", checkinLat, checkinLng)
+
+    return Math.abs(latitude - checkinLat) < (latitudeDelta * 0.5) &&
+      Math.abs(longitude - checkinLng) < (longitudeDelta * 0.5)
   }
 
   scrollToGoogleImage = (photo_reference) => {
@@ -660,12 +698,6 @@ export default class App extends Component<Props> {
       user
     } = this.state
     const allPhotos = [...queryData, ...photos]
-    const {
-      latitude,
-      longitude,
-      latitudeDelta,
-      longitudeDelta
-    } = !!region && region.__getValue()
 
     // console.log("render state photos: ", photos)
     // console.log("selectedPlace: ", selectedPlace)
@@ -677,6 +709,12 @@ export default class App extends Component<Props> {
             provider={PROVIDER_GOOGLE}
             style={styles.map}
             region={region}
+            initialRegion={{
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
+              latitudeDelta: 0.04,
+              longitudeDelta: 0.04
+            }}
             user={user}
             onRegionChange={this.onRegionChange}
             onRegionChangeComplete={this.getNearbyCheckins}
@@ -684,6 +722,13 @@ export default class App extends Component<Props> {
             showsUserLocation={true}
             showsMyLocationButton={true}
             showsCompass={true}
+            showsScale={true}
+            mapPadding={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: PHOTO_SIZE - 30
+            }}
           >
 
             {/*!!currentLocation &&
@@ -823,44 +868,40 @@ export default class App extends Component<Props> {
             />
           </View>
 
-          {allPhotos && allPhotos.length > 0 &&
-            <FlatList
-              ref={(ref) => {this.flatListRef = ref}}
-              data={allPhotos}
-              renderItem={this._renderMedia}
-              horizontal={true}
-              keyExtractor={(item, index) => {
-
-                console.log("keyExtractor item: ", item)
-                return item.docKey || item.id
-              }}
-              style={styles.swiperWrapper}
-              contentContainerStyle={styles.swiperContainer}
-              onViewableItemsChanged={this.handleViewableItemsChanged}
-              ListHeaderComponent={
-                <TouchableOpacity style={{
-                    height: PHOTO_SIZE,
-                    width: PHOTO_SIZE / 2,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: 'rgba(0,0,0,0.3)'
-                  }}
-                >
-                  <IconToggle
-                    name="camera-alt"
-                    size={40}
-                    color={'rgba(0,0,0,0.5)'}
-                    onPress={this.toggleMediaUpload}
-                  />
-                </TouchableOpacity>
-              }
-              getItemLayout={(data, index) => ({
-                length: PHOTO_SIZE,
-                offset: (PHOTO_SIZE + 1) * index,
-                index
-              })}
-            />
-          }
+          <FlatList
+            ref={(ref) => {this.flatListRef = ref}}
+            data={allPhotos}
+            renderItem={this._renderMedia}
+            horizontal={true}
+            keyExtractor={(item, index) => {
+              return item.docKey || item.id
+            }}
+            style={styles.swiperWrapper}
+            contentContainerStyle={styles.swiperContainer}
+            onViewableItemsChanged={this.handleViewableItemsChanged}
+            ListHeaderComponent={
+              <TouchableOpacity style={{
+                  height: PHOTO_SIZE,
+                  width: PHOTO_SIZE / 2,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(0,0,0,0.3)'
+                }}
+              >
+                <IconToggle
+                  name="camera-alt"
+                  size={40}
+                  color={'rgba(0,0,0,0.5)'}
+                  onPress={this.toggleMediaUpload}
+                />
+              </TouchableOpacity>
+            }
+            getItemLayout={(data, index) => ({
+              length: PHOTO_SIZE,
+              offset: (PHOTO_SIZE + 1) * index,
+              index
+            })}
+          />
 
           {uploadMedia && !!geoCollection &&
             <MediaUpload
@@ -869,6 +910,10 @@ export default class App extends Component<Props> {
               imageStoreRef={imageStoreRef}
               toggleMediaUpload={this.toggleMediaUpload}
               user={user}
+              scrollToCheckin={this.scrollToCheckin}
+              animateToRegion={reg =>
+                !!region && region.timing(reg).start()
+              }
             />
           }
         </View>
