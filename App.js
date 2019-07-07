@@ -58,6 +58,19 @@ import personIcon from './app/assets/images/circle.png'
 
 console.log("personIcon: ", personIcon)
 
+//util method
+function queryDataHasChanged(queryData=[], originalQueryData=[]) {
+  if (queryData.length !== originalQueryData.length) {
+    return true
+  }
+  // const maxLength = Math.max(queryData.length, originalQueryData.length)
+  for(let i = 0; i < queryData.length; i++) {
+    if (queryData[i].docKey !== originalQueryData[i].docKey) {
+      return true
+    }
+  }
+  return false
+}
 
 
 
@@ -396,7 +409,8 @@ export default class App extends Component<Props> {
 
       //Attempt to only update state if results have changed
       //TODO: improve this by checking each datum's id
-      if (true || queryData.length !== originalQueryData.length) {
+      if (queryDataHasChanged(queryData, originalQueryData)) {
+      // if (true || queryData.length !== originalQueryData.length) {
         console.log("setting queryData from snapshot: ", queryData)
         this.setState({
           queryData: queryData
@@ -619,8 +633,6 @@ export default class App extends Component<Props> {
       latitudeDelta=0,
       longitudeDelta=0
     } = (this.state.region && this.state.region.__getValue()) || {}
-
-    console.log("isCheckinOnScreen. region latitude, longitude, latitudeDelta, longitudeDelta: ", latitude, longitude, latitudeDelta, longitudeDelta, ", checkinLat, checkinLng: ", checkinLat, checkinLng)
 
     return Math.abs(latitude - checkinLat) < (latitudeDelta * 0.5) &&
       Math.abs(longitude - checkinLng) < (longitudeDelta * 0.5)
@@ -882,7 +894,7 @@ export default class App extends Component<Props> {
             ListHeaderComponent={
               <TouchableOpacity style={{
                   height: PHOTO_SIZE,
-                  width: PHOTO_SIZE / 2,
+                  width: PHOTO_SIZE * 0.75,
                   justifyContent: 'center',
                   alignItems: 'center',
                   backgroundColor: 'rgba(0,0,0,0.3)'
