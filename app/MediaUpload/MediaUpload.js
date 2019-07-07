@@ -15,6 +15,8 @@ import uuidV4 from 'uuid/v4'
 import RNFS from 'react-native-fs'
 import firebase from 'react-native-firebase'
 import MovToMp4 from 'react-native-mov-to-mp4'
+import Geolocation from '@react-native-community/geolocation'
+
 
 function generateCheckin({
   latitude,
@@ -53,7 +55,7 @@ export default class BadInstagramCloneApp extends Component {
       const data = await this.camera.takePictureAsync(options);
       console.log("camera data: ", data);
 
-      navigator.geolocation.getCurrentPosition((location={}) => {
+      Geolocation.getCurrentPosition((location={}) => {
         const {coords: {latitude, longitude}} = location || {}
         const docKey = uuidV4()
 
@@ -91,7 +93,7 @@ export default class BadInstagramCloneApp extends Component {
 
               geoCollection.add(doc)
               .then(docRef => {
-                console.log("added doc to geocollection. docRef: ", docRef)
+                console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
                 toggleMediaUpload()
               })
               .catch(error => {
@@ -141,7 +143,7 @@ export default class BadInstagramCloneApp extends Component {
         //here you can upload the video...
         console.log("mp4 conversion mp4Path: ", mp4Path);
 
-        navigator.geolocation.getCurrentPosition((location={}) => {
+        Geolocation.getCurrentPosition((location={}) => {
           console.log("currentPostion location: ", location)
           const {
             coords: {

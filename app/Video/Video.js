@@ -4,7 +4,8 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  Alert
 } from 'react-native';
 import Video from 'react-native-video';
 import { IconToggle } from 'react-native-material-ui';
@@ -16,6 +17,10 @@ export default class CVideo extends Component {
 		width: 0,
     paused: true
 	}
+
+  componentDidUpdate(prevProps) {
+    const {} = this.props
+  }
 
 	setVidSize = (natWidth, natHeight) => {
 		const {height} = this.props
@@ -35,13 +40,62 @@ export default class CVideo extends Component {
     this.props.onPress()
   }
 
+  deleteCheckin = () => {
+    const {
+      checkin: {
+        id,
+        downloadURL,
+        docKey
+      }={},
+      geoCollection,
+      imageStoreRef
+    } = this.props
+
+    Alert.alert(
+      'Delete Checkin',
+      'You sure? This cannot be undone!',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {text: 'OK', onPress: () => {
+          console.log("calling dleteCheckin")
+          geoCollection.doc(id).delete()
+          .then(()=>{
+            console.log("checkin deleted successfully")
+          })
+          .catch(error => {
+            console.error("checkin failed to delete! error: ", error)
+          })
+
+          // images/${docKey}.jpg
+          imageStoreRef.child(`images/${docKey}.mov`).delete()
+          .then(()=>{
+            console.log("image deleted successfully")
+          })
+          .catch(error => {
+            console.error("image failed to delete! error: ", error)
+          })
+        }},
+      ],
+      {cancelable: true},
+    )
+  }
+
 	render() {
 		const {
-			uri,
+			checkin: {
+        downloadURL: uri,
+        userUid
+      },
 			height,
-      userUuid,
+      // userUid,
+      userUid: currentUserUuid,
       selected,
-      index
+      index,
+      onPress=()=>{}
 		} = this.props
 		const {
       width,
@@ -52,14 +106,14 @@ export default class CVideo extends Component {
 
 
 		return <TouchableOpacity
-      onPress={this.togglePause}
+      onPress={onPress}
       style={{position: 'relative'}}
     >
       <Video
         // source={{uri: downloadURL}}   // Can be a URL or a local file.
         // source={{uri: 'http://techslides.com/demos/sample-videos/small.mp4'}}
         source={{uri}}
-        paused={paused}
+        paused={!selected}
         ref={(ref) => {
          //TODO: need to change this so it is an array
          this.player = ref
@@ -93,7 +147,7 @@ export default class CVideo extends Component {
         }}
       />
 
-      {(paused && width > 0) &&
+      {(!selected && width > 0) &&
         <View style={{
           position: 'absolute',
           top: 0,
@@ -105,8 +159,26 @@ export default class CVideo extends Component {
         }}>
           <IconToggle name={'play-circle-filled'}
             color={'rgba(255,255,255,0.65)'}
-            size={75}
-            onPress={this.togglePause}
+            size={50}
+            onPress={onPress}
+          />
+        </View>
+      }
+
+      {(!userUid || userUid === currentUserUuid) &&
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            flex: 0
+          }}
+        >
+          <IconToggle
+            name="close"
+            size={25}
+            color={'#FFF'}
+            onPress={this.deleteCheckin}
           />
         </View>
       }

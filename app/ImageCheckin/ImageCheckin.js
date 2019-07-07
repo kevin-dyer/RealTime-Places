@@ -5,7 +5,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Image
+  Image,
+  Alert
 } from 'react-native';
 import { IconToggle } from 'react-native-material-ui';
 
@@ -36,6 +37,50 @@ export default class ImageCheckin extends Component {
 		})
 	}
 
+  deleteCheckin = () => {
+    const {
+      checkin: {
+        id,
+        downloadURL,
+        docKey
+      }={},
+      geoCollection,
+      imageStoreRef
+    } = this.props
+
+    Alert.alert(
+      'Delete Checkin',
+      'You sure? This cannot be undone!',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {text: 'OK', onPress: () => {
+          console.log("calling dleteCheckin")
+          geoCollection.doc(id).delete()
+          .then(()=>{
+            console.log("checkin deleted successfully")
+          })
+          .catch(error => {
+            console.error("checkin failed to delete! error: ", error)
+          })
+
+          // images/${docKey}.jpg
+          imageStoreRef.child(`images/${docKey}.jpg`).delete()
+          .then(()=>{
+            console.log("image deleted successfully")
+          })
+          .catch(error => {
+            console.error("image failed to delete! error: ", error)
+          })
+        }},
+      ],
+      {cancelable: true},
+    )
+  }
+
 
 	render() {
 		const {
@@ -45,7 +90,7 @@ export default class ImageCheckin extends Component {
         docKey,
         userUid
       },
-      userUuid: currentUserUuid,
+      userUid: currentUserUuid,
       selected,
       index,
       onPress=()=>{}
@@ -54,7 +99,7 @@ export default class ImageCheckin extends Component {
       width
     } = this.state
 
-    // console.log("imageCheckin width: ", width, ", height: ", height)
+    console.log("imageCheckin currentUserUuid: ", currentUserUuid, ", checkin.userUid: ", userUid)
     return (
       <TouchableOpacity
         key={`queryPhoto-${docKey || index}`}
@@ -70,22 +115,20 @@ export default class ImageCheckin extends Component {
           }}
         />
 
-        {(!!userUid && userUid === currentUserUuid) &&
+        {(!userUid || userUid === currentUserUuid) &&
           <View
             style={{
               position: 'absolute',
               top: 0,
               right: 0,
-              flex: 0,
-              borderWidth: 5,
-              borderColor: 'white'
+              flex: 0
             }}
           >
             <IconToggle
-              name="close-circle"
-              size={20}
+              name="close"
+              size={25}
               color={'#FFF'}
-              onClick={this.deleteCheckin}
+              onPress={this.deleteCheckin}
             />
           </View>
         }

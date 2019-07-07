@@ -52,6 +52,12 @@ import {
 import {PLACES_KEY} from './configs'
 import uuidV4 from 'uuid/v4'
 import { throttle, debounce } from 'throttle-debounce'
+import { Icon } from 'react-native-material-ui'
+
+import personIcon from './app/assets/images/circle.png'
+
+console.log("personIcon: ", personIcon)
+
 
 
 
@@ -97,12 +103,7 @@ export default class App extends Component<Props> {
       // }),
 
       //TODO: comment out lat and long
-      region: {
-        latitude: 0,
-        longitude: 0,
-        latitudeDelta: .02,
-        longitudeDelta: .02,
-      },
+      region: undefined,
       currentLocation: {
         latitude: 0,
         longitude: 0
@@ -136,6 +137,8 @@ export default class App extends Component<Props> {
 
       const {coords: {latitude, longitude}} = location || {}
 
+      console.log("setting region to latitude, longitude: ", latitude, longitude)
+
       this.setState({
         currentLocation: {latitude, longitude},
         // region: {
@@ -150,16 +153,6 @@ export default class App extends Component<Props> {
           longitudeDelta: .02,
         })
       })
-
-      // console.log("geohash: ", encodeGeohash({lat: latitude, lng:}))
-
-      console.log("latitude: ", latitude, ", longitude: ", longitude, ", this.state.region: ", this.state.region)
-      // this.state.region.setValue({
-      //   latitude,
-      //   longitude
-      // })
-      // this.state.region.timing({latitude, longitude}).start()
-
     }, (error) => {
       console.error("error getting current position: ", error)
     }, {
@@ -179,10 +172,6 @@ export default class App extends Component<Props> {
 
           // // Create a GeoFirestore reference
           const geofirestore: GeoFirestore = new GeoFirestore(firestore);
-
-          // const restaurantsGeostoreRef = db.collection('exploreMap');
-          // const restaurantsRef = new GeoFirestore(restaurantsGeostoreRef);
-
           // // Create a GeoCollection reference
           const geocollection: GeoCollectionReference = geofirestore.collection('checkins');
 
@@ -192,48 +181,6 @@ export default class App extends Component<Props> {
             user: credential.user.toJSON(),
             imageStoreRef
           })
-
-          //Test set
-          // console.log("geocollection: ", geocollection, ", .add: ", geocollection.add)
-
-          // console.log("GeoPoint: ", firebase.firestore.GeoPoint)
-          // console.log("GeoDocumentReference: ", GeoDocumentReference)
-          // console.log("encodeGeohash: ", encodeGeohash)
-          // interface GeoDocument {
-          //   g: string; //geohash
-          //   l: GeoPoint;
-          //   d: DocumentData;
-          // }
-          // const testDoc: GeoDocument = {
-          //   g: firebase.firestore.GeoPoint(10, 20)
-          // }
-
-          // const doc = {
-          //   timestamp: Date.now(),
-          //   base64: 'testdata',
-          //   coordinates: new firebase.firestore.GeoPoint(11,22),
-          // };
-
-          // console.log("sending doc: ", doc)
-
-          // geocollection.add(doc)
-          // .then(docRef => {
-          //   console.log("added doc to geocollection. docRef: ", docRef)
-          // })
-          // .catch(error => {
-          //   console.log("error adding doc: ", error)
-          // })
-          // geofirestore.setWithDocument('test', firebase.firestore.GeoPoint(10,20), {
-          //   timestamp: Date.now(),
-          //   type: 'image',
-          //   base64: 'testdata'
-          // }).then(() => {
-          //   console.log('TEST Provided key has been added to GeoFirestore');
-          // }, (error) => {
-          //   console.log('Error: ' + error);
-          // });
-
-          // console.log("geofirestore: ", geofirestore, ", geocollection: ", geocollection)
         }
       })
       .catch(error => {
@@ -258,15 +205,6 @@ export default class App extends Component<Props> {
     .catch(error => {
       console.log("failed to fetch predictions. error: ", error)
     })
-
-    // RNGooglePlaces.getAutocompletePredictions(text, {fields: ['photos']})
-    // .then((results) => {
-    //   console.log("prediction results: ", results)
-    //   this.setState({ predictions: results })
-    // })
-    // .catch((error) => console.log(error.message));
-
-    
   }
 
   handlePlaceSelect = (place={}, disableRegionChange) => {
@@ -280,7 +218,6 @@ export default class App extends Component<Props> {
     console.log("handlePlaceSelect. place: ", place)
 
     this.setState({
-      // selectedPlace: place,
       searchText: `${primaryText} ${secondaryText}`,
       predictions: []
     })
@@ -358,12 +295,6 @@ export default class App extends Component<Props> {
         main_text: name
       }
     }, true)
-
-    // this.structured_formatting: {
-    //     main_text: primaryText,
-    //     secondary_text: secondaryText
-    //   }={},
-    //   place_id
   }
 
   clearSearch = () => {
@@ -424,7 +355,10 @@ export default class App extends Component<Props> {
       // console.log("query.onSnapshot. snapshot: ", snapshot)
       const {docs=[]} = snapshot || {}
       const queryData = docs.map(doc => {
-        return doc.data()
+        return {
+          ...doc.data(),
+          id: doc.id
+        }
       })
 
       //BIG TODO: need to filter queryData based on if it is inside view window
@@ -496,10 +430,16 @@ export default class App extends Component<Props> {
     item,
     index
   }={}, selectedCheckin={}) => {
-    const {user: {uid}={}} = this.state
+    const {
+      user: {uid}={},
+      geoCollection,
+      imageStoreRef
+    } = this.state
     const selected = selectedCheckin === docKey
 
     console.log("_renderQueryPhoto downloadURL: ", downloadURL)
+
+    console.log("query photo render. this.state.user.uid: ", this.state.user && this.state.user.uid)
     
     return <ImageCheckin
       checkin={item}
@@ -512,19 +452,26 @@ export default class App extends Component<Props> {
         // this.setSelectedCheckin(docKey)
         this.scrollToCheckin(docKey)
       }}
+      geoCollection={geoCollection}
+      imageStoreRef={imageStoreRef}
     />
   }
 
   _renderVideo = ({
-    item: {downloadURL, docKey}={},
+    item: {docKey}={},
+    item,
     index
   }={}, selectedCheckin) => {
-    const {user: {uid}={}} = this.state
+    const {
+      user: {uid}={},
+      geoCollection,
+      imageStoreRef
+    } = this.state
     const selected = selectedCheckin === docKey
     // console.log("_renderVideo downloadURL: ", downloadURL)
     return <Video
       key={`video-${docKey || index}`}
-      uri={downloadURL}
+      checkin={item}
       height={PHOTO_SIZE}
       userUid={uid}
       selected={selected}
@@ -533,6 +480,8 @@ export default class App extends Component<Props> {
         this.scrollToCheckin(docKey)
       }}
       index={index}
+      geoCollection={geoCollection}
+      imageStoreRef={imageStoreRef}
     />
   }
 
@@ -588,6 +537,27 @@ export default class App extends Component<Props> {
     }
   }
 
+  handleViewableItemsChanged = ({
+    viewableItems,
+    changed,
+  }) => {
+    const {selectedCheckin} = this.state
+    //TODO: Update selecteCheckin
+
+    if (!!selectedCheckin) {
+      const isSelectedVisible = viewableItems.some(({item: {docKey}={}}) => {
+        return docKey === selectedCheckin
+      })
+
+      //if selected checkin is not visible, unselect
+      //NOTE: this may not be desireable because will cause shift
+      if (!isSelectedVisible) {
+        this.setSelectedCheckin(null)
+      }
+    }
+    console.log("handleViewableItemsChanged, viewableItems: ", viewableItems, ", changed: ", changed)
+  }
+
   render() {
     const {
       searchText,
@@ -611,7 +581,7 @@ export default class App extends Component<Props> {
     return (
       <ThemeContext.Provider value={getTheme(uiTheme)}>
         <View style={styles.container}>
-          <Animated
+          {!!region && <Animated
             provider={PROVIDER_GOOGLE}
             style={styles.map}
             region={region}
@@ -621,42 +591,41 @@ export default class App extends Component<Props> {
             onPoiClick={this.onPoiClick}
           >
 
-          {!!currentLocation &&
-            <Marker
-              title={"Current Position"}
-              description={""}
-              coordinate={currentLocation}
-              pinColor={COLOR.blue600}
-            />
-          }
+            {!!currentLocation &&
+              <Marker
+                key="currentLocation"
+                coordinate={currentLocation}
+                image={personIcon}
+              />
+            }
 
-          {!!selectedPlace &&
-            <Marker
-              title={selectedPlace.title}
-              description={selectedPlace.description}
-              coordinate={{
-                latitude: selectedPlace.geometry.location.lat,
-                longitude: selectedPlace.geometry.location.lng
-              }}
-              pinColor={COLOR.yellow600}
-            />
-          }
+            {!!selectedPlace &&
+              <Marker
+                key="selectedPlace"
+                title={selectedPlace.title}
+                description={selectedPlace.description}
+                coordinate={{
+                  latitude: selectedPlace.geometry.location.lat,
+                  longitude: selectedPlace.geometry.location.lng
+                }}
+                pinColor={COLOR.yellow600}
+              />
+            }
 
-          {queryData && queryData.map(doc => {
-            return <Marker
-              key={doc.docKey}
-              title={"Checkin"}
-              description={"checkin description"}
-              coordinate={{
-                latitude: doc.coordinates.latitude,
-                longitude: doc.coordinates.longitude
-              }}
-              onPress={e => this.scrollToCheckin(doc.docKey)}
-              pinColor={COLOR.red600}
-            />
-          })}
-          
-          </Animated>
+            {queryData && queryData.map(doc => {
+              return <Marker
+                key={doc.docKey}
+                title={"Checkin"}
+                description={"checkin description"}
+                coordinate={{
+                  latitude: doc.coordinates.latitude,
+                  longitude: doc.coordinates.longitude
+                }}
+                onPress={e => this.scrollToCheckin(doc.docKey)}
+                pinColor={COLOR.red600}
+              />
+            })}
+          </Animated>}
 
           <View style={{
             position: 'absolute',
@@ -770,6 +739,24 @@ export default class App extends Component<Props> {
               }}
               style={styles.swiperWrapper}
               contentContainerStyle={styles.swiperContainer}
+              onViewableItemsChanged={this.handleViewableItemsChanged}
+              ListHeaderComponent={
+                <TouchableOpacity style={{
+                    height: PHOTO_SIZE,
+                    width: PHOTO_SIZE / 2,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(0,0,0,0.3)'
+                  }}
+                >
+                  <IconToggle
+                    name="camera-alt"
+                    size={40}
+                    color={'rgba(0,0,0,0.5)'}
+                    onPress={this.toggleMediaUpload}
+                  />
+                </TouchableOpacity>
+              }
             />
           }
 
@@ -800,8 +787,19 @@ export default class App extends Component<Props> {
             <IconToggle
               name="add-circle"
               color={COLOR.blue500}
+              underlayColor={"#FFF"}
+              maxOpacity={0.4}
+              percent={200}
               size={50}
               onPress={this.toggleMediaUpload}
+              style={{
+                container: {
+                  shadowColor: 'black',
+                  shadowOffset: {width: 4, height: 4},
+                  shadowOpacity: 0.5,
+                  shadowRadius: 6
+                }
+              }}
             />
           </View>
 
@@ -811,6 +809,7 @@ export default class App extends Component<Props> {
               geoCollection={geoCollection}
               imageStoreRef={imageStoreRef}
               toggleMediaUpload={this.toggleMediaUpload}
+              user={user}
             />
           }
         </View>
