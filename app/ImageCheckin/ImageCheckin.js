@@ -109,7 +109,7 @@ export default class ImageCheckin extends Component {
           height: selected ? height * scale : height,
           width: selected ? width * scale : height,
           marginLeft: index > 0 ? 1 : 0,
-          zIndex: 200
+          zIndex: 200,
         }}
         onPress={onPress}
       >

@@ -19,6 +19,7 @@
     "react-native-fs": "^2.13.3",
     "react-native-google-places": "^2.5.2",
     "react-native-maps": "^0.24.2",
+    "react-native-material-tabs": "^4.0.0",
     "react-native-material-ui": "^1.30.1",
     "react-native-mov-to-mp4": "^0.2.1",
     "react-native-scalable-image": "^0.5.1",

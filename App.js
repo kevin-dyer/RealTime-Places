@@ -912,6 +912,7 @@ export default class App extends Component<Props> {
                 style={styles.swiperWrapper}
                 contentContainerStyle={styles.swiperContainer}
                 onViewableItemsChanged={this.handleViewableItemsChanged}
+                removeClippedSubviews={false}
                 ListHeaderComponent={
                   <TouchableOpacity style={{
                       height: PHOTO_SIZE,
@@ -936,7 +937,7 @@ export default class App extends Component<Props> {
                   index
                 })}
               />
-              {!!selectedCheckin &&
+              {false && !!selectedCheckin &&
                 <View style={{
                   position: 'absolute',
                   top: 0,
@@ -1015,6 +1016,6 @@ const styles = StyleSheet.create({
   swiperContainer: {
     alignItems: 'flex-end',
     // paddingRight: 20,
-    backgroundColor: 'rgba(0,0,0,0.2)'
+    backgroundColor: 'rgba(0,0,0,0.2)',
   }
 });

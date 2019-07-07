@@ -4,7 +4,8 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  Dimensions
 } from 'react-native';
 import {
   COLOR,
@@ -16,6 +17,9 @@ import RNFS from 'react-native-fs'
 import firebase from 'react-native-firebase'
 import MovToMp4 from 'react-native-mov-to-mp4'
 import Geolocation from '@react-native-community/geolocation'
+import MaterialTabs from 'react-native-material-tabs'
+
+const {width, height} = Dimensions.get('window')
 
 
 function generateCheckin({
@@ -37,6 +41,11 @@ function generateCheckin({
 }
 
 export default class BadInstagramCloneApp extends Component {
+  state = {
+    selectedTab: 0, //or video
+    isRecording: false
+  }
+
   takePicture = async function() {
     const {
       geoCollection,
@@ -54,18 +63,26 @@ export default class BadInstagramCloneApp extends Component {
         // base64: true,
         // doNotSave: true
       };
+
+      this.setState({
+        isRecording: true
+      })
       const data = await this.camera.takePictureAsync(options);
-      console.log("camera data: ", data);
+      // console.log("camera data: ", data);
+
+      this.setState({
+        isRecording: false
+      })
 
       Geolocation.getCurrentPosition((location={}) => {
         const {coords: {latitude, longitude}} = location || {}
         const docKey = uuidV4()
 
-        console.log("lat: ", latitude, ", lng: ", longitude, ", imageStoreRef: ", imageStoreRef)
+        // console.log("lat: ", latitude, ", lng: ", longitude, ", imageStoreRef: ", imageStoreRef)
 
         const imgRef = imageStoreRef.child(`images/${docKey}.jpg`)
 
-        console.log("imgRef: ", imgRef, ", data.uri: ", data.uri)
+        // console.log("imgRef: ", imgRef, ", data.uri: ", data.uri)
 
 
 
@@ -149,8 +166,12 @@ export default class BadInstagramCloneApp extends Component {
 
       };
       const docKey = uuidV4()
+
+      this.setState({isRecording: true})
       const data = await this.camera.recordAsync(options);
       console.log("video data: ", data);
+
+      this.setState({isRecording: false})
 
       //TODO: test if this works!
       MovToMp4.convertMovToMp4(data.uri, docKey + ".mp4", function (mp4Path) {
@@ -224,8 +245,15 @@ export default class BadInstagramCloneApp extends Component {
     }
   }
 
+  stopVideo = () => {
+    const {selectedTab} = this.state
+
+    this.camera.stopRecording()
+  }
+
   render() {
     const {toggleMediaUpload} = this.props
+    const {selectedTab, isRecording} = this.state
 
     return (
       <View style={styles.container}>
@@ -276,14 +304,90 @@ export default class BadInstagramCloneApp extends Component {
           onGoogleVisionBarcodesDetected={({ barcodes }) => {
             console.log(barcodes);
           }}
+          ratio={'1:1'}
         />
-        <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-          <TouchableOpacity onPress={this.takePicture.bind(this)} style={styles.capture}>
-            <Text style={{ fontSize: 14 }}> Pic </Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={this.takeVideo.bind(this)} style={[styles.capture, styles.videoCapture]}>
-            <Text style={styles.vidText}>Vid</Text>
-          </TouchableOpacity>
+
+        <View style={{
+          backgroundColor: '#f7f7f7',
+          flex: 1,
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexDirection: 'column',
+          position: 'relative'
+        }}>
+
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: 120
+            }}
+            onTouchStart={e => {
+              console.log("onTouchStart called! e: ", e)
+
+              if (selectedTab === 1) {
+                console.log("handle recording")
+                this.takeVideo()
+              }
+              return e
+            }}
+            onTouchEnd={e => {
+              console.log("onTouchEnd Called e: ", e)
+
+              if (selectedTab === 1) {
+                this.stopVideo()
+              }
+              return e
+            }}
+          >
+            <IconToggle
+              name="md-radio-button-off"
+              iconSet={'Ionicons'}
+              size={isRecording ? 150 : 70}
+              color={isRecording ? COLOR.red500 : '#cccccc'}
+              underlayColor={isRecording ? COLOR.red500 : '#000'}
+              maxOpacity={0.5}
+              percent={200}
+              onPress={e => {
+                if (selectedTab === 0) {
+                  this.takePicture()
+                }
+              }}
+              style={{
+                container: {
+                  // shadowColor: '#000',
+                  // shadowOffset: {width: 2, height: 2},
+                  // shadowOpacity: 0.3,
+                  // shadowRadius: 3,
+                }
+              }}
+            />
+          </View>
+          <View style={{
+            position: 'absolute',
+            bottom: 20,
+            left: 0,
+            width,
+            paddingLeft: 40,
+            paddingRight: 40
+          }}>
+            <MaterialTabs
+              items={['Photo', 'Video']}
+              selectedIndex={selectedTab}
+              onChange={index => this.setState({ selectedTab: index })}
+              barColor={'rgba(0,0,0,0)'}
+              indicatorColor={'#000'}
+              activeTextColor={'#000'}
+              inactiveTextColor={'#cccccc'}
+              textStyle={{
+                fontSize: 18
+              }}
+              barHeight={120}
+              uppercase={false}
+              disabled={isRecording}
+            />
+          </View>
         </View>
       </View>
     );
@@ -295,31 +399,34 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     backgroundColor: 'black',
-    width: '100%',
+    width,
+    height,
     zIndex: 100
   },
   preview: {
     flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'center',
+    height: width,
+    width
   },
-  capture: {
-    flex: 0,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 15,
-    paddingHorizontal: 20,
-    alignSelf: 'center',
-    margin: 20,
-  },
-  videoCapture: {
-    backgroundColor: 'rgba(0,0,0,0)',
-    borderWidth: 2,
-    borderColor: '#FFF'
-  },
-  vidText: {
-    fontSize: 14,
-    // fontWeight: '800',
-    color: '#FFF',
-  }
+  // capture: {
+  //   flex: 0,
+  //   backgroundColor: '#fff',
+  //   borderRadius: 5,
+  //   padding: 15,
+  //   paddingHorizontal: 20,
+  //   alignSelf: 'center',
+  //   margin: 20,
+  // },
+  // videoCapture: {
+  //   backgroundColor: 'rgba(0,0,0,0)',
+  //   borderWidth: 2,
+  //   borderColor: '#FFF'
+  // },
+  // vidText: {
+  //   fontSize: 14,
+  //   // fontWeight: '800',
+  //   color: '#FFF',
+  // }
 });
