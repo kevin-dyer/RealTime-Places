@@ -95,7 +95,8 @@ export default class CVideo extends Component {
       userUid: currentUserUuid,
       selected,
       index,
-      onPress=()=>{}
+      onPress=()=>{},
+      scale
 		} = this.props
 		const {
       width,
@@ -122,8 +123,8 @@ export default class CVideo extends Component {
         onError={this.videoError}               // Callback when video cannot be loaded
         style={{
           marginLeft: index > 0 ? 1 : 0,
-          height: selected ? height * 1.5 : height,
-          width: selected ? width * 1.5 : height
+          height: selected ? height * scale : height,
+          width: selected ? width * scale : height
         }}
         resizeMode={'cover'}
         repeat

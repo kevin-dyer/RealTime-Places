@@ -93,7 +93,8 @@ export default class ImageCheckin extends Component {
       userUid: currentUserUuid,
       selected,
       index,
-      onPress=()=>{}
+      onPress=()=>{},
+      scale
 		} = this.props
 		const {
       width
@@ -103,15 +104,19 @@ export default class ImageCheckin extends Component {
     return (
       <TouchableOpacity
         key={`queryPhoto-${docKey || index}`}
-        style={{position: 'relative'}}
+        style={{
+          position: 'relative',
+          height: selected ? height * scale : height,
+          width: selected ? width * scale : height,
+          marginLeft: index > 0 ? 1 : 0,
+          zIndex: 200
+        }}
         onPress={onPress}
       >
         <Image
           source={{uri: downloadURL}}
           style={{
-            marginLeft: index > 0 ? 1 : 0,
-            height: selected ? height * 1.5 : height,
-            width: selected ? width * 1.5 : height,
+            flex: 1,
             resizeMode: 'cover'
           }}
         />

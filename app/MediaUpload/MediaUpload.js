@@ -138,7 +138,8 @@ export default class BadInstagramCloneApp extends Component {
       geoCollection,
       imageStoreRef,
       user: {uid=''}={},
-      animateToRegion
+      animateToRegion,
+      scrollToCheckin
     } = this.props
     console.log("take VIDEO called! this.camera: ", this.camera)
     if (this.camera) {

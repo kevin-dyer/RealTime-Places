@@ -79,6 +79,7 @@ console.disableYellowBox = true;
 
 const {width, height} = Dimensions.get('window')
 const PHOTO_SIZE = 140
+const PHOTO_SCALE = 2
 
 const uiTheme = {
   palette: {
@@ -483,6 +484,7 @@ export default class App extends Component<Props> {
       }}
       selected={selected}
       index={index}
+      scale={PHOTO_SCALE}
     />
   }
 
@@ -520,6 +522,7 @@ export default class App extends Component<Props> {
       }}
       geoCollection={geoCollection}
       imageStoreRef={imageStoreRef}
+      scale={PHOTO_SCALE}
     />
   }
 
@@ -548,6 +551,7 @@ export default class App extends Component<Props> {
       index={index}
       geoCollection={geoCollection}
       imageStoreRef={imageStoreRef}
+      scale={PHOTO_SCALE}
     />
   }
 
@@ -570,10 +574,16 @@ export default class App extends Component<Props> {
   }
 
   toggleMediaUpload=(show)=> {
+    const {uploadMedia} = this.state
     this.setState({uploadMedia: typeof(show) === 'boolean'
       ? show
-      : !this.state.uploadMedia
+      : !uploadMedia
     })
+
+    //Unselect checkins when going to media upload page
+    if (show === true || (!uploadMedia && show === undefined)) {
+      this.setSelectedCheckin(null)
+    }
   }
 
   //TODO: rename this method to include selecting place
@@ -739,7 +749,7 @@ export default class App extends Component<Props> {
               top: 0,
               left: 0,
               right: 0,
-              bottom: PHOTO_SIZE - 30
+              bottom: !!selectedCheckin ? ((PHOTO_SIZE * PHOTO_SCALE) - 30) : (PHOTO_SIZE - 30)
             }}
           >
 
@@ -880,40 +890,71 @@ export default class App extends Component<Props> {
             />
           </View>
 
-          <FlatList
-            ref={(ref) => {this.flatListRef = ref}}
-            data={allPhotos}
-            renderItem={this._renderMedia}
-            horizontal={true}
-            keyExtractor={(item, index) => {
-              return item.docKey || item.id
-            }}
-            style={styles.swiperWrapper}
-            contentContainerStyle={styles.swiperContainer}
-            onViewableItemsChanged={this.handleViewableItemsChanged}
-            ListHeaderComponent={
-              <TouchableOpacity style={{
-                  height: PHOTO_SIZE,
-                  width: PHOTO_SIZE * 0.75,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(0,0,0,0.3)'
+          <View style={{
+            // position: 'relative',
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            zIndex: 2,
+          }}>
+            <View style={{
+              position: 'relative',
+              width
+            }}>
+              <FlatList
+                ref={(ref) => {this.flatListRef = ref}}
+                data={allPhotos}
+                renderItem={this._renderMedia}
+                horizontal={true}
+                keyExtractor={(item, index) => {
+                  return item.docKey || item.id
                 }}
-              >
-                <IconToggle
-                  name="camera-alt"
-                  size={40}
-                  color={'rgba(0,0,0,0.5)'}
-                  onPress={this.toggleMediaUpload}
-                />
-              </TouchableOpacity>
-            }
-            getItemLayout={(data, index) => ({
-              length: PHOTO_SIZE,
-              offset: (PHOTO_SIZE + 1) * index,
-              index
-            })}
-          />
+                style={styles.swiperWrapper}
+                contentContainerStyle={styles.swiperContainer}
+                onViewableItemsChanged={this.handleViewableItemsChanged}
+                ListHeaderComponent={
+                  <TouchableOpacity style={{
+                      height: PHOTO_SIZE,
+                      width: PHOTO_SIZE * 0.75,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(0,0,0,0.3)',
+                      marginRight: 1
+                    }}
+                  >
+                    <IconToggle
+                      name="camera-alt"
+                      size={40}
+                      color={'rgba(0,0,0,0.5)'}
+                      onPress={this.toggleMediaUpload}
+                    />
+                  </TouchableOpacity>
+                }
+                getItemLayout={(data, index) => ({
+                  length: PHOTO_SIZE,
+                  offset: (PHOTO_SIZE + 1) * index,
+                  index
+                })}
+              />
+              {!!selectedCheckin &&
+                <View style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                }}>
+                  <IconToggle
+                    name="close"
+                    size={30}
+                    color={'rgba(255,255,255,0.8)'}
+                    onPress={e => {
+                      console.log("Calling FlatList onPress!")
+                      this.setSelectedCheckin(null)
+                    }}
+                  />
+                </View>
+              }
+            </View>
+          </View>
 
           {uploadMedia && !!geoCollection &&
             <MediaUpload
@@ -966,13 +1007,14 @@ const styles = StyleSheet.create({
   swiperWrapper: {
     width,
     // height: PHOTO_SIZE,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    zIndex: 2,
+    // position: 'absolute',
+    // bottom: 0,
+    // left: 0,
+    // zIndex: 2,
   },
   swiperContainer: {
     alignItems: 'flex-end',
-    paddingRight: 20
+    // paddingRight: 20,
+    backgroundColor: 'rgba(0,0,0,0.2)'
   }
 });

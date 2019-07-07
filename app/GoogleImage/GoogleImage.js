@@ -41,7 +41,8 @@ export default class GoogleImage extends Component {
       uri,
       selected,
       index,
-      onPress=()=>{}
+      onPress=()=>{},
+      scale=2
 		} = this.props
 		const {
       width
@@ -57,8 +58,8 @@ export default class GoogleImage extends Component {
           source={{uri}}
           style={{
             marginLeft: index > 0 ? 1 : 0,
-            height: selected ? height * 1.5 : height,
-            width: selected ? width * 1.5 : height,
+            height: selected ? height * scale : height,
+            width: selected ? width * scale : height,
             resizeMode: 'cover'
           }}
         />
