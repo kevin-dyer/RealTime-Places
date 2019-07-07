@@ -30,7 +30,7 @@ import RNGooglePlaces from 'react-native-google-places';
 import Autocomplete from 'react-native-autocomplete-input'
 import Image from 'react-native-scalable-image';
 import ImageCheckin from './app/ImageCheckin/ImageCheckin'
-// import Video from 'react-native-video';
+import GoogleImage from './app/GoogleImage/GoogleImage'
 import Video from './app/Video/Video'
 import MediaUpload from './app/MediaUpload/MediaUpload'
 import firebase from 'react-native-firebase'
@@ -269,8 +269,14 @@ export default class App extends Component<Props> {
       }
 
       console.log("places photos: ", photos)
-      return this.fetchPlacePhotos(photos).then(photos => {
-        this.setState({photos})
+      return this.fetchPlacePhotos(photos).then(photoUrls => {
+        this.setState({photos: photos.map((photo, index) => ({
+          uri: photoUrls[index],
+          photo_reference: photo.photo_reference,
+          height: photo.height,
+          width: photo.width,
+          type: 'googlePhoto'
+        }))})
       })
     })
     .catch(error => {
@@ -324,7 +330,7 @@ export default class App extends Component<Props> {
 
   //TODO: Need to throttle
   //TODO: Need to adjust the query radius based on latitude delta 
-  getNearbyCheckins = throttle(1000, (region) => {
+  getNearbyCheckins = debounce(1000, (region) => {
     const {
       latitude,
       longitude,
@@ -394,31 +400,40 @@ export default class App extends Component<Props> {
   }
 
   _renderMedia = (media={}) => {
-    const {item} = media
+    const {item: {
+      type
+    }={}} = media
     const {selectedCheckin} = this.state
 
-    // console.log("_renderMedia item: ", item)
-
-    if (typeof(item) === 'string') {
-      return this._renderPhoto(media)
-    }
-    const {type} = item || {}
-    if (type === 'image') {
+    if (type === 'googlePhoto') {
+      return this._renderPhoto(media, selectedCheckin)
+    } else if (type === 'image') {
       return this._renderQueryPhoto(media, selectedCheckin)
     } else if (type === 'video') {
       return this._renderVideo(media, selectedCheckin)
     }
   }
-  _renderPhoto = ({item, index}={}, ) => {
+  _renderPhoto = (
+    {
+      item: {photo_reference, uri},
+      index
+    }={},
+    selectedCheckin
+  ) => {
     // console.log("_renderPhoto item: ", item)
-    return <Image
-        key={`photo-${index}`}
-        source={{uri: item}}
-        height={PHOTO_SIZE}
-        style={{
-          marginLeft: index > 0 ? 1 : 0
-        }}
-      />
+    // const {selectedCheckin} = this.state
+    const selected = selectedCheckin === photo_reference
+
+    return <GoogleImage
+      key={`googleImage-${index}`}
+      uri={uri}
+      height={PHOTO_SIZE}
+      onPress={e => {
+        this.scrollToGoogleImage(photo_reference)
+      }}
+      selected={selected}
+      index={index}
+    />
   }
 
   _renderQueryPhoto = ({
@@ -437,18 +452,19 @@ export default class App extends Component<Props> {
     } = this.state
     const selected = selectedCheckin === docKey
 
-    console.log("_renderQueryPhoto downloadURL: ", downloadURL)
+    // console.log("_renderQueryPhoto downloadURL: ", downloadURL)
 
-    console.log("query photo render. this.state.user.uid: ", this.state.user && this.state.user.uid)
+    // console.log("query photo render. this.state.user.uid: ", this.state.user && this.state.user.uid)
     
     return <ImageCheckin
+      key={`queryPhoto-${docKey}`}
       checkin={item}
       index={index}
       userUid={uid}
       height={PHOTO_SIZE}
       selected={selected}
       onPress={e => {
-        console.log("calling setSelectedCheckin, docKey: ", docKey)
+        // console.log("calling setSelectedCheckin, docKey: ", docKey)
         // this.setSelectedCheckin(docKey)
         this.scrollToCheckin(docKey)
       }}
@@ -537,6 +553,36 @@ export default class App extends Component<Props> {
     }
   }
 
+  scrollToGoogleImage = (photo_reference) => {
+    const {
+      queryData=[],
+      photos=[],
+      selectedCheckin
+    } = this.state
+
+    const index = photos.findIndex(({photo_reference: photoRef}) => {
+      return  photo_reference === photoRef
+    })
+
+    // console.log("scrollToGoo Images selectedCheckin: ", selectedCheckin, ", photo_reference: ", photo_reference)
+
+    if (index > -1) {
+      if (selectedCheckin !== photos[index].photo_reference) {
+
+        console.log("scrolling to queryData.length + index: ", queryData.length + index)
+        this.flatListRef.scrollToIndex({
+          animated: true,
+          index: queryData.length + index,
+          // viewOffset,
+          viewPosition: 0
+        })
+      }
+      this.setSelectedCheckin(photo_reference)
+    }
+
+  }
+
+  //BIG NOTE: note able to get working for google images
   handleViewableItemsChanged = ({
     viewableItems,
     changed,
@@ -545,17 +591,23 @@ export default class App extends Component<Props> {
     //TODO: Update selecteCheckin
 
     if (!!selectedCheckin) {
-      const isSelectedVisible = viewableItems.some(({item: {docKey}={}}) => {
-        return docKey === selectedCheckin
+      const isSelectedVisible = viewableItems.some(({
+        item: {docKey, photo_reference}={},
+      }) => {
+        if (!!photo_reference) {
+          console.log("photo_reference: ", photo_reference, ", selectedCheckin: ", selectedCheckin, " ==: ", photo_reference == selectedCheckin, ",===: ", photo_reference === selectedCheckin)
+        }
+        return docKey === selectedCheckin || photo_reference === selectedCheckin
       })
 
       //if selected checkin is not visible, unselect
       //NOTE: this may not be desireable because will cause shift
       if (!isSelectedVisible) {
-        this.setSelectedCheckin(null)
+        console.log("selected is NOT visible, setting to null")
+        // this.setSelectedCheckin(null)
       }
     }
-    console.log("handleViewableItemsChanged, viewableItems: ", viewableItems, ", changed: ", changed)
+    // console.log("handleViewableItemsChanged, viewableItems: ", viewableItems, ", changed: ", changed)
   }
 
   render() {
@@ -576,7 +628,7 @@ export default class App extends Component<Props> {
     const allPhotos = [...queryData, ...photos]
 
     // console.log("render state photos: ", photos)
-    console.log("selectedPlace: ", selectedPlace)
+    // console.log("selectedPlace: ", selectedPlace)
 
     return (
       <ThemeContext.Provider value={getTheme(uiTheme)}>
@@ -757,51 +809,13 @@ export default class App extends Component<Props> {
                   />
                 </TouchableOpacity>
               }
+              getItemLayout={(data, index) => ({
+                length: PHOTO_SIZE,
+                offset: (PHOTO_SIZE + 1) * index,
+                index
+              })}
             />
           }
-
-          {/*<TouchableOpacity
-            style={{
-              margin: 20,
-              padding: 20,
-              borderRadius: 50,
-              backgroundColor: uploadMedia ? 'grey' : 'blue',
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-              zIndex: 3
-            }}
-            onPress={this.toggleMediaUpload}
-          >
-            <Text style={{color: 'white'}}>Upload</Text>
-          </TouchableOpacity>*/}
-
-          <View style={{
-            // margin: 20,
-            // backgroundColor: uploadMedia ? 'grey' : 'blue',
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            zIndex: 3
-          }}>
-            <IconToggle
-              name="add-circle"
-              color={COLOR.blue500}
-              underlayColor={"#FFF"}
-              maxOpacity={0.4}
-              percent={200}
-              size={50}
-              onPress={this.toggleMediaUpload}
-              style={{
-                container: {
-                  shadowColor: 'black',
-                  shadowOffset: {width: 4, height: 4},
-                  shadowOpacity: 0.5,
-                  shadowRadius: 6
-                }
-              }}
-            />
-          </View>
 
           {uploadMedia && !!geoCollection &&
             <MediaUpload

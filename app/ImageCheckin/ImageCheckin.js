@@ -111,11 +111,12 @@ export default class ImageCheckin extends Component {
           style={{
             marginLeft: index > 0 ? 1 : 0,
             height: selected ? height * 1.5 : height,
-            width: selected ? width * 1.5 : width
+            width: selected ? width * 1.5 : height,
+            resizeMode: 'cover'
           }}
         />
 
-        {(!userUid || userUid === currentUserUuid) &&
+        {((!userUid || userUid === currentUserUuid) && selected) &&
           <View
             style={{
               position: 'absolute',
