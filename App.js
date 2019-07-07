@@ -224,7 +224,9 @@ export default class App extends Component<Props> {
 
     console.log("fetching place details place_id: ", place_id)
 
-    fetch(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${place_id}&key=${PLACES_KEY}&fields=geometry,photo`)
+    Keyboard.dismiss()
+
+    return fetch(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${place_id}&key=${PLACES_KEY}&fields=geometry,photo`)
     .then(resp => {
       if (resp.ok) {
         return resp.json()
@@ -260,7 +262,8 @@ export default class App extends Component<Props> {
       console.log("place select lat: ", lat, ", lng: ", lng, ", northeast: ", northeast, ", southwest: ", southwest,", latDelta: ", latDelta, ", lngDelta: ", lngDelta)
 
       if (!disableRegionChange) {
-        this.state.region.timing({
+        // this.state.region.timing({
+        this.state.region.animateToRegion({
           latitude: lat,
           longitude: lng,
           latitudeDelta: latDelta,
@@ -281,13 +284,13 @@ export default class App extends Component<Props> {
     })
     .catch(error => {
       console.log("failed to fetch place details. error: ", error)
+      throw error
     })
-
-    Keyboard.dismiss()
   }
 
   onPoiClick = ({nativeEvent}={}) => {
     console.log("onPoiClick nativeEvent: ", nativeEvent)
+    const {queryData=[]} = this.state
     const {
       placeId: place_id,
       coordinate,
@@ -301,6 +304,24 @@ export default class App extends Component<Props> {
         main_text: name
       }
     }, true)
+    .then(resp => {
+      const {photos=[]} = this.state
+
+      if (photos.length > 0) {
+        console.log("photos > 0 , scrolling to end of queryData")
+        // this.flatListRef.scrollToIndex({
+        //   animated: true,
+        //   index: queryData.length + 1,
+        //   // viewOffset,
+        //   viewPosition: 0
+        // })
+        const [{photo_reference}] = photos
+
+        setTimeout(() => {
+          this.scrollToGoogleImage(photo_reference)
+        }, 500)
+      }
+    })
   }
 
   clearSearch = () => {
@@ -316,6 +337,7 @@ export default class App extends Component<Props> {
         if (resp.ok) {
           return resp.url
         }
+        throw resp
       }).catch(error => {
         console.error("error: ", error)
       })
@@ -334,13 +356,16 @@ export default class App extends Component<Props> {
     const {
       latitude,
       longitude,
-      latitudeDelta
+      latitudeDelta,
+      longitudeDelta
     } = region
     const {
       geoCollection
     } = this.state
 
-    const radius = ((latitudeDelta * 40008000 / 360) / 2) / 1000//not sure if I need to divide by 2
+    const mainDelta = Math.max(latitudeDelta, longitudeDelta)
+
+    const radius = ((mainDelta * 40008000 / 360) / 2) / 1000//not sure if I need to divide by 2
 
     console.log("radius: ", radius)
 
@@ -371,10 +396,20 @@ export default class App extends Component<Props> {
 
       //Attempt to only update state if results have changed
       //TODO: improve this by checking each datum's id
-      if (queryData.length !== originalQueryData.length) {
+      if (true || queryData.length !== originalQueryData.length) {
         console.log("setting queryData from snapshot: ", queryData)
         this.setState({
-          queryData: queryData.sort((a, b) => {
+          queryData: queryData
+          .filter(({
+            coordinates: {
+              latitude: checkinLat,
+              longitude: checkinLng
+            }}) => {
+            //NOTE: delta are degrees (111km or 69mi)
+            return Math.abs(latitude - checkinLat) < (latitudeDelta * 0.5) &&
+              Math.abs(longitude - checkinLng) < (longitudeDelta * 0.5)
+          })
+          .sort((a, b) => {
             if (a.timestamp < b.timestamp) {
               return 1
             } else if (a.timestamp > b.timestamp) {
@@ -543,8 +578,8 @@ export default class App extends Component<Props> {
         this.flatListRef.scrollToIndex({
           animated: true,
           index,
-          // viewOffset,
-          // viewPosition
+          // viewOffset: -PHOTO_SIZE,
+          // viewPosition: 1
         })
       }
 
@@ -569,12 +604,13 @@ export default class App extends Component<Props> {
     if (index > -1) {
       if (selectedCheckin !== photos[index].photo_reference) {
 
-        console.log("scrolling to queryData.length + index: ", queryData.length + index)
+        console.log("scrolling to (queryData.length + index + 1) * PHOTO_SIZE: ", (queryData.length + index + 1) * PHOTO_SIZE)
         this.flatListRef.scrollToIndex({
           animated: true,
           index: queryData.length + index,
-          // viewOffset,
-          viewPosition: 0
+          // offset: (queryData.length + index + 1) * PHOTO_SIZE
+          // viewOffset: PHOTO_SIZE,
+          // viewPosition: 0
         })
       }
       this.setSelectedCheckin(photo_reference)
@@ -594,9 +630,6 @@ export default class App extends Component<Props> {
       const isSelectedVisible = viewableItems.some(({
         item: {docKey, photo_reference}={},
       }) => {
-        if (!!photo_reference) {
-          console.log("photo_reference: ", photo_reference, ", selectedCheckin: ", selectedCheckin, " ==: ", photo_reference == selectedCheckin, ",===: ", photo_reference === selectedCheckin)
-        }
         return docKey === selectedCheckin || photo_reference === selectedCheckin
       })
 
@@ -617,6 +650,7 @@ export default class App extends Component<Props> {
       predictions,
       currentLocation={latitude: 0, longitude: 0},
       selectedPlace,
+      selectedCheckin,
       photos=[],
       queryData=[],
       uploadMedia,
@@ -626,6 +660,12 @@ export default class App extends Component<Props> {
       user
     } = this.state
     const allPhotos = [...queryData, ...photos]
+    const {
+      latitude,
+      longitude,
+      latitudeDelta,
+      longitudeDelta
+    } = !!region && region.__getValue()
 
     // console.log("render state photos: ", photos)
     // console.log("selectedPlace: ", selectedPlace)
@@ -641,15 +681,18 @@ export default class App extends Component<Props> {
             onRegionChange={this.onRegionChange}
             onRegionChangeComplete={this.getNearbyCheckins}
             onPoiClick={this.onPoiClick}
+            showsUserLocation={true}
+            showsMyLocationButton={true}
+            showsCompass={true}
           >
 
-            {!!currentLocation &&
+            {/*!!currentLocation &&
               <Marker
                 key="currentLocation"
                 coordinate={currentLocation}
                 image={personIcon}
               />
-            }
+            */}
 
             {!!selectedPlace &&
               <Marker
@@ -667,16 +710,16 @@ export default class App extends Component<Props> {
             {queryData && queryData.map(doc => {
               return <Marker
                 key={doc.docKey}
-                title={"Checkin"}
-                description={"checkin description"}
                 coordinate={{
                   latitude: doc.coordinates.latitude,
                   longitude: doc.coordinates.longitude
                 }}
                 onPress={e => this.scrollToCheckin(doc.docKey)}
-                pinColor={COLOR.red600}
+                pinColor={doc.docKey === selectedCheckin ? COLOR.green200 : COLOR.red700}
               />
             })}
+
+            
           </Animated>}
 
           <View style={{
@@ -786,8 +829,10 @@ export default class App extends Component<Props> {
               data={allPhotos}
               renderItem={this._renderMedia}
               horizontal={true}
-              keyExtractor={(item) => {
-                return item.docKey || item.imageKey || item.videoKey
+              keyExtractor={(item, index) => {
+
+                console.log("keyExtractor item: ", item)
+                return item.docKey || item.id
               }}
               style={styles.swiperWrapper}
               contentContainerStyle={styles.swiperContainer}
