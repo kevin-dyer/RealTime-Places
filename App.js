@@ -124,7 +124,7 @@ export default class App extends Component<Props> {
       },
       predictions: [],
       photos: [],
-      uploadMedia: false,
+      uploadMedia: true,
       queryData: [],
       user: {},
       selectedCheckin: undefined //Used to highlight photo/video
@@ -332,7 +332,8 @@ export default class App extends Component<Props> {
         const [{photo_reference}] = photos
 
         setTimeout(() => {
-          this.scrollToGoogleImage(photo_reference)
+          // this.scrollToGoogleImage(photo_reference)
+          this.scrollToGoogleImage(0)
         }, 500)
       }
     })
@@ -361,6 +362,7 @@ export default class App extends Component<Props> {
   }
 
   onRegionChange = (region) => {
+    // console.log("calling onRegionChange. region: ", region)
     this.state.region.setValue(region);
   }
 
@@ -381,11 +383,18 @@ export default class App extends Component<Props> {
 
     const radius = ((mainDelta * 40008000 / 360) / 2) / 1000//not sure if I need to divide by 2
 
-    console.log("radius: ", radius)
+    // console.log("radius: ", radius)
 
-    console.log("calling getNearbyCheckins")
+    // console.log("calling getNearbyCheckins, region latitude: ",latitude, ", longitude: ", longitude)
 
-    if (!latitude || !longitude) {
+    //validation
+    if (
+      !latitude ||
+      !longitude ||
+      Math.min(latitude, longitude) < -180 ||
+      Math.max(latitude, longitude) > 180
+    ) {
+      console.warn("skipping getNearbyCheckins call. location is invalid. lat, lng: ", latitude, longitude)
       return
     }
     const query: GeoQuery = geoCollection.near({
@@ -472,15 +481,21 @@ export default class App extends Component<Props> {
     selectedCheckin
   ) => {
     // console.log("_renderPhoto item: ", item)
-    // const {selectedCheckin} = this.state
-    const selected = selectedCheckin === photo_reference
+    const {queryData=[]} = this.state
+    // const selected = selectedCheckin === photo_reference
+    const photoIndex = index - queryData.length
+    const selected = selectedCheckin === photoIndex
+
+    console.log("selected: ", selected, ", photoIndex: ", photoIndex, ", index: ", index)
 
     return <GoogleImage
       key={`googleImage-${index}`}
       uri={uri}
       height={PHOTO_SIZE}
       onPress={e => {
-        this.scrollToGoogleImage(photo_reference)
+        // this.scrollToGoogleImage(photo_reference)
+        console.log("scrollToGoogleImage photoIndex: ", photoIndex)
+        this.scrollToGoogleImage(photoIndex)
       }}
       selected={selected}
       index={index}
@@ -648,21 +663,21 @@ export default class App extends Component<Props> {
       Math.abs(longitude - checkinLng) < (longitudeDelta * 0.5)
   }
 
-  scrollToGoogleImage = (photo_reference) => {
+  scrollToGoogleImage = (index) => {
     const {
       queryData=[],
       photos=[],
       selectedCheckin
     } = this.state
 
-    const index = photos.findIndex(({photo_reference: photoRef}) => {
-      return  photo_reference === photoRef
-    })
+    // const index = photos.findIndex(({photo_reference: photoRef}) => {
+    //   return  photo_reference === photoRef
+    // })
 
     // console.log("scrollToGoo Images selectedCheckin: ", selectedCheckin, ", photo_reference: ", photo_reference)
 
     if (index > -1) {
-      if (selectedCheckin !== photos[index].photo_reference) {
+      if (selectedCheckin !== index) {
 
         console.log("scrolling to (queryData.length + index + 1) * PHOTO_SIZE: ", (queryData.length + index + 1) * PHOTO_SIZE)
         this.flatListRef.scrollToIndex({
@@ -673,7 +688,7 @@ export default class App extends Component<Props> {
           // viewPosition: 0
         })
       }
-      this.setSelectedCheckin(photo_reference)
+      this.setSelectedCheckin(index)
     }
 
   }
@@ -689,15 +704,17 @@ export default class App extends Component<Props> {
     if (!!selectedCheckin) {
       const isSelectedVisible = viewableItems.some(({
         item: {docKey, photo_reference}={},
+        index
       }) => {
-        return docKey === selectedCheckin || photo_reference === selectedCheckin
+        // return docKey === selectedCheckin || photo_reference === selectedCheckin
+        return docKey === selectedCheckin || selectedCheckin === index
       })
 
       //if selected checkin is not visible, unselect
       //NOTE: this may not be desireable because will cause shift
       if (!isSelectedVisible) {
         console.log("selected is NOT visible, setting to null")
-        // this.setSelectedCheckin(null)
+        this.setSelectedCheckin(null)
       }
     }
     // console.log("handleViewableItemsChanged, viewableItems: ", viewableItems, ", changed: ", changed)

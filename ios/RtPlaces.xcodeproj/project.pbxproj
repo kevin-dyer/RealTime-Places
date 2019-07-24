@@ -30,6 +30,7 @@
 		1982B7AA22A1EE79008E11AC /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19941AB02297A1D60031B3AB /* libRNFirebase.a */; };
 		19D0ECD122A2F4DD005440D7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 19D0ECD022A2F4DD005440D7 /* GoogleService-Info.plist */; };
 		19DEE66F22D08C55000DAB6B /* libRNCGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19DEE66B22D08C05000DAB6B /* libRNCGeolocation.a */; };
+		19DEE67922DBFB2A000DAB6B /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19DEE67622DBFAF0000DAB6B /* libART.a */; };
 		19EC3BFF2290CF1800355359 /* libPods-RtPlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19EC3BE62290CEDF00355359 /* libPods-RtPlaces.a */; };
 		19EC3C002290CF2B00355359 /* libyoga.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19EC3BEC2290CEDF00355359 /* libyoga.a */; };
 		265ED532719141DF81A019E8 /* Fontisto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5A5561656D334AC99CEBD3BB /* Fontisto.ttf */; };
@@ -458,6 +459,20 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNCGeolocation;
 		};
+		19DEE67522DBFAF0000DAB6B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19DEE67022DBFAEB000DAB6B /* ART.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0CF68AC11AF0540F00FF9E5C;
+			remoteInfo = ART;
+		};
+		19DEE67722DBFAF0000DAB6B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19DEE67022DBFAEB000DAB6B /* ART.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 323A12871E5F266B004975B8;
+			remoteInfo = "ART-tvOS";
+		};
 		19EC3BB82290C66000355359 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 19EC3B8E2290C66000355359 /* RNCamera.xcodeproj */;
@@ -763,6 +778,7 @@
 		1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNGooglePlaces.xcodeproj; path = "../node_modules/react-native-google-places/ios/RNGooglePlaces.xcodeproj"; sourceTree = "<group>"; };
 		19D0ECD022A2F4DD005440D7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		19DEE5FD22D08C05000DAB6B /* RNCGeolocation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCGeolocation.xcodeproj; path = "../node_modules/@react-native-community/geolocation/ios/RNCGeolocation.xcodeproj"; sourceTree = "<group>"; };
+		19DEE67022DBFAEB000DAB6B /* ART.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ART.xcodeproj; path = "../node_modules/react-native/Libraries/ART/ART.xcodeproj"; sourceTree = "<group>"; };
 		19EC3B772290BE8700355359 /* RNCamera.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
 		19EC3B8E2290C66000355359 /* RNCamera.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
 		19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
@@ -835,6 +851,7 @@
 				FA00D79DF478ECE23746A92B /* libPods-RtPlaces.a in Frameworks */,
 				1909750622B86562002A742B /* libmovToMp4.a in Frameworks */,
 				19DEE66F22D08C55000DAB6B /* libRNCGeolocation.a in Frameworks */,
+				19DEE67922DBFB2A000DAB6B /* libART.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1024,6 +1041,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		19DEE67122DBFAEB000DAB6B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				19DEE67622DBFAF0000DAB6B /* libART.a */,
+				19DEE67822DBFAF0000DAB6B /* libART-tvOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		19EC3B782290BE8700355359 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -1160,6 +1186,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				19DEE67022DBFAEB000DAB6B /* ART.xcodeproj */,
 				19DEE5FD22D08C05000DAB6B /* RNCGeolocation.xcodeproj */,
 				1909749022B8653D002A742B /* movToMp4.xcodeproj */,
 				1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */,
@@ -1346,6 +1373,10 @@
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = 19DEE67122DBFAEB000DAB6B /* Products */;
+					ProjectRef = 19DEE67022DBFAEB000DAB6B /* ART.xcodeproj */;
+				},
 				{
 					ProductGroup = 1909749122B8653D002A742B /* Products */;
 					ProjectRef = 1909749022B8653D002A742B /* movToMp4.xcodeproj */;
@@ -1825,6 +1856,20 @@
 			fileType = archive.ar;
 			path = libRNCGeolocation.a;
 			remoteRef = 19DEE66A22D08C05000DAB6B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		19DEE67622DBFAF0000DAB6B /* libART.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libART.a;
+			remoteRef = 19DEE67522DBFAF0000DAB6B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		19DEE67822DBFAF0000DAB6B /* libART-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libART-tvOS.a";
+			remoteRef = 19DEE67722DBFAF0000DAB6B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		19EC3BB92290C66000355359 /* libRNCamera.a */ = {

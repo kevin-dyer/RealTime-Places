@@ -137,7 +137,6 @@ export default class CVideo extends Component {
           	}={},
           	naturalSize
           } = response || {}
-          console.log("onLoad naturalSize: ", naturalSize)
 
           if (orientation === "portrait") {
           	//Reverse width and height

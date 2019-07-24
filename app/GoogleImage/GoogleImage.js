@@ -29,7 +29,6 @@ export default class GoogleImage extends Component {
 	setImgSize = (natWidth, natHeight, other) => {
 		const {height} = this.props
 
-    console.log("setImgSize Other (for portrate): ", other)
 		this.setState({
 			width: (natWidth / natHeight) * height
 		})
