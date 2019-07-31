@@ -26,13 +26,10 @@ import MapView, {
   AnimatedRegion,
   Animated
 } from 'react-native-maps';
-import RNGooglePlaces from 'react-native-google-places';
-import Autocomplete from 'react-native-autocomplete-input'
-import Image from 'react-native-scalable-image';
-import ImageCheckin from './app/ImageCheckin/ImageCheckin'
-import GoogleImage from './app/GoogleImage/GoogleImage'
-import Video from './app/Video/Video'
+// import RNGooglePlaces from 'react-native-google-places';
 import MediaUpload from './app/MediaUpload/MediaUpload'
+import MediaDrawer from './app/components/MediaDrawer/MediaDrawer'
+import PlacesAutoComplete from './app/components/PlacesAutoComplete/PlacesAutoComplete'
 import firebase from 'react-native-firebase'
 import {
   GeoCollectionReference,
@@ -54,13 +51,13 @@ import uuidV4 from 'uuid/v4'
 import { throttle, debounce } from 'throttle-debounce'
 import { Icon } from 'react-native-material-ui'
 
-import personIcon from './app/assets/images/circle.png'
-
-console.log("personIcon: ", personIcon)
 
 //util method
 function queryDataHasChanged(queryData=[], originalQueryData=[]) {
+
+  console.log("queryData: ", queryData,', originalQueryData',originalQueryData)
   if (queryData.length !== originalQueryData.length) {
+    console.log("exiting queryDataHasChanged b/c lenghts are diff")
     return true
   }
   // const maxLength = Math.max(queryData.length, originalQueryData.length)
@@ -124,7 +121,7 @@ export default class App extends Component<Props> {
       },
       predictions: [],
       photos: [],
-      uploadMedia: true,
+      uploadMedia: false,
       queryData: [],
       user: {},
       selectedCheckin: undefined //Used to highlight photo/video
@@ -204,6 +201,12 @@ export default class App extends Component<Props> {
           
   }
 
+  componentWillUnmount() {
+    if (!!this.geoQuery) {
+      this.geoQuery.cancel()
+    }
+  }
+
   handleTextChange = (text) => {
     this.setState({searchText: text})
 
@@ -223,22 +226,22 @@ export default class App extends Component<Props> {
 
   handlePlaceSelect = (place={}, disableRegionChange) => {
     const {
-      structured_formatting: {
-        main_text: primaryText='',
-        secondary_text: secondaryText=''
-      }={},
+       structured_formatting: {
+         main_text: primaryText='',
+         secondary_text: secondaryText=''
+       }={},
       place_id
     } = place
     console.log("handlePlaceSelect. place: ", place)
 
-    this.setState({
-      searchText: `${primaryText} ${secondaryText}`,
-      predictions: []
-    })
+    // this.setState({
+    //   searchText: `${primaryText} ${secondaryText}`,
+    //   predictions: []
+    // })
 
     console.log("fetching place details place_id: ", place_id)
 
-    Keyboard.dismiss()
+    // Keyboard.dismiss()
 
     return fetch(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${place_id}&key=${PLACES_KEY}&fields=geometry,photo`)
     .then(resp => {
@@ -277,12 +280,12 @@ export default class App extends Component<Props> {
 
       if (!disableRegionChange) {
         // this.state.region.timing({
-        this.state.region.timing({
+        this.moveRegion({
           latitude: lat,
           longitude: lng,
           latitudeDelta: latDelta,
           longitudeDelta: lngDelta,
-        }).start()
+        })
       }
 
       console.log("places photos: ", photos)
@@ -323,12 +326,7 @@ export default class App extends Component<Props> {
 
       if (photos.length > 0) {
         console.log("photos > 0 , scrolling to end of queryData")
-        // this.flatListRef.scrollToIndex({
-        //   animated: true,
-        //   index: queryData.length + 1,
-        //   // viewOffset,
-        //   viewPosition: 0
-        // })
+
         const [{photo_reference}] = photos
 
         setTimeout(() => {
@@ -343,6 +341,7 @@ export default class App extends Component<Props> {
     this.setState({searchText: '', predictions: []})
   }
 
+  //NOTE: maxHeight will change in different views
   fetchPlacePhotos = (photos) => {
     const requests = photos.map(photo => 
       fetch(
@@ -361,6 +360,8 @@ export default class App extends Component<Props> {
     return Promise.all(requests)
   }
 
+
+
   onRegionChange = (region) => {
     // console.log("calling onRegionChange. region: ", region)
     this.state.region.setValue(region);
@@ -378,11 +379,9 @@ export default class App extends Component<Props> {
     const {
       geoCollection
     } = this.state
-
     const mainDelta = Math.max(latitudeDelta, longitudeDelta)
-
     const radius = ((mainDelta * 40008000 / 360) / 2) / 1000//not sure if I need to divide by 2
-
+    const maxDocs = 100
     // console.log("radius: ", radius)
 
     // console.log("calling getNearbyCheckins, region latitude: ",latitude, ", longitude: ", longitude)
@@ -397,55 +396,73 @@ export default class App extends Component<Props> {
       console.warn("skipping getNearbyCheckins call. location is invalid. lat, lng: ", latitude, longitude)
       return
     }
-    const query: GeoQuery = geoCollection.near({
+
+    const queryConfigs = {
       center: new firebase.firestore.GeoPoint(latitude, longitude),
-      radius // TODO: adjust based on latitudeDelta
-    });
+      radius
+    }
+
+    this.geoQuery = geoCollection.near(queryConfigs);
 
     // Get query (as Promise)
-    query.get()
-    query.onSnapshot((snapshot: GeoQuerySnapshot) => {
-      const {queryData: originalQueryData} = this.state
-      // console.log("query.onSnapshot. snapshot: ", snapshot)
-      const {docs=[]} = snapshot || {}
-      const queryData = docs.map(doc => {
-        return {
-          ...doc.data(),
-          id: doc.id
-        }
-      })
+    this.geoQuery.get()
 
-      //BIG TODO: need to filter queryData based on if it is inside view window
+//     this.geoQuery.on('key_entered', (key, location, distance) => {
+//       console.log(key + " entered query at " + location + " (" + distance + " km from center)");
+//       // const doc = geoCollection.get(key).then()
+//     })
+// 
+//     this.geoQuery.on('key_exited', (key, location, distance) => {
+//       console.log(key + " exited query to " + location + " (" + distance + " km from center)");
+//     })
 
-      //Attempt to only update state if results have changed
-      //TODO: improve this by checking each datum's id
-      if (queryDataHasChanged(queryData, originalQueryData)) {
-      // if (true || queryData.length !== originalQueryData.length) {
-        console.log("setting queryData from snapshot: ", queryData)
-        this.setState({
-          queryData: queryData
-          // .filter(({
-          //   coordinates: {
-          //     latitude: checkinLat,
-          //     longitude: checkinLng
-          //   }}) => {
-          //   //NOTE: delta are degrees (111km or 69mi)
-          //   return Math.abs(latitude - checkinLat) < (latitudeDelta * 0.5) &&
-          //     Math.abs(longitude - checkinLng) < (longitudeDelta * 0.5)
-          // })
-          .filter(this.isCheckinOnScreen)
-          .sort((a, b) => {
-            if (a.timestamp < b.timestamp) {
-              return 1
-            } else if (a.timestamp > b.timestamp) {
-              return -1
-            } else {
-              return 0
-            }
-          })
-        })
-      }
-    })
+
+     // this.geoQuery.onSnapshot((snapshot: GeoQuerySnapshot) => {
+    .then((snapshot: GeoQuerySnapshot) => {
+       const {queryData: originalQueryData} = this.state
+       // console.log("query.onSnapshot. snapshot: ", snapshot)
+       const {docs=[]} = snapshot || {}
+       const queryData = docs.map(doc => {
+         return {
+           ...doc.data(),
+           id: doc.id
+         }
+       })
+       .filter(this.isCheckinOnScreen)
+       .sort((a, b) => {
+         if (a.timestamp < b.timestamp) {
+           return 1
+         } else if (a.timestamp > b.timestamp) {
+           return -1
+         } else {
+           return 0
+         }
+       })
+       .slice(0, maxDocs)
+ 
+       //BIG TODO: format new query data 
+ 
+       //Attempt to only update state if results have changed
+       //TODO: improve this by checking each datum's id
+       if (queryDataHasChanged(queryData, originalQueryData)) {
+       // if (true || queryData.length !== originalQueryData.length) {
+         // console.log("setting queryData from snapshot queryData: ", queryData, ", originalQueryData: ", originalQueryData)
+         this.setState({
+           queryData: queryData
+           // .filter(this.isCheckinOnScreen)
+           // .sort((a, b) => {
+           //   if (a.timestamp < b.timestamp) {
+           //     return 1
+           //   } else if (a.timestamp > b.timestamp) {
+           //     return -1
+           //   } else {
+           //     return 0
+           //   }
+           // })
+           // .slice(0, maxDocs)
+         })
+       }
+     })
   })
 
   setSelectedCheckin = (docKey) => {
@@ -457,135 +474,6 @@ export default class App extends Component<Props> {
     this.setState({
       selectedCheckin: nextCheckin
     })
-  }
-
-  _renderMedia = (media={}) => {
-    const {item: {
-      type
-    }={}} = media
-    const {selectedCheckin} = this.state
-
-    if (type === 'googlePhoto') {
-      return this._renderPhoto(media, selectedCheckin)
-    } else if (type === 'image') {
-      return this._renderQueryPhoto(media, selectedCheckin)
-    } else if (type === 'video') {
-      return this._renderVideo(media, selectedCheckin)
-    }
-  }
-  _renderPhoto = (
-    {
-      item: {photo_reference, uri},
-      index
-    }={},
-    selectedCheckin
-  ) => {
-    // console.log("_renderPhoto item: ", item)
-    const {queryData=[]} = this.state
-    // const selected = selectedCheckin === photo_reference
-    const photoIndex = index - queryData.length
-    const selected = selectedCheckin === photoIndex
-
-    console.log("selected: ", selected, ", photoIndex: ", photoIndex, ", index: ", index)
-
-    return <GoogleImage
-      key={`googleImage-${index}`}
-      uri={uri}
-      height={PHOTO_SIZE}
-      onPress={e => {
-        // this.scrollToGoogleImage(photo_reference)
-        console.log("scrollToGoogleImage photoIndex: ", photoIndex)
-        this.scrollToGoogleImage(photoIndex)
-      }}
-      selected={selected}
-      index={index}
-      scale={PHOTO_SCALE}
-    />
-  }
-
-  _renderQueryPhoto = ({
-    item: {
-      downloadURL='',
-      docKey,
-      userUid
-    }={},
-    item,
-    index
-  }={}, selectedCheckin={}) => {
-    const {
-      user: {uid}={},
-      geoCollection,
-      imageStoreRef
-    } = this.state
-    const selected = selectedCheckin === docKey
-
-    // console.log("_renderQueryPhoto downloadURL: ", downloadURL)
-
-    // console.log("query photo render. this.state.user.uid: ", this.state.user && this.state.user.uid)
-    
-    return <ImageCheckin
-      key={`queryPhoto-${docKey}`}
-      checkin={item}
-      index={index}
-      userUid={uid}
-      height={PHOTO_SIZE}
-      selected={selected}
-      onPress={e => {
-        // console.log("calling setSelectedCheckin, docKey: ", docKey)
-        // this.setSelectedCheckin(docKey)
-        this.scrollToCheckin(docKey)
-      }}
-      geoCollection={geoCollection}
-      imageStoreRef={imageStoreRef}
-      scale={PHOTO_SCALE}
-    />
-  }
-
-  _renderVideo = ({
-    item: {docKey}={},
-    item,
-    index
-  }={}, selectedCheckin) => {
-    const {
-      user: {uid}={},
-      geoCollection,
-      imageStoreRef
-    } = this.state
-    const selected = selectedCheckin === docKey
-    // console.log("_renderVideo downloadURL: ", downloadURL)
-    return <Video
-      key={`video-${docKey || index}`}
-      checkin={item}
-      height={PHOTO_SIZE}
-      userUid={uid}
-      selected={selected}
-      onPress={e => {
-        // this.setSelectedCheckin(docKey)
-        this.scrollToCheckin(docKey)
-      }}
-      index={index}
-      geoCollection={geoCollection}
-      imageStoreRef={imageStoreRef}
-      scale={PHOTO_SCALE}
-    />
-  }
-
-  deleteCheckin = (checkin) => {
-    Alert.alert(
-      'Delete Checkin',
-      'Are you sure you want to delete this checkin?',
-      [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        {text: 'OK', onPress: () => {
-          console.log('TODO: delete checkin and media here')
-        }},
-      ],
-      {cancelable: true}
-    )
   }
 
   toggleMediaUpload=(show)=> {
@@ -601,123 +489,34 @@ export default class App extends Component<Props> {
     }
   }
 
-  //TODO: rename this method to include selecting place
-  scrollToCheckin=(docKey) => {
-    const {queryData=[], selectedCheckin} = this.state
+   isCheckinOnScreen = ({
+     coordinates: {
+       latitude: checkinLat,
+       longitude: checkinLng
+     }={}
+   }={}) => {
+     const {region} = this.state
+ 
+     if (!region) return false
+ 
+     const {
+       latitude=0,
+       longitude=0,
+       latitudeDelta=0,
+       longitudeDelta=0
+     } = (this.state.region && this.state.region.__getValue()) || {}
+ 
+     return Math.abs(latitude - checkinLat) < (latitudeDelta * 0.5) &&
+       Math.abs(longitude - checkinLng) < (longitudeDelta * 0.5)
+   }
 
+  moveRegion = (region) => {
+    const {region: stateRegion} = this.state
+    if (!!stateRegion) {
 
-    //FIX THIS
-    const index = queryData.findIndex(checkin =>
-      checkin.docKey === docKey
-    )
-
-    console.log("scrollToCheckin docKey: ", docKey, ", index: ", index, ", queryData: ", queryData)
-
-    if (index > -1) {
-      const checkin = queryData[index]
-      //NOTE: do not scroll if checkin is already selected
-      if (selectedCheckin !== checkin.docKey) {
-        this.flatListRef.scrollToIndex({
-          animated: true,
-          index,
-          // viewOffset: -PHOTO_SIZE,
-          // viewPosition: 1
-        })
-      }
-
-      if (!this.isCheckinOnScreen(checkin)) {
-        const {
-          coordinates: {latitude, longitude}={}
-        } = checkin
-        this.state.region.timing({
-          latitude,
-          longitude,
-          latitudeDelta: 0.04,
-          longitudeDelta: 0.04,
-        }).start()
-      }
-
-      //TODO: need to set new variable to selectedCheckin
-      this.setSelectedCheckin(docKey)
+      console.log("calling  moveRegion stateRegion.timing")
+      stateRegion.timing(region).start()
     }
-  }
-
-  isCheckinOnScreen = ({
-    coordinates: {
-      latitude: checkinLat,
-      longitude: checkinLng
-    }={}
-  }={}) => {
-    const {region} = this.state
-
-    if (!region) return false
-
-    const {
-      latitude=0,
-      longitude=0,
-      latitudeDelta=0,
-      longitudeDelta=0
-    } = (this.state.region && this.state.region.__getValue()) || {}
-
-    return Math.abs(latitude - checkinLat) < (latitudeDelta * 0.5) &&
-      Math.abs(longitude - checkinLng) < (longitudeDelta * 0.5)
-  }
-
-  scrollToGoogleImage = (index) => {
-    const {
-      queryData=[],
-      photos=[],
-      selectedCheckin
-    } = this.state
-
-    // const index = photos.findIndex(({photo_reference: photoRef}) => {
-    //   return  photo_reference === photoRef
-    // })
-
-    // console.log("scrollToGoo Images selectedCheckin: ", selectedCheckin, ", photo_reference: ", photo_reference)
-
-    if (index > -1) {
-      if (selectedCheckin !== index) {
-
-        console.log("scrolling to (queryData.length + index + 1) * PHOTO_SIZE: ", (queryData.length + index + 1) * PHOTO_SIZE)
-        this.flatListRef.scrollToIndex({
-          animated: true,
-          index: queryData.length + index,
-          // offset: (queryData.length + index + 1) * PHOTO_SIZE
-          // viewOffset: PHOTO_SIZE,
-          // viewPosition: 0
-        })
-      }
-      this.setSelectedCheckin(index)
-    }
-
-  }
-
-  //BIG NOTE: note able to get working for google images
-  handleViewableItemsChanged = ({
-    viewableItems,
-    changed,
-  }) => {
-    const {selectedCheckin} = this.state
-    //TODO: Update selecteCheckin
-
-    if (!!selectedCheckin) {
-      const isSelectedVisible = viewableItems.some(({
-        item: {docKey, photo_reference}={},
-        index
-      }) => {
-        // return docKey === selectedCheckin || photo_reference === selectedCheckin
-        return docKey === selectedCheckin || selectedCheckin === index
-      })
-
-      //if selected checkin is not visible, unselect
-      //NOTE: this may not be desireable because will cause shift
-      if (!isSelectedVisible) {
-        console.log("selected is NOT visible, setting to null")
-        this.setSelectedCheckin(null)
-      }
-    }
-    // console.log("handleViewableItemsChanged, viewableItems: ", viewableItems, ", changed: ", changed)
   }
 
   render() {
@@ -770,16 +569,22 @@ export default class App extends Component<Props> {
             }}
           >
 
-            {/*!!currentLocation &&
-              <Marker
-                key="currentLocation"
-                coordinate={currentLocation}
-                image={personIcon}
+            {queryData && queryData.map(doc => {
+              return <Marker
+                key={doc.docKey}
+                coordinate={{
+                  latitude: doc.coordinates.latitude,
+                  longitude: doc.coordinates.longitude
+                }}
+                onPress={e => this.scrollToCheckin(doc.docKey)}
+                pinColor={doc.docKey === selectedCheckin ? COLOR.green200 : COLOR.red700}
+                zIndex={doc.docKey === selectedCheckin ? 10 : 1}
               />
-            */}
+            })}
 
             {!!selectedPlace &&
               <Marker
+                ref={selectedMarker => this.selectedMarker = selectedMarker}
                 key="selectedPlace"
                 title={selectedPlace.title}
                 description={selectedPlace.description}
@@ -791,188 +596,24 @@ export default class App extends Component<Props> {
               />
             }
 
-            {queryData && queryData.map(doc => {
-              return <Marker
-                key={doc.docKey}
-                coordinate={{
-                  latitude: doc.coordinates.latitude,
-                  longitude: doc.coordinates.longitude
-                }}
-                onPress={e => this.scrollToCheckin(doc.docKey)}
-                pinColor={doc.docKey === selectedCheckin ? COLOR.green200 : COLOR.red700}
-              />
-            })}
-
             
           </Animated>}
 
-          <View style={{
-            position: 'absolute',
-            width,
-            height: 200,
-            top: 0,
-            left: 0,
-            padding: 20,
-            marginTop: 40
-          }}>
-            <Autocomplete
-              data={predictions}
-              value={searchText}
-              onChangeText={this.handleTextChange}
-              renderTextInput={(props) => {
-                return <View style={{
-                  position: 'relative'
-                }}>
-                  <TextInput
-                    value={searchText}
-                    autoFocus={false}
-                    {...props}
-                    blurOnSubmit={true}
-                    style={[
-                      ...props.style,
-                      {
-                        borderRadius: 2,
-                        borderWidth: 0,
-                        marginBottom: 10,
-                        borderColor: 'rgba(0,0,0,0)',
-                        height:  45,
-                        paddingRight: 50
-                       }
-                    ]}
-                    
-                    shadowColor={'black'}
-                    shadowOffset={{width: 0, height: 2}}
-                    shadowOpacity={0.3}
-                    shadowRadius={4}
-                  />
+          <PlacesAutoComplete
+            onPlaceSelect={this.handlePlaceSelect}
+          />
 
-                  {!!searchText &&
-                    <View style={{
-                      position: 'absolute',
-                      top: 5,
-                      right: 0,
-                    }}>
-                      <IconToggle
-                        name="close"
-                        size={18}
-                        color={'rgba(0,0,0,0.8)'}
-                        onPress={this.clearSearch}
-                      />
-                    </View>
-                  }
-                </View>
-              }}
-              renderItem={({
-                item: {
-                  place_id: placeID,
-                  structured_formatting: {
-                    main_text: primaryText,
-                    secondary_text: secondaryText
-                  }
-                },
-                item,
-                i
-              }) => (
-                <TouchableOpacity
-                  onPress={e => this.handlePlaceSelect(item)}
-                  style={{
-                    padding: 10,
-                    margin: 2,
-                    backgroundColor: 'rgba(255,255,255,1)'
-                  }}
-                  key={placeID}
-                >
-                  <Text>{primaryText}</Text>
-                  <Text style={{
-                    fontSize: 9,
-                    color: 'rgba(0,0,0,0.6)'
-                  }}>{secondaryText}</Text>
-                </TouchableOpacity>
-              )}
-              containerStyle={{
-                flex: 0
-              }}
-              listContainerStyle={{
-                backgroundColor: 'rgba(0,0,0,0)',
-              }}
-              listStyle={{
-                backgroundColor: 'rgba(0,0,0,0)',
-                maxHeight: height * 0.7,
-                overflow: 'scroll'
-              }}
-              inputContainerStyle={{
-                borderWidth: 0,
-                position: 'relative'
-              }}
-            />
-          </View>
-
-          <View style={{
-            // position: 'relative',
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            zIndex: 2,
-          }}>
-            <View style={{
-              position: 'relative',
-              width
-            }}>
-              <FlatList
-                ref={(ref) => {this.flatListRef = ref}}
-                data={allPhotos}
-                renderItem={this._renderMedia}
-                horizontal={true}
-                keyExtractor={(item, index) => {
-                  return item.docKey || item.id
-                }}
-                style={styles.swiperWrapper}
-                contentContainerStyle={styles.swiperContainer}
-                onViewableItemsChanged={this.handleViewableItemsChanged}
-                removeClippedSubviews={false}
-                ListHeaderComponent={
-                  <TouchableOpacity style={{
-                      height: PHOTO_SIZE,
-                      width: PHOTO_SIZE * 0.75,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      backgroundColor: 'rgba(0,0,0,0.3)',
-                      marginRight: 1
-                    }}
-                  >
-                    <IconToggle
-                      name="camera-alt"
-                      size={40}
-                      color={'rgba(0,0,0,0.5)'}
-                      onPress={this.toggleMediaUpload}
-                    />
-                  </TouchableOpacity>
-                }
-                getItemLayout={(data, index) => ({
-                  length: PHOTO_SIZE,
-                  offset: (PHOTO_SIZE + 1) * index,
-                  index
-                })}
-              />
-              {false && !!selectedCheckin &&
-                <View style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                }}>
-                  <IconToggle
-                    name="close"
-                    size={30}
-                    color={'rgba(255,255,255,0.8)'}
-                    onPress={e => {
-                      console.log("Calling FlatList onPress!")
-                      this.setSelectedCheckin(null)
-                    }}
-                  />
-                </View>
-              }
-            </View>
-          </View>
+          <MediaDrawer
+            allMedia={allPhotos}
+            selectedCheckin={selectedCheckin}
+            setSelectedCheckin={this.setSelectedCheckin}
+            queryData={queryData} 
+            user={user}
+            geoCollection={geoCollection}
+            imageStoreRef={imageStoreRef}
+            moveRegion={this.moveRegion}
+            toggleMediaUpload={this.toggleMediaUpload}
+          />
 
           {uploadMedia && !!geoCollection &&
             <MediaUpload
@@ -982,9 +623,7 @@ export default class App extends Component<Props> {
               toggleMediaUpload={this.toggleMediaUpload}
               user={user}
               scrollToCheckin={this.scrollToCheckin}
-              animateToRegion={reg =>
-                !!region && region.timing(reg).start()
-              }
+              animateToRegion={this.moveRegion}
             />
           }
         </View>

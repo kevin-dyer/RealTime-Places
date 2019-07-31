@@ -52,7 +52,7 @@ export default class PlacesNearbyPicker extends Component {
         return resp.json()
       }
     }).then(resp => {
-      console.log("fetchPlacesNearby resp: ", resp)
+      console.log("fetchPlacesNearby resp.results: ", resp.results)
 
       this.setState({
         places: resp.results

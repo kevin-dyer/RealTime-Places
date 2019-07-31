@@ -45,6 +45,11 @@ const flashModeOrder = {
   // auto: 'torch',
   // torch: 'off',
 };
+const categories = [
+  {value: 'surfing'},
+  {value: 'fishing'},
+  {value: 'other'}
+]
 
 function generateCheckin({
   latitude,
@@ -52,7 +57,17 @@ function generateCheckin({
   type='image',
   docKey='',
   url='',
-  userUid=''
+  userUid='',
+  comment,
+  placeNearby: {
+    place_id,
+    name,
+    id,
+    geometry: {
+      location
+    }={}
+  }={},
+  category
 }) {
   return {
     timestamp: Date.now(),
@@ -60,11 +75,19 @@ function generateCheckin({
     docKey,
     type,
     downloadURL: url, //TODO: change downloadURL to just url
-    userUid
+    userUid,
+    comment,
+    placeNearby: {
+      place_id,
+      id,
+      location,
+      name
+    },
+    category
   };
 }
 
-export default class BadInstagramCloneApp extends Component {
+export default class MediaUpload extends Component {
   state = {
     selectedTab: 0, //or video
     isRecording: false,
@@ -76,8 +99,10 @@ export default class BadInstagramCloneApp extends Component {
     recordingStartTime: 0,
     videoProgress: 0,
     videoPaused: true,
+    comment: '',
     placeNearby: null,
-    nearbyPlaces: []
+    nearbyPlaces: [],
+    category: null
   }
 
   takePicture = async function() {
@@ -141,7 +166,10 @@ export default class BadInstagramCloneApp extends Component {
       currentPosition: {
         latitude,
         longitude
-      }={}
+      }={},
+      comment,
+      placeNearby,
+      category
     } = this.state
     const docKey = uuidV4()
 
@@ -185,7 +213,10 @@ export default class BadInstagramCloneApp extends Component {
             docKey,
             type: 'image',
             url: snapshot.downloadURL,
-            userUid: uid
+            userUid: uid,
+            comment,
+            placeNearby,
+            category
           });
 
           geoCollection.add(doc)
@@ -362,6 +393,19 @@ export default class BadInstagramCloneApp extends Component {
   onPlaceSelect = (place) => {
     this.setState({
       placeNearby: place
+    })
+  }
+
+  handleCommentChange = (text) => {
+    this.setState({
+      comment: text
+    })
+  }
+
+  handleCategoryChange = (text) => {
+    console.log("handleCategoryChange called. text: ", text.value)
+    this.setState({
+      category: text.value
     })
   }
 
@@ -580,6 +624,17 @@ export default class BadInstagramCloneApp extends Component {
               </View>
             </View>
           }
+
+          {!!imageUri || !!videoUri &&
+            <View
+              style={{position: 'absolute',
+                bottom: 0,
+                right: 0
+              }}
+            >
+              {/* TODO: add icons to comment, places nearby and categry */}
+            </View>
+          }
         </View>
 
         <View style={{
@@ -731,6 +786,7 @@ export default class BadInstagramCloneApp extends Component {
                 numberOfLines={3}
                 blurOnSubmit={true}
                 returnKeyType={'done'}
+                onChangeText={this.handleCommentChange}
               />
 
 
@@ -741,9 +797,12 @@ export default class BadInstagramCloneApp extends Component {
               />
 
               <Dropdown
-                data={[{value: 'surfing'}, {value: 'fishing'}, {value: 'other'}]}
+                data={categories}
+                onChangeText={this.handleCategoryChange}
+                labelExtractor={({value}) => value}
+                valueExtractor={(value) => value}
                 renderBase={props => {
-
+                  const {value: {value=''}={}} = props
                   return <Input
                     placeholder="Select a category"
                     leftIcon={
@@ -756,6 +815,7 @@ export default class BadInstagramCloneApp extends Component {
                     containerStyle={{marginTop: 30}}
                     leftIconContainerStyle={{marginRight: 20}}
                     {...props}
+                    value={value}
                   />
                 }}
               />
