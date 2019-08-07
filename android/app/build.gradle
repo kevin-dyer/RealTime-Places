@@ -147,6 +147,9 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-video')
+    implementation project(':react-native-fs')
+    implementation project(':@react-native-community_geolocation')
     implementation project(':react-native-vector-icons')
     implementation project(':react-native-firebase')
     implementation project(':react-native-camera')

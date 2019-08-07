@@ -3,6 +3,9 @@ package com.rtplaces;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.brentvatne.react.ReactVideoPackage;
+import com.rnfs.RNFSPackage;
+import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import io.invertase.firebase.RNFirebasePackage;
 import org.reactnative.camera.RNCameraPackage;
@@ -28,6 +31,9 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ReactVideoPackage(),
+            new RNFSPackage(),
+            new GeolocationPackage(),
             new VectorIconsPackage(),
             new RNFirebasePackage(),
             new RNCameraPackage(),
