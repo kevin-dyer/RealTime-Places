@@ -381,7 +381,7 @@ export default class App extends Component<Props> {
     } = this.state
     const mainDelta = Math.max(latitudeDelta, longitudeDelta)
     const radius = ((mainDelta * 40008000 / 360) / 2) / 1000//not sure if I need to divide by 2
-    const maxDocs = 100
+    const maxDocs = 10
     // console.log("radius: ", radius)
 
     // console.log("calling getNearbyCheckins, region latitude: ",latitude, ", longitude: ", longitude)
@@ -402,13 +402,14 @@ export default class App extends Component<Props> {
       radius
     }
 
-    const twoWkMs = 3600 * 24 * 14 * 1000
+    // const twoWkMs = 3600 * 24 * 14 * 1000
     this.geoQuery = geoCollection
       .near(queryConfigs)
       // .orderBy('d.timestamp')
       .limit(20)
       //TODO: replace with orderBy if possible
-      .where('d.timestamp', '>=', Date.now()) //last two weeks
+      // .where('timestamp', '>=', Date.now()) //last two weeks
+
 
 
     // Get query (as Promise)
