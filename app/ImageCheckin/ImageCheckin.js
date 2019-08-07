@@ -189,63 +189,64 @@ export default class ImageCheckin extends Component {
               padding: 18
             }}
           >
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center'
-              }}
-            >
-              <Icon
-                name='ios-create'
-                size={16}
-                color='white'
-              />
-
-              <Text
-                style={{
-                  color: '#FFF',
-                  marginLeft: 20,
-                  fontSize: 14
+            {!!comment && <View style={{
+                flexDirection: 'row',
+                alignItems: 'center'
                 }}
-              >{comment}</Text>
-            </View>
+              >
+                <Icon
+                  name='ios-create'
+                  size={16}
+                  color='white'
+                />
 
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center'
-              }}
-            >
-              <Icon
-                name='ios-pin'
-                size={16}
-                color='white'
-              />
+                <Text
+                  style={{
+                    color: '#FFF',
+                    marginLeft: 20,
+                    fontSize: 14
+                  }}
+                >{comment}</Text>
+              </View>}
+            
 
-              <Text
-                style={{
-                  color: '#FFF',
-                  marginLeft: 20
+            {!!placeName && <View style={{
+                flexDirection: 'row',
+                alignItems: 'center'
                 }}
-              >{placeName}</Text>
-            </View>
+              >
+                <Icon
+                  name='ios-pin'
+                  size={16}
+                  color='white'
+                />
 
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center'
-              }}
-            >
-              <Icon
-                name='ios-albums'
-                size={16}
-                color='white'
-              />
+                <Text
+                  style={{
+                    color: '#FFF',
+                    marginLeft: 20
+                  }}
+                >{placeName}</Text>
+              </View>}
 
-              <Text
-                style={{
-                  color: '#FFF',
-                  marginLeft: 20
+            {!!category && <View style={{
+                flexDirection: 'row',
+                alignItems: 'center'
                 }}
-              >{category}</Text>
-            </View>
+              >
+                <Icon
+                  name='ios-albums'
+                  size={16}
+                  color='white'
+                />
+  
+                <Text
+                  style={{
+                    color: '#FFF',
+                    marginLeft: 20
+                  }}
+                >{category}</Text>
+              </View>}
             
           </View>
         }

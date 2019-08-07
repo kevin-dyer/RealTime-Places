@@ -402,7 +402,14 @@ export default class App extends Component<Props> {
       radius
     }
 
-    this.geoQuery = geoCollection.near(queryConfigs);
+    const twoWkMs = 3600 * 24 * 14 * 1000
+    this.geoQuery = geoCollection
+      .near(queryConfigs)
+      // .orderBy('d.timestamp')
+      .limit(20)
+      //TODO: replace with orderBy if possible
+      .where('d.timestamp', '>=', Date.now()) //last two weeks
+
 
     // Get query (as Promise)
     this.geoQuery.get()
