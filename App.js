@@ -297,6 +297,12 @@ export default class App extends Component<Props> {
           width: photo.width,
           type: 'googlePhoto'
         }))})
+
+        setTimeout(() => {
+          if (photos.length > 0) {
+            this.setSelectedCheckin(photos[0].photo_reference)
+          }
+        })
       })
     })
     .catch(error => {
@@ -330,8 +336,7 @@ export default class App extends Component<Props> {
         const [{photo_reference}] = photos
 
         setTimeout(() => {
-          // this.scrollToGoogleImage(photo_reference)
-          this.scrollToGoogleImage(0)
+          this.setSelectedCheckin(photo_reference)
         }, 500)
       }
     })
@@ -406,7 +411,7 @@ export default class App extends Component<Props> {
     this.geoQuery = geoCollection
       .near(queryConfigs)
       // .orderBy('d.timestamp')
-      .limit(20)
+      // .limit(20)
       //TODO: replace with orderBy if possible
       // .where('timestamp', '>=', Date.now()) //last two weeks
 
@@ -425,10 +430,9 @@ export default class App extends Component<Props> {
 //     })
 
 
-     // this.geoQuery.onSnapshot((snapshot: GeoQuerySnapshot) => {
-    .then((snapshot: GeoQuerySnapshot) => {
+     this.geoQuery.onSnapshot((snapshot: GeoQuerySnapshot) => {
+    // .then((snapshot: GeoQuerySnapshot) => {
        const {queryData: originalQueryData} = this.state
-       // console.log("query.onSnapshot. snapshot: ", snapshot)
        const {docs=[]} = snapshot || {}
        const queryData = docs.map(doc => {
          return {
@@ -447,27 +451,12 @@ export default class App extends Component<Props> {
          }
        })
        .slice(0, maxDocs)
- 
-       //BIG TODO: format new query data 
- 
+  
        //Attempt to only update state if results have changed
-       //TODO: improve this by checking each datum's id
        if (queryDataHasChanged(queryData, originalQueryData)) {
-       // if (true || queryData.length !== originalQueryData.length) {
          // console.log("setting queryData from snapshot queryData: ", queryData, ", originalQueryData: ", originalQueryData)
          this.setState({
            queryData: queryData
-           // .filter(this.isCheckinOnScreen)
-           // .sort((a, b) => {
-           //   if (a.timestamp < b.timestamp) {
-           //     return 1
-           //   } else if (a.timestamp > b.timestamp) {
-           //     return -1
-           //   } else {
-           //     return 0
-           //   }
-           // })
-           // .slice(0, maxDocs)
          })
        }
      })
@@ -584,7 +573,9 @@ export default class App extends Component<Props> {
                   latitude: doc.coordinates.latitude,
                   longitude: doc.coordinates.longitude
                 }}
-                onPress={e => this.scrollToCheckin(doc.docKey)}
+                onPress={e => {
+                  this.setSelectedCheckin(doc.docKey)
+                }}
                 pinColor={doc.docKey === selectedCheckin ? COLOR.green200 : COLOR.red700}
                 zIndex={doc.docKey === selectedCheckin ? 10 : 1}
               />
@@ -630,7 +621,7 @@ export default class App extends Component<Props> {
               imageStoreRef={imageStoreRef}
               toggleMediaUpload={this.toggleMediaUpload}
               user={user}
-              scrollToCheckin={this.scrollToCheckin}
+              setSelectedCheckin={this.setSelectedCheckin}
               animateToRegion={this.moveRegion}
             />
           }

@@ -127,6 +127,10 @@ export default class ImageCheckin extends Component {
       ? screenWidth
       : selected ? width * scale : height
 
+    if (selected) {
+      console.log("imageCheckin selected: ", )
+    }
+
     // console.log("imageCheckin currentUserUuid: ", currentUserUuid, ", checkin.userUid: ", userUid)
     return (
       <TouchableOpacity
@@ -150,7 +154,7 @@ export default class ImageCheckin extends Component {
           }}
         />
 
-        {((!userUid || userUid === currentUserUuid) && (selected || fullScreen)) &&
+        {(selected || fullScreen) &&
           <View
             style={{
               position: 'absolute',
@@ -170,13 +174,16 @@ export default class ImageCheckin extends Component {
                 color={'#FFF'}
                 onPress={onExpand}
               />
-              <IconToggle
-                name="ios-trash"
-                iconSet="Ionicons"
-                size={28}
-                color={'#FFF'}
-                onPress={this.deleteCheckin}
-              />
+
+              {(!userUid || userUid === currentUserUuid) &&
+                <IconToggle
+                  name="ios-trash"
+                  iconSet="Ionicons"
+                  size={28}
+                  color={'#FFF'}
+                  onPress={this.deleteCheckin}
+                />
+              }
             </View>
           </View>
         }

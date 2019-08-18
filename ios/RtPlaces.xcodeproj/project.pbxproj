@@ -5,6 +5,7 @@
 	};
 	objectVersion = 46;
 	objects = {
+
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -12,6 +13,7 @@
 		00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302DC1ABCB9D200DB3ED1 /* libRCTNetwork.a */; };
 		00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302E41ABCB9EE00DB3ED1 /* libRCTVibration.a */; };
 		035518F9D4EF4295ACC65E7C /* EvilIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D68B8E4DE6F44666BC54C473 /* EvilIcons.ttf */; };
+		0CBDCEBC230265B000615459 /* libRNGooglePlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1982B7A822A1E053008E11AC /* libRNGooglePlaces.a */; };
 		11D1A2F320CAFA9E000508D9 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 78C398B91ACF4ADC00677621 /* libRCTLinking.a */; };
 		139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 139105C11AF99BAD00B5F7CC /* libRCTSettings.a */; };
@@ -25,7 +27,6 @@
 		17B8B2F0E3EE4F6EBAFB600C /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 689019FCBDD54E258F978B43 /* Zocial.ttf */; };
 		1909750622B86562002A742B /* libmovToMp4.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1909749522B8653E002A742B /* libmovToMp4.a */; };
 		1982B64B229B9C25008E11AC /* libreact-native-maps.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19941B86229B55570031B3AB /* libreact-native-maps.a */; };
-		1982B7A922A1E08F008E11AC /* libRNGooglePlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1982B7A822A1E053008E11AC /* libRNGooglePlaces.a */; };
 		1982B7AA22A1EE79008E11AC /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19941AB02297A1D60031B3AB /* libRNFirebase.a */; };
 		19D0ECD122A2F4DD005440D7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 19D0ECD022A2F4DD005440D7 /* GoogleService-Info.plist */; };
 		19DEE66F22D08C55000DAB6B /* libRNCGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19DEE66B22D08C05000DAB6B /* libRNCGeolocation.a */; };
@@ -107,6 +108,34 @@
 			proxyType = 1;
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
 			remoteInfo = RtPlaces;
+		};
+		0CBDCE67230265AB00615459 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9C7C87B5D0A6752AFA2642F1BCA967A3;
+			remoteInfo = "gRPC-C++-gRPCCertificates-Cpp";
+		};
+		0CBDCE69230265AB00615459 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8998273719FDD789E6F9C7541AFD0B33;
+			remoteInfo = RNVectorIcons;
+		};
+		0CBDCE8D230265AB00615459 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9C7C87B5D0A6752AFA2642F1BCA967A3;
+			remoteInfo = "gRPC-C++-gRPCCertificates-Cpp";
+		};
+		0CBDCE8F230265AB00615459 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8998273719FDD789E6F9C7541AFD0B33;
+			remoteInfo = RNVectorIcons;
 		};
 		139105C01AF99BAD00B5F7CC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -234,13 +263,6 @@
 			remoteGlobalIDString = 4C4FCB1764AF17FD98D0D8F1667A6E4F;
 			remoteInfo = "gRPC-C++";
 		};
-		1982B74022A1DD57008E11AC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 47D7CCC87B6CA8694007C1F13BA00318;
-			remoteInfo = "gRPC-C++-gRPCCertificates";
-		};
 		1982B74222A1DD57008E11AC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
@@ -289,13 +311,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 4C4FCB1764AF17FD98D0D8F1667A6E4F;
 			remoteInfo = "gRPC-C++";
-		};
-		1982B77022A1DD57008E11AC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 19EC3BED2290CEFA00355359 /* Pods.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 47D7CCC87B6CA8694007C1F13BA00318;
-			remoteInfo = "gRPC-C++-gRPCCertificates";
 		};
 		1982B77222A1DD57008E11AC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -845,12 +860,12 @@
 				19EC3BFF2290CF1800355359 /* libPods-RtPlaces.a in Frameworks */,
 				19EC3C002290CF2B00355359 /* libyoga.a in Frameworks */,
 				1982B64B229B9C25008E11AC /* libreact-native-maps.a in Frameworks */,
-				1982B7A922A1E08F008E11AC /* libRNGooglePlaces.a in Frameworks */,
 				1982B7AA22A1EE79008E11AC /* libRNFirebase.a in Frameworks */,
 				FA00D79DF478ECE23746A92B /* libPods-RtPlaces.a in Frameworks */,
 				1909750622B86562002A742B /* libmovToMp4.a in Frameworks */,
 				19DEE66F22D08C55000DAB6B /* libRNCGeolocation.a in Frameworks */,
 				19DEE67922DBFB2A000DAB6B /* libART.a in Frameworks */,
+				0CBDCEBC230265B000615459 /* libRNGooglePlaces.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1080,7 +1095,7 @@
 				1982B648229B9C24008E11AC /* libGoogle-Maps-iOS-Utils.a */,
 				1994194E2296FC6E0031B3AB /* libGoogleUtilities.a */,
 				1982B73F22A1DD57008E11AC /* libgRPC-C++.a */,
-				1982B74122A1DD57008E11AC /* gRPCCertificates.bundle */,
+				0CBDCE68230265AB00615459 /* gRPCCertificates-Cpp.bundle */,
 				1982B74322A1DD57008E11AC /* libgRPC-Core.a */,
 				19941B82229B55570031B3AB /* libGTMSessionFetcher.a */,
 				19941B84229B55570031B3AB /* libleveldb-library.a */,
@@ -1092,6 +1107,7 @@
 				19941B86229B55570031B3AB /* libreact-native-maps.a */,
 				190974B822B8653E002A742B /* libreact-native-video.a */,
 				1982B74722A1DD57008E11AC /* libRNFS.a */,
+				0CBDCE6A230265AB00615459 /* libRNVectorIcons.a */,
 				19EC3BEC2290CEDF00355359 /* libyoga.a */,
 			);
 			name = Products;
@@ -1112,7 +1128,7 @@
 				1982B666229B9C25008E11AC /* libGoogle-Maps-iOS-Utils.a */,
 				199419682296FC6E0031B3AB /* libGoogleUtilities.a */,
 				1982B76F22A1DD57008E11AC /* libgRPC-C++.a */,
-				1982B77122A1DD57008E11AC /* gRPCCertificates.bundle */,
+				0CBDCE8E230265AB00615459 /* gRPCCertificates-Cpp.bundle */,
 				1982B77322A1DD57008E11AC /* libgRPC-Core.a */,
 				19941BA3229B55570031B3AB /* libGTMSessionFetcher.a */,
 				19941BA5229B55570031B3AB /* libleveldb-library.a */,
@@ -1124,6 +1140,7 @@
 				19941BA7229B55570031B3AB /* libreact-native-maps.a */,
 				190974DB22B8653E002A742B /* libreact-native-video.a */,
 				1982B77722A1DD57008E11AC /* libRNFS.a */,
+				0CBDCE90230265AB00615459 /* libRNVectorIcons.a */,
 				19EC3BFE2290CEFA00355359 /* libyoga.a */,
 			);
 			name = Products;
@@ -1507,6 +1524,34 @@
 			remoteRef = 00C302E31ABCB9EE00DB3ED1 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		0CBDCE68230265AB00615459 /* gRPCCertificates-Cpp.bundle */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "gRPCCertificates-Cpp.bundle";
+			remoteRef = 0CBDCE67230265AB00615459 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		0CBDCE6A230265AB00615459 /* libRNVectorIcons.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNVectorIcons.a;
+			remoteRef = 0CBDCE69230265AB00615459 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		0CBDCE8E230265AB00615459 /* gRPCCertificates-Cpp.bundle */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "gRPCCertificates-Cpp.bundle";
+			remoteRef = 0CBDCE8D230265AB00615459 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		0CBDCE90230265AB00615459 /* libRNVectorIcons.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNVectorIcons.a;
+			remoteRef = 0CBDCE8F230265AB00615459 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		139105C11AF99BAD00B5F7CC /* libRCTSettings.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1633,13 +1678,6 @@
 			remoteRef = 1982B73E22A1DD57008E11AC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		1982B74122A1DD57008E11AC /* gRPCCertificates.bundle */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = gRPCCertificates.bundle;
-			remoteRef = 1982B74022A1DD57008E11AC /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		1982B74322A1DD57008E11AC /* libgRPC-Core.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1687,13 +1725,6 @@
 			fileType = archive.ar;
 			path = "libgRPC-C++.a";
 			remoteRef = 1982B76E22A1DD57008E11AC /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		1982B77122A1DD57008E11AC /* gRPCCertificates.bundle */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = gRPCCertificates.bundle;
-			remoteRef = 1982B77022A1DD57008E11AC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		1982B77322A1DD57008E11AC /* libgRPC-Core.a */ = {

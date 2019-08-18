@@ -100,9 +100,9 @@ export default class MediaUpload extends Component {
     videoProgress: 0,
     videoPaused: true,
     comment: '',
-    placeNearby: null,
+    placeNearby: undefined,
     nearbyPlaces: [],
-    category: null
+    category: undefined
   }
 
   takePicture = async function() {
@@ -111,7 +111,7 @@ export default class MediaUpload extends Component {
       toggleMediaUpload,
       imageStoreRef,
       user: {uid=''}={},
-      scrollToCheckin,
+      // scrollToCheckin,
       animateToRegion
     } = this.props
 
@@ -157,7 +157,7 @@ export default class MediaUpload extends Component {
       toggleMediaUpload,
       imageStoreRef,
       user: {uid=''}={},
-      scrollToCheckin,
+      setSelectedCheckin,
       animateToRegion
     } = this.props
     const {
@@ -172,6 +172,7 @@ export default class MediaUpload extends Component {
       category
     } = this.state
     const docKey = uuidV4()
+    const checkinType = !!videoUri ? 'video' : 'image'
 
     console.log("saveMedia called ")
 
@@ -186,7 +187,7 @@ export default class MediaUpload extends Component {
 
 
 
-    mediaRef.putFile(imageUri)
+    mediaRef.putFile(imageUri || videoUri)
     .on(
       firebase.storage.TaskEvent.STATE_CHANGED,
       snapshot => {
@@ -211,7 +212,7 @@ export default class MediaUpload extends Component {
             latitude,
             longitude,
             docKey,
-            type: 'image',
+            type: checkinType,
             url: snapshot.downloadURL,
             userUid: uid,
             comment,
@@ -233,6 +234,7 @@ export default class MediaUpload extends Component {
             // setTimeout(() => {
             //   scrollToCheckin(docKey)
             // }, 1000)
+            setSelectedCheckin(docKey)
             this.handleBack()
           })
           .catch(error => {
@@ -260,7 +262,7 @@ export default class MediaUpload extends Component {
       imageStoreRef,
       user: {uid=''}={},
       animateToRegion,
-      scrollToCheckin
+      // scrollToCheckin
     } = this.props
     console.log("take VIDEO called! this.camera: ", this.camera)
     if (this.camera) {

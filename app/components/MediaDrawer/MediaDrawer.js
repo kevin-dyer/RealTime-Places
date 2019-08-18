@@ -20,7 +20,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import ImageCheckin from '../../ImageCheckin/ImageCheckin'
 import GoogleImage from '../../GoogleImage/GoogleImage'
 import Video from '../../Video/Video'
+import MediaItem from '../MediaItem/MediaItem'
 import {PLACES_KEY} from '../../../configs'
+import {debounce} from 'lodash'
 
 const {width, height} = Dimensions.get('window')
 
@@ -52,117 +54,52 @@ export default class MediaDrawer extends Component {
     fullScreen: false
 	}
 
-  componentDidMount() {
-  }
+  componentDidUpdate({selectedCheckin: oldSelectedCheckin}) {
+    const {selectedCheckin, allMedia=[]} = this.props
 
-  _renderMedia = (media={}) => {
-    const {item: {
-      type
-    }={}} = media
+    if (!!selectedCheckin && oldSelectedCheckin !== selectedCheckin) {
+      const selectedIndex = allMedia.findIndex(media => 
+        media.docKey === selectedCheckin || media.photo_reference === selectedCheckin
+      )
 
-    if (type === 'googlePhoto') {
-      return this._renderPhoto(media)
-    } else if (type === 'image') {
-      return this._renderQueryPhoto(media)
-    } else if (type === 'video') {
-      return this._renderVideo(media)
+      if (selectedIndex > -1) {
+        console.log("scrolling to index: ", selectedIndex, this.flatListRef)
+        this.flatListRef.scrollToIndex({
+          animated: true,
+          index: selectedIndex,
+          // viewOffset: -PHOTO_SIZE,
+          // viewPosition: 1
+        })
+      }
     }
-  }
-  _renderPhoto = (
-    {
-      item: {photo_reference, uri},
-      index
-    }={}
-  ) => {
-    const {
-      selectedCheckin,
-      queryData=[]
-    } = this.props
-    const queryLength = queryData.length
-    // const selected = selectedCheckin === photo_reference
-    const photoIndex = index - queryLength
-    const selected = selectedCheckin === photoIndex
-
-    return <GoogleImage
-      key={`googleImage-${index}`}
-      uri={uri}
-      height={PHOTO_SIZE}
-      onPress={e => {
-        // this.scrollToGoogleImage(photo_reference)
-        console.log("scrollToGoogleImage photoIndex: ", photoIndex)
-        this.scrollToGoogleImage(photoIndex)
-      }}
-      selected={selected}
-      index={index}
-      scale={PHOTO_SCALE}
-    />
+    //TODO: if selectedCheckin changes, then scroll to it
+    //NOTE: might still need a way to scroll to something
   }
 
-  _renderQueryPhoto = ({
-    item: {
-      downloadURL='',
-      docKey,
-      userUid
-    }={},
-    item,
-    index
-  }={}) => {
+  //TODO: Check if userUid is correct
+  //TODO: pass in geoCollection and imageStoreRef
+  _renderMedia = (media={}) => {
     const {
       selectedCheckin,
-      user: {uid}={},
+      setSelectedCheckin,
+      user: {
+        uid
+      }={},
       geoCollection,
       imageStoreRef
     } = this.props
     const {fullScreen} = this.state
-    const selected = selectedCheckin === docKey
-    
-    return <ImageCheckin
-      key={`queryPhoto-${docKey}`}
-      checkin={item}
-      index={index}
-      userUid={uid}
-      height={PHOTO_SIZE}
-      selected={selected}
-      onPress={e => {
-        // console.log("calling setSelectedCheckin, docKey: ", docKey)
-        // this.setSelectedCheckin(docKey)
-        this.scrollToCheckin(docKey)
-      }}
-      geoCollection={geoCollection}
-      imageStoreRef={imageStoreRef}
-      scale={PHOTO_SCALE}
-      onExpand={this.toggleFullScreen}
+    return <MediaItem
+      {...media}
       fullScreen={fullScreen}
-    />
-  }
-
-  _renderVideo = ({
-    item: {docKey}={},
-    item,
-    index
-  }={}) => {
-    const {
-      user: {uid}={},
-      geoCollection,
-      imageStoreRef,
-      selectedCheckin,
-    } = this.props
-    const selected = selectedCheckin === docKey
-    // console.log("_renderVideo downloadURL: ", downloadURL)
-    return <Video
-      key={`video-${docKey || index}`}
-      checkin={item}
-      height={PHOTO_SIZE}
+      size={PHOTO_SIZE}
+      scale={PHOTO_SCALE}
       userUid={uid}
-      selected={selected}
-      onPress={e => {
-        // this.setSelectedCheckin(docKey)
-        this.scrollToCheckin(docKey)
-      }}
-      index={index}
+      selectedCheckin={selectedCheckin}
       geoCollection={geoCollection}
       imageStoreRef={imageStoreRef}
-      scale={PHOTO_SCALE}
+      onExpand={this.toggleFullScreen}
+      setSelectedCheckin={setSelectedCheckin}
     />
   }
 
@@ -242,26 +179,57 @@ export default class MediaDrawer extends Component {
       setSelectedCheckin=()=>{}
     } = this.props
 
-    if (index > -1) {
+    // if (index > -1) {
       if (selectedCheckin !== index) {
 
-        console.log("scrolling to (queryData.length + index + 1) * PHOTO_SIZE: ", (queryData.length + index + 1) * PHOTO_SIZE)
-        this.flatListRef.scrollToIndex({
-          animated: true,
-          index: queryData.length + index,
-          // offset: (queryData.length + index + 1) * PHOTO_SIZE
-          // viewOffset: PHOTO_SIZE,
-          // viewPosition: 0
-        })
+        // console.log("scrolling to (queryData.length + index + 1) * PHOTO_SIZE: ", (queryData.length + index + 1) * PHOTO_SIZE)
+        // this.flatListRef.scrollToIndex({
+        //   animated: true,
+        //   index: queryData.length + index,
+        //   // offset: (queryData.length + index + 1) * PHOTO_SIZE
+        //   // viewOffset: PHOTO_SIZE,
+        //   // viewPosition: 0
+        // })
       }
       setSelectedCheckin(index)
-    }
+    // }
 
   }
 
   toggleFullScreen = () => {
     this.setState({fullScreen: !this.state.fullScreen})
   }
+
+  selectedCheckinIsVisible = (viewableItems=[]) => {
+    const {selectedCheckin} = this.props
+
+    return viewableItems.some(({item: {docKey, photo_reference}={}}) => {
+      return !!docKey  && docKey === selectedCheckin ||
+         !!photo_reference && photo_reference === selectedCheckin
+    })
+  }
+
+//   handleListChange = debounce(
+//     ({
+//       viewableItems=[],
+//       changed=[]
+//     }) => {
+//       const {setSelectedCheckin} = this.props
+//       const {fullScreen} = this.state
+//       console.log("update FlatList!", viewableItems)
+// 
+//       //TODO: Remove SelectedCheckin if offscreen
+//       if (this.selectedCheckinIsVisible(viewableItems)) {
+//         setSelectedCheckin(null)
+//       }
+// 
+//       //if full screen, snap to index
+//       //NOTE: this could cause feedback loop
+//       if (fullScreen) {
+//         console.log("snap to index here!")
+//       }
+//     }, 500
+//   )
 
 	render() {
     const {
@@ -274,7 +242,7 @@ export default class MediaDrawer extends Component {
     const {fullScreen} = this.state
     const queryLength = queryData.length
 
-    console.log("allMedia: ", allMedia)
+    // console.log("allMedia: ", allMedia)
 
 
     //TODO: position selected image using xPosition and the image's width
@@ -305,14 +273,14 @@ export default class MediaDrawer extends Component {
           style={styles.swiperWrapper}
           contentContainerStyle={styles.swiperContainer}
           removeClippedSubviews={false}
-          ListHeaderComponent={
+          ListHeaderComponent={!fullScreen &&
             <TouchableOpacity style={{
                 height: PHOTO_SIZE,
                 width: fullScreen ? width : PHOTO_SIZE * 0.75,
                 justifyContent: 'center',
                 alignItems: 'center',
                 backgroundColor: 'rgba(0,0,0,0.3)',
-                marginRight: 1
+                marginRight: fullScreen ? 0 : 1
               }}
               onPress={toggleMediaUpload}
             >
@@ -324,33 +292,24 @@ export default class MediaDrawer extends Component {
             </TouchableOpacity>
           }
           getItemLayout={(data, index) => ({
-            length: PHOTO_SIZE,
-            offset: (PHOTO_SIZE + 1) * index,
+            length: fullScreen ? height : PHOTO_SIZE,
+            offset: fullScreen
+              ? height * index
+              : (PHOTO_SIZE + 1) * index,
             index
           })}
           onRefresh={()=>{
             this.toggleFullScreen()
           }}
           refreshing={false}
+          // snapToAlignment={'start'}
+          // onViewableItemsChanged={
+          //   this.handleListChange
+          // }
+          onPanResponderRelease={e => {
+            console.log("FlatList onPanResponderRelease")
+            }}
         />
-
-        {false && !!selectedCheckin &&
-          <View style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-          }}>
-            <IconToggle
-              name="close"
-              size={30}
-              color={'rgba(255,255,255,0.8)'}
-              onPress={e => {
-                console.log("Calling FlatList onPress!")
-                setSelectedCheckin(null)
-              }}
-            />
-          </View>
-        }
       </View>
     </View>
 	}
