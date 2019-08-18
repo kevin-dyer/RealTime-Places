@@ -206,8 +206,18 @@ export default class MediaDrawer extends Component {
 
   }
 
-  toggleFullScreen = () => {
+  toggleFullScreen = (index) => {
     this.setState({fullScreen: !this.state.fullScreen})
+
+    if (!!this.flatListRef && !isNaN(index)) {
+      console.log("toggleFullScreen calling scrollToIndex: ", index)
+      setTimeout(() => { 
+        this.flatListRef.scrollToIndex({
+          animated: false,
+          index
+        })
+      }, 200)
+    }
   }
 
   selectedCheckinIsVisible = (viewableItems=[]) => {
@@ -310,7 +320,7 @@ export default class MediaDrawer extends Component {
             index
           })}
           onRefresh={()=>{
-            this.toggleFullScreen()
+            this.toggleFullScreen(0)
           }}
           refreshing={false}
           // snapToAlignment={'start'}

@@ -271,7 +271,7 @@ export default class MediaItem extends Component {
                 iconSet="Ionicons"
                 size={fullScreen ? 30 : 24}
                 color={'#FFF'}
-                onPress={onExpand}
+                onPress={e => onExpand(index)}
               />
 
               {(!userUid || userUid === currentUserUuid) &&

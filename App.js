@@ -289,6 +289,8 @@ export default class App extends Component<Props> {
       }
 
       console.log("places photos: ", photos)
+
+      //TODO: split photos by size (thumb vs full size (screenWidth))
       return this.fetchPlacePhotos(photos).then(photoUrls => {
         this.setState({photos: photos.map((photo, index) => ({
           uri: photoUrls[index],
