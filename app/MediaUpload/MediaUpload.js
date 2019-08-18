@@ -175,6 +175,7 @@ export default class MediaUpload extends Component {
     const checkinType = !!videoUri ? 'video' : 'image'
 
     console.log("saveMedia called ")
+    this.setState({uploading: true})
 
     // console.log("lat: ", latitude, ", lng: ", longitude, ", imageStoreRef: ", imageStoreRef)
 
@@ -223,36 +224,22 @@ export default class MediaUpload extends Component {
           geoCollection.add(doc)
           .then(docRef => {
             console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
-            // toggleMediaUpload(false)
-
-            // animateToRegion({
-            //   latitude,
-            //   longitude,
-            //   latitudeDelta: 0.04,
-            //   longitudeDelta: 0.04
-            // }).start()
-            // setTimeout(() => {
-            //   scrollToCheckin(docKey)
-            // }, 1000)
             setSelectedCheckin(docKey)
+
             this.handleBack()
+            return docRef
           })
           .catch(error => {
             console.log("error adding doc: ", error)
+            this.setState({uploading: false})
+            throw error
           })
         }
-        // this.setState(state);
       },
       error => {
-        // unsubscribe();
         console.alert('Sorry, Try again. error: ', error);
       }
     )
-    // .then(snapshot => {
-    // })
-    // .catch(error => {
-    //   console.log("mediaRef upload error: ", error)
-    // })
   }
 
   takeVideo = () => {
@@ -357,7 +344,8 @@ export default class MediaUpload extends Component {
       videoUri: '',
       nearbyPlaces: [],
       videoPaused: true,
-      videoProgress: 0
+      videoProgress: 0,
+      uploading: false
     })
   }
 
@@ -420,7 +408,8 @@ export default class MediaUpload extends Component {
       videoProgress,
       videoPaused,
       currentPosition,
-      placeNearby
+      placeNearby,
+      uploading
     } = this.state
     // const videoProgress = Math.floor((Date.now() - recordingStartTime) / 1000) / 15
     // console.log("render imageUri: ", imageUri)
@@ -511,11 +500,7 @@ export default class MediaUpload extends Component {
                 }}
                 resizeMode={'contain'}
                 repeat={true}
-                onEnd={e => {
-                  // this.player.seek(0);
-                  // setTimeout(this.toggleReplay, 100)
-                  this.toggleReplay()
-                }}
+                onEnd={this.toggleReplay}
               />
 
               <View style={{
@@ -844,6 +829,7 @@ export default class MediaUpload extends Component {
                   title="Submit"
                   type="clear"
                   titleStyle={{fontSize: 24}}
+                  disabled={uploading}
                   onPress={this.saveMedia}
                 />
               </View>
