@@ -300,7 +300,9 @@ export default class App extends Component<Props> {
 
         setTimeout(() => {
           if (photos.length > 0) {
-            this.setSelectedCheckin(photos[0].photo_reference)
+
+            //NOTE: this is not quite right, want to actually go to the very beginning of the list
+            this.setSelectedCheckin(0)
           }
         })
       })

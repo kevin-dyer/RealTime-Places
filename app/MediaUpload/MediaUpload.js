@@ -355,7 +355,9 @@ export default class MediaUpload extends Component {
     this.setState({
       imageUri: '',
       videoUri: '',
-      nearbyPlaces: []
+      nearbyPlaces: [],
+      videoPaused: true,
+      videoProgress: 0
     })
   }
 
@@ -368,14 +370,8 @@ export default class MediaUpload extends Component {
   toggleReplay = () => {
     const {videoPaused} = this.state
 
-    console.log("toggleReplay caled, videoPaused: ", videoPaused, ", !!this.camera: ", !!this.camera)
-    if (!!this.camera) {
-      if (!!videoPaused) {
-        this.camera.resumePreview()
-      } else {
-        this.camera.pausePreview()
-      }
-
+    console.log("toggleReplay caled, videoPaused: ", videoPaused)
+    if (!!this.player) {
       this.setState({videoPaused: !videoPaused})
     }
   }
@@ -513,13 +509,25 @@ export default class MediaUpload extends Component {
                   height: width,
                   width
                 }}
-                resizeMode={'cover'}
+                resizeMode={'contain'}
+                repeat={true}
+                onEnd={e => {
+                  // this.player.seek(0);
+                  // setTimeout(this.toggleReplay, 100)
+                  this.toggleReplay()
+                }}
               />
 
               <View style={{
                 position: 'absolute',
-                top: width / 2 - 20,
-                right: width / 2 - 20,
+                // top: width / 2 - 20,
+                // right: width / 2 - 20,
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                justifyContent: 'center',
+                alignItems: 'center',
                 padding: 8
               }}>
                 <IconToggle

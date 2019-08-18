@@ -15,10 +15,25 @@ import Video from 'react-native-video';
 
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window')
-
+const HEADER_HEIGHT = 100
 
 export default class MediaItem extends Component {
   state = {paused: true}
+
+  componentDidUpdate({selectedCheckin: oldCheckin}, {paused: wasPaused}) {
+    const {
+      selectedCheckin,
+      item: {type}={}
+    } = this.props
+    const wasSelected = this.isSelected(oldCheckin)
+    const isSelected = this.isSelected(selectedCheckin)
+
+    if (!wasPaused && !isSelected) {
+      console.log("no longer selected!")
+      this.togglePause(true)
+    }
+  }
+
   deleteCheckin = () => {
     const {
       item: {
@@ -58,22 +73,26 @@ export default class MediaItem extends Component {
             .catch(error => {
               console.error("image failed to delete! error: ", error)
             })
-          }},
+          }, style: 'destructive'},
         ],
         {cancelable: true},
       )
     }
   }
 
-  isSelected = () => {
+  isSelected = (selectedCheckin) => {
     const {
-      selectedCheckin,
+      selectedCheckin: defaultSelectedCheckin,
       item: {
         docKey,
         photo_reference,
       },
       index
     } = this.props
+
+    if (!selectedCheckin) {
+      selectedCheckin = defaultSelectedCheckin
+    }
 
     if (!!docKey && docKey === selectedCheckin) {
       return true
@@ -119,7 +138,6 @@ export default class MediaItem extends Component {
     } = this.props
     const {paused} = this.state
 
-    console.log("video downloadURL: ", downloadURL)
     return <View
       style={{
         position: 'relative',
@@ -140,7 +158,7 @@ export default class MediaItem extends Component {
         }}
         resizeMode={'cover'}
         repeat
-        resizeMode={'cover'}
+        onEnd={this.togglePause}
       />
 
       <View style={{
@@ -166,8 +184,11 @@ export default class MediaItem extends Component {
     </View>
   }
 
-  togglePause = () => {
-    this.setState({paused: !this.state.paused})
+  togglePause = (paused) => {
+    const nextPaused = typeof(paused) === 'boolean'
+      ? paused
+      : !this.state.paused
+    this.setState({paused: nextPaused})
   }
 
   render() {
@@ -206,7 +227,6 @@ export default class MediaItem extends Component {
     const key = docKey || photo_reference || index
 
 
-    // console.log("imageCheckin currentUserUuid: ", currentUserUuid, ", checkin.userUid: ", userUid)
     return (
       <TouchableOpacity
         key={key}
@@ -221,6 +241,16 @@ export default class MediaItem extends Component {
         onPress={e => !fullScreen && setSelectedCheckin(key)}
         activeOpacity={1}
       >
+        {fullScreen &&
+          <View style={{
+            width: screenWidth,
+            height: HEADER_HEIGHT,
+            backgroundColor: '#000'
+            }}
+          >
+
+          </View>
+        }
         {this._renderMedia(selected)}
 
         {(selected || fullScreen) &&
@@ -261,7 +291,7 @@ export default class MediaItem extends Component {
           <View
             style={{
               width: screenWidth,
-              height: screenHeight - screenWidth,
+              height: screenHeight - screenWidth - HEADER_HEIGHT,
               backgroundColor: '#000',
               padding: 18,
               flexDirection: 'column',

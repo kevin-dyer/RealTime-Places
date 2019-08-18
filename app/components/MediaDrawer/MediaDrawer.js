@@ -57,7 +57,17 @@ export default class MediaDrawer extends Component {
   componentDidUpdate({selectedCheckin: oldSelectedCheckin}) {
     const {selectedCheckin, allMedia=[]} = this.props
 
-    if (!!selectedCheckin && oldSelectedCheckin !== selectedCheckin) {
+    if ((!!selectedCheckin || !isNaN(selectedCheckin)) && oldSelectedCheckin !== selectedCheckin) {
+      //Go to specified index if selectedCheckin is an integer
+      if (!isNaN(selectedCheckin)) {
+        this.flatListRef.scrollToIndex({
+          animated: true,
+          index: selectedCheckin,
+          // viewOffset: -PHOTO_SIZE,
+          // viewPosition: 1
+        })
+        return
+      }
       const selectedIndex = allMedia.findIndex(media => 
         media.docKey === selectedCheckin || media.photo_reference === selectedCheckin
       )
@@ -231,6 +241,7 @@ export default class MediaDrawer extends Component {
 //     }, 500
 //   )
 
+
 	render() {
     const {
       allMedia=[],
@@ -292,7 +303,7 @@ export default class MediaDrawer extends Component {
             </TouchableOpacity>
           }
           getItemLayout={(data, index) => ({
-            length: fullScreen ? height : PHOTO_SIZE,
+            length: fullScreen ? height : PHOTO_SIZE + 1,
             offset: fullScreen
               ? height * index
               : (PHOTO_SIZE + 1) * index,
@@ -306,9 +317,9 @@ export default class MediaDrawer extends Component {
           // onViewableItemsChanged={
           //   this.handleListChange
           // }
-          onPanResponderRelease={e => {
-            console.log("FlatList onPanResponderRelease")
-            }}
+          decelerationRate={fullScreen ? 0 : 'normal'}
+          snapToInterval={fullScreen ? height : PHOTO_SIZE + 1} //your element width
+          snapToAlignment={"start"}
         />
       </View>
     </View>
