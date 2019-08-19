@@ -57,14 +57,12 @@ export default class MediaDrawer extends Component {
   componentDidUpdate({selectedCheckin: oldSelectedCheckin}) {
     const {selectedCheckin, allMedia=[]} = this.props
 
-    if ((!!selectedCheckin || !isNaN(selectedCheckin)) && oldSelectedCheckin !== selectedCheckin) {
+    if ((!!selectedCheckin || Number.isInteger(selectedCheckin)) && oldSelectedCheckin !== selectedCheckin) {
       //Go to specified index if selectedCheckin is an integer
-      if (!isNaN(selectedCheckin)) {
+      if (Number.isInteger(selectedCheckin) && selectedCheckin < allMedia.length) {
         this.flatListRef.scrollToIndex({
           animated: true,
-          index: selectedCheckin,
-          // viewOffset: -PHOTO_SIZE,
-          // viewPosition: 1
+          index: selectedCheckin
         })
         return
       }
@@ -223,33 +221,32 @@ export default class MediaDrawer extends Component {
   selectedCheckinIsVisible = (viewableItems=[]) => {
     const {selectedCheckin} = this.props
 
-    return viewableItems.some(({item: {docKey, photo_reference}={}}) => {
+    return viewableItems.some(({
+      item: {
+        docKey,
+        photo_reference
+      }={}
+    }) => {
       return !!docKey  && docKey === selectedCheckin ||
          !!photo_reference && photo_reference === selectedCheckin
     })
   }
 
-//   handleListChange = debounce(
-//     ({
-//       viewableItems=[],
-//       changed=[]
-//     }) => {
-//       const {setSelectedCheckin} = this.props
-//       const {fullScreen} = this.state
-//       console.log("update FlatList!", viewableItems)
-// 
-//       //TODO: Remove SelectedCheckin if offscreen
-//       if (this.selectedCheckinIsVisible(viewableItems)) {
-//         setSelectedCheckin(null)
-//       }
-// 
-//       //if full screen, snap to index
-//       //NOTE: this could cause feedback loop
-//       if (fullScreen) {
-//         console.log("snap to index here!")
-//       }
-//     }, 500
-//   )
+  handleListChange = debounce(
+    ({
+      viewableItems=[],
+      changed=[]
+    }) => {
+      const {setSelectedCheckin} = this.props
+      const {fullScreen} = this.state
+      const checkinIsVisible = this.selectedCheckinIsVisible(viewableItems)
+
+      //TODO: Remove SelectedCheckin if offscreen
+      if (!checkinIsVisible) {
+        setSelectedCheckin(null)
+      }
+    }, 600
+  )
 
 
 	render() {
@@ -277,7 +274,11 @@ export default class MediaDrawer extends Component {
       left: 0,
       zIndex: 2,
       height: fullScreen ? height : null,
-      width
+      width,
+      shadowColor: 'rgb(0,0,0)',
+      shadowOffset: {width: 0, height: -1},
+      shadowRadius: 6,
+      shadowOpacity: 0.4
     }}>
       <View style={{
         position: 'relative',
@@ -324,9 +325,9 @@ export default class MediaDrawer extends Component {
           }}
           refreshing={false}
           // snapToAlignment={'start'}
-          // onViewableItemsChanged={
-          //   this.handleListChange
-          // }
+          onViewableItemsChanged={
+            this.handleListChange
+          }
           decelerationRate={fullScreen ? 0 : 'normal'}
           snapToInterval={fullScreen ? height : PHOTO_SIZE + 1} //your element width
           snapToAlignment={"start"}

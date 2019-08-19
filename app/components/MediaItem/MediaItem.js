@@ -80,6 +80,71 @@ export default class MediaItem extends Component {
     }
   }
 
+  flagInappropriateContent = () => {
+    const {
+      item: {
+        id,
+        downloadURL,
+        docKey,
+        inappropriateCount=0
+      },
+      geoCollection,
+    } = this.props
+
+    Alert.alert(
+      'Inappropriate Content',
+      'Flag this checkin as Inappropriate.',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {text: 'OK', onPress: () => {
+          console.log("calling flagCheckin")
+          geoCollection.doc(id).update({
+            inappropriateCount: inappropriateCount + 1
+          })
+          .then(()=>{
+            console.log("checkin flagged successfully")
+          })
+          .catch(error => {
+            console.error("checkin failed to be flagged! error: ", error)
+          })
+        }, style: 'destructive'},
+      ],
+      {cancelable: true},
+    )
+  }
+
+  rateCheckin = (positiveRating) => {
+    const {
+      item: {
+        id,
+        downloadURL,
+        docKey,
+        ratings: {
+          totalCount=0,
+          positiveCount=0
+        }={}
+      },
+      geoCollection,
+    } = this.props
+
+    geoCollection.doc(id).update({
+      ratings: {
+        totalCount: totalCount + 1,
+        positiveCount: positiveCount + (positiveRating ? 1 : 0)
+      }
+    })
+    .then(()=>{
+      console.log("checkin rated successfully. totalCount: ", totalCount + 1, ", positiveCount: ", positiveCount + (positiveRating ? 1 : 0))
+    })
+    .catch(error => {
+      console.error("checkin failed to be flagged! error: ", error)
+    })
+  }
+
   isSelected = (selectedCheckin) => {
     const {
       selectedCheckin: defaultSelectedCheckin,
@@ -257,33 +322,85 @@ export default class MediaItem extends Component {
           <View
             style={{
               position: 'absolute',
-              top: fullScreen ? 20 : 0,
+              top: fullScreen ? 30 : 0,
               right: 0,
+              // width: screenWidth
+              width: '100%'
             }}
           >
             <View style={{
               alignItems: 'center',
               flex: 1,
-              flexDirection: 'row'
+              flexDirection: 'row',
+              justifyContent: 'space-between',
             }}>
-              <IconToggle
-                name={fullScreen ? "ios-contract" : "ios-expand"}
-                iconSet="Ionicons"
-                size={fullScreen ? 30 : 24}
-                color={'#FFF'}
-                onPress={e => onExpand(index)}
-              />
+              <View>
+                {fullScreen &&
+                  <IconToggle
+                    name={"ios-arrow-back"}
+                    iconSet="Ionicons"
+                    size={35}
+                    color={'#FFF'}
+                    onPress={e => onExpand(index)}
+                  />
+                }
+              </View>
+              <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                {!fullScreen &&
+                  <IconToggle
+                    name={fullScreen ? "ios-contract" : "ios-expand"}
+                    iconSet="Ionicons"
+                    size={fullScreen ? 30 : 24}
+                    color={'#FFF'}
+                    onPress={e => onExpand(index)}
+                  />
+                }
 
-              {(!userUid || userUid === currentUserUuid) &&
-                <IconToggle
-                  name="ios-trash"
-                  iconSet="Ionicons"
-                  size={28}
-                  color={'#FFF'}
-                  onPress={this.deleteCheckin}
-                />
-              }
+                {userUid !== currentUserUuid &&
+                  <IconToggle
+                    name="ios-alert"
+                    iconSet="Ionicons"
+                    size={28}
+                    color={'#FFF'}
+                    onPress={this.flagInappropriateContent}
+                  />
+                }
+
+                {(!userUid || userUid === currentUserUuid) &&
+                  <IconToggle
+                    name="ios-trash"
+                    iconSet="Ionicons"
+                    size={28}
+                    color={'#FFF'}
+                    onPress={this.deleteCheckin}
+                  />
+                }
+              </View>
             </View>
+          </View>
+        }
+
+        {(selected || fullScreen) &&
+          <View style={{
+            position: 'absolute',
+            bottom: fullScreen ? screenHeight - screenWidth - HEADER_HEIGHT : 20,
+            right: 0,
+            flexDirection: 'row'
+          }}>
+            <IconToggle
+              name="ios-thumbs-down"
+              iconSet="Ionicons"
+              size={fullScreen ? 28 : 20}
+              color={'#FFF'}
+              onPress={e => this.rateCheckin(false)}
+            />
+            <IconToggle
+              name="ios-thumbs-up"
+              iconSet="Ionicons"
+              size={fullScreen ? 28 : 20}
+              color={'#FFF'}
+              onPress={e => this.rateCheckin(true)}
+            />
           </View>
         }
 
@@ -295,14 +412,13 @@ export default class MediaItem extends Component {
               backgroundColor: '#000',
               padding: 18,
               flexDirection: 'column',
-              // justifyContent: 'space-around',
-              // alignItems: 'stretch'
             }}
           >
             {!!comment && <View style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
-                // alignItems: 'center'
+                marginTop: 16,
+                marginBottom: 16
                 }}
               >
                 <Icon
@@ -324,6 +440,8 @@ export default class MediaItem extends Component {
             {!!placeName && <View style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
+                marginTop: 16,
+                marginBottom: 16
                 }}
               >
                 <Icon
@@ -343,6 +461,8 @@ export default class MediaItem extends Component {
             {!!category && <View style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
+                marginTop: 16,
+                marginBottom: 16
                 }}
               >
                 <Icon

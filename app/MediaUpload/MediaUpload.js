@@ -478,7 +478,7 @@ export default class MediaUpload extends Component {
                 flex: 1,
                 width,
                 height: width,
-                resizeMode: 'contain'
+                resizeMode: 'cover'
               }}
             />
           }
@@ -813,6 +813,7 @@ export default class MediaUpload extends Component {
                     value={value}
                   />
                 }}
+                onFocus={e => {console.log("dropdown onFocus"); Keyboard.dismiss();}}
               />
 
               <View style={{

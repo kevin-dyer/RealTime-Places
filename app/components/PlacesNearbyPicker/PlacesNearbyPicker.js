@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Keyboard
 } from 'react-native';
 import { Dropdown } from 'react-native-material-dropdown';
 import { Input, Button } from 'react-native-elements';
@@ -76,6 +77,7 @@ export default class PlacesNearbyPicker extends Component {
     console.log("selectedPlace: ", selectedPlace)
 
     return <Dropdown
+      onFocus={e => {console.log("dropdown onFocus"); Keyboard.dismiss();}}
       data={places}
       onChangeText={onPlaceSelect}
       labelExtractor={({name}) => name}
