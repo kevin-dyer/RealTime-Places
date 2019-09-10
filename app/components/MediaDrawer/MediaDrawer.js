@@ -23,6 +23,7 @@ import Video from '../../Video/Video'
 import MediaItem from '../MediaItem/MediaItem'
 import {PLACES_KEY} from '../../../configs'
 import {debounce} from 'lodash'
+import {getUser} from '../../FireService/FireService'
 
 const {width, height} = Dimensions.get('window')
 
@@ -90,13 +91,14 @@ export default class MediaDrawer extends Component {
     const {
       selectedCheckin,
       setSelectedCheckin,
-      user: {
-        uid
-      }={},
-      geoCollection,
-      imageStoreRef
+      // user: {
+      //   uid
+      // }={},
+      // geoCollection,
+      // imageStoreRef
     } = this.props
     const {fullScreen} = this.state
+    const {uid} = getUser() || {}
     return <MediaItem
       {...media}
       fullScreen={fullScreen}
@@ -104,8 +106,8 @@ export default class MediaDrawer extends Component {
       scale={PHOTO_SCALE}
       userUid={uid}
       selectedCheckin={selectedCheckin}
-      geoCollection={geoCollection}
-      imageStoreRef={imageStoreRef}
+      // geoCollection={geoCollection}
+      // imageStoreRef={imageStoreRef}
       onExpand={this.toggleFullScreen}
       setSelectedCheckin={setSelectedCheckin}
     />
@@ -179,31 +181,6 @@ export default class MediaDrawer extends Component {
       Math.abs(longitude - checkinLng) < (longitudeDelta * 0.5)
   }
 
-  scrollToGoogleImage = (index) => {
-    const {
-      queryData=[],
-      photos=[],
-      selectedCheckin,
-      setSelectedCheckin=()=>{}
-    } = this.props
-
-    // if (index > -1) {
-      if (selectedCheckin !== index) {
-
-        // console.log("scrolling to (queryData.length + index + 1) * PHOTO_SIZE: ", (queryData.length + index + 1) * PHOTO_SIZE)
-        // this.flatListRef.scrollToIndex({
-        //   animated: true,
-        //   index: queryData.length + index,
-        //   // offset: (queryData.length + index + 1) * PHOTO_SIZE
-        //   // viewOffset: PHOTO_SIZE,
-        //   // viewPosition: 0
-        // })
-      }
-      setSelectedCheckin(index)
-    // }
-
-  }
-
   toggleFullScreen = (index) => {
     this.setState({fullScreen: !this.state.fullScreen})
 
@@ -255,7 +232,10 @@ export default class MediaDrawer extends Component {
       selectedCheckin,
       setSelectedCheckin=()=>{},
       queryData=[],
-      toggleMediaUpload=()=>{}
+      // toggleMediaUpload=()=>{}
+      navigation: {
+        navigate
+      }={}
     } = this.props
     const {fullScreen} = this.state
     const queryLength = queryData.length
@@ -304,7 +284,7 @@ export default class MediaDrawer extends Component {
                 backgroundColor: 'rgba(0,0,0,0.3)',
                 marginRight: fullScreen ? 0 : 1
               }}
-              onPress={toggleMediaUpload}
+              onPress={() => navigate('MediaUpload')}
             >
               <Icon
                 name="ios-camera"

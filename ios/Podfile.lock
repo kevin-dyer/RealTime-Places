@@ -216,6 +216,10 @@ PODS:
     - React/RCTBlob
   - RNFS (2.14.1):
     - React
+  - RNGestureHandler (1.4.0):
+    - React
+  - RNReanimated (1.2.0):
+    - React
   - RNVectorIcons (6.6.0):
     - React
   - yoga (0.59.5.React)
@@ -249,11 +253,13 @@ DEPENDENCIES:
   - React/RCTVibration (from `../node_modules/react-native`)
   - React/RCTWebSocket (from `../node_modules/react-native`)
   - RNFS (from `../node_modules/react-native-fs`)
+  - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
+  https://github.com/cocoapods/specs.git:
     - boost-for-react-native
     - BoringSSL-GRPC
     - Firebase
@@ -296,6 +302,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-video/react-native-video.podspec"
   RNFS:
     :path: "../node_modules/react-native-fs"
+  RNGestureHandler:
+    :path: "../node_modules/react-native-gesture-handler"
+  RNReanimated:
+    :path: "../node_modules/react-native-reanimated"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
   yoga:
@@ -333,9 +343,11 @@ SPEC CHECKSUMS:
   react-native-maps: 0316ed017dbb64b33b227751fa810e2454fcfa39
   react-native-video: 8c49eca5a6087de968a05b340933b10e3b58169a
   RNFS: a8fbe7060fa49157d819466404794ad9c58e58cf
+  RNGestureHandler: 71871d4792db2a73f70204483d30350ec9384cbd
+  RNReanimated: 1b52415c4302f198cb581282a0166690bad62c43
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   yoga: 2e571f113e8cbeb0eb752aeebc86c1bfe7a8200c
 
-PODFILE CHECKSUM: 922c2924dd7a8638a4401edc3e886e5a72806eda
+PODFILE CHECKSUM: 81da04dd2c44702cb0ae53e371d47fd12a44c373
 
-COCOAPODS: 1.8.0.beta.1
+COCOAPODS: 1.7.5

@@ -20,6 +20,7 @@
     "react-native-elements": "^1.1.0",
     "react-native-firebase": "^5.3.1",
     "react-native-fs": "^2.13.3",
+    "react-native-gesture-handler": "^1.4.1",
     "react-native-google-places": "^2.5.2",
     "react-native-iphone-x-helper": "^1.2.1",
     "react-native-maps": "^0.24.2",
@@ -28,10 +29,15 @@
     "react-native-material-ui": "^1.30.1",
     "react-native-mov-to-mp4": "^0.2.1",
     "react-native-progress": "^3.6.0",
+    "react-native-reanimated": "^1.2.0",
     "react-native-scalable-image": "^0.5.1",
+    "react-native-screens": "^2.0.0-alpha.1",
     "react-native-swiper": "^1.5.14",
     "react-native-vector-icons": "^6.6.0",
     "react-native-video": "^4.4.1",
+    "react-navigation": "^3.12.0",
+    "redux": "^4.0.4",
+    "redux-thunk": "^2.3.0",
     "throttle-debounce": "^2.1.0",
     "uuid": "^3.3.2"
   },
@@ -41,7 +47,8 @@
     "babel-jest": "24.8.0",
     "jest": "24.8.0",
     "metro-react-native-babel-preset": "0.54.0",
-    "react-test-renderer": "16.8.3"
+    "react-test-renderer": "16.8.3",
+    "redux-devtools": "^3.5.0"
   },
   "jest": {
     "preset": "react-native"

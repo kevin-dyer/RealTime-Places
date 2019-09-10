@@ -30,6 +30,11 @@ import { Input, Button } from 'react-native-elements';
 import { Dropdown } from 'react-native-material-dropdown';
 import * as Progress from 'react-native-progress';
 import PlacesNearbyPicker from '../components/PlacesNearbyPicker/PlacesNearbyPicker'
+import {
+  getFirestore,
+  getImageStoreRef,
+  saveMedia
+} from '../../FireService/FireService'
 
 
 
@@ -51,41 +56,6 @@ const categories = [
   {value: 'other'}
 ]
 
-function generateCheckin({
-  latitude,
-  longitude,
-  type='image',
-  docKey='',
-  url='',
-  userUid='',
-  comment,
-  placeNearby: {
-    place_id,
-    name,
-    id,
-    geometry: {
-      location
-    }={}
-  }={},
-  category
-}) {
-  return {
-    timestamp: Date.now(),
-    coordinates: new firebase.firestore.GeoPoint(latitude,longitude),
-    docKey,
-    type,
-    downloadURL: url, //TODO: change downloadURL to just url
-    userUid,
-    comment,
-    placeNearby: {
-      place_id,
-      id,
-      location,
-      name
-    },
-    category
-  };
-}
 
 export default class MediaUpload extends Component {
   state = {
@@ -102,17 +72,21 @@ export default class MediaUpload extends Component {
     comment: '',
     placeNearby: undefined,
     nearbyPlaces: [],
-    category: undefined
+    category: undefined,
+    isMuted: false
   }
 
   takePicture = async function() {
     const {
       geoCollection,
-      toggleMediaUpload,
+      // toggleMediaUpload,
       imageStoreRef,
       user: {uid=''}={},
       // scrollToCheckin,
-      animateToRegion
+      animateToRegion,
+      navigation: {
+        navigate
+      }={}
     } = this.props
 
     console.log("take pic called! this.camera: ", this.camera)
@@ -153,110 +127,63 @@ export default class MediaUpload extends Component {
 
   saveMedia = () => {
     const {
-      geoCollection,
-      toggleMediaUpload,
-      imageStoreRef,
-      user: {uid=''}={},
       setSelectedCheckin,
       animateToRegion
     } = this.props
     const {
       imageUri,
       videoUri,
-      currentPosition: {
-        latitude,
-        longitude
-      }={},
+      currentPosition,
       comment,
       placeNearby,
       category
     } = this.state
-    const docKey = uuidV4()
-    const checkinType = !!videoUri ? 'video' : 'image'
 
-    console.log("saveMedia called ")
     this.setState({uploading: true})
 
-    // console.log("lat: ", latitude, ", lng: ", longitude, ", imageStoreRef: ", imageStoreRef)
-
-    const mediaRef = !!videoUri
-      ? imageStoreRef.child(`images/${docKey}.mov`)
-      : imageStoreRef.child(`images/${docKey}.jpg`)
-
-    // console.log("mediaRef: ", mediaRef, ", data.uri: ", data.uri)
-
-
-
-
-    mediaRef.putFile(imageUri || videoUri)
-    .on(
-      firebase.storage.TaskEvent.STATE_CHANGED,
-      snapshot => {
-        let state = {};
-        state = {
-          ...state,
-          progress: (snapshot.bytesTransferred / snapshot.totalBytes) * 100 // Calculate progress percentage
-        };
-
+    saveMedia({
+      imageUri,
+      videoUri,
+      currentPosition,
+      comment,
+      placeNearby,
+      category,
+      onProgress: (uploadProgress) => {
         this.setState({
-          uploadProgress: (snapshot.bytesTransferred / snapshot.totalBytes)
+          uploadProgress
         })
-        // console.log("upload progress: ", (snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-        if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
-          console.log("Successful upload!")
-          console.log('Uploaded a blob or file! snapshot.downloadURL: ', snapshot && snapshot.downloadURL);
-
-          this.setState({
-            uploadProgress: 1
-          })
-          const doc = generateCheckin({
-            latitude,
-            longitude,
-            docKey,
-            type: checkinType,
-            url: snapshot.downloadURL,
-            userUid: uid,
-            comment,
-            placeNearby,
-            category
-          });
-
-          geoCollection.add(doc)
-          .then(docRef => {
-            console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
-            setSelectedCheckin(docKey)
-
-            this.handleBack()
-            return docRef
-          })
-          .catch(error => {
-            console.log("error adding doc: ", error)
-            this.setState({uploading: false})
-            throw error
-          })
-        }
-      },
-      error => {
-        console.alert('Sorry, Try again. error: ', error);
       }
-    )
+    })
+    .then(docRef => {
+      console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
+      setSelectedCheckin(docKey)
+
+      this.handleBack()
+      return docRef
+    })
+    .catch(error => {
+      console.log("error adding doc: ", error)
+      this.setState({uploading: false})
+      throw error
+    })
   }
 
   takeVideo = () => {
     const {
-      toggleMediaUpload,
+      // toggleMediaUpload,
       geoCollection,
       imageStoreRef,
       user: {uid=''}={},
       animateToRegion,
       // scrollToCheckin
     } = this.props
+    const {isMuted} = this.state
     console.log("take VIDEO called! this.camera: ", this.camera)
     if (this.camera) {
       const options = {
         maxDuration,
         quality: RNCamera.Constants.VideoQuality['720p']
-
+        muted: isMuted
       };
       const docKey = uuidV4()      
 
@@ -338,6 +265,11 @@ export default class MediaUpload extends Component {
     this.setState({flashMode: flashModeOrder[this.state.flashMode]})
   }
 
+  toggleMute = () => {
+    // RNCamera.Constants.FlashMode.on
+    this.setState({isMuted: !this.state.isMuted})
+  }
+
   clearMedia = () => {
     this.setState({
       imageUri: '',
@@ -350,9 +282,13 @@ export default class MediaUpload extends Component {
   }
 
   handleBack = () => {
-    const {toggleMediaUpload} = this.props
+    const {
+      navigation: {
+        navigate
+      }={}
+    } = this.props
 
-    toggleMediaUpload(false)
+    navigate('MapSearch')
   }
 
   toggleReplay = () => {
@@ -409,7 +345,8 @@ export default class MediaUpload extends Component {
       videoPaused,
       currentPosition,
       placeNearby,
-      uploading
+      uploading,
+      isMuted
     } = this.state
     // const videoProgress = Math.floor((Date.now() - recordingStartTime) / 1000) / 15
     // console.log("render imageUri: ", imageUri)
@@ -616,6 +553,30 @@ export default class MediaUpload extends Component {
                     </View>
                   }
                 </View>
+
+                <IconToggle
+                  name={isMuted
+                    ? 'ios-volume-off'
+                    : 'ios-volume-high'
+                  }
+                  iconSet={'Ionicons'}
+                  size={25}
+                  color={isMuted
+                    ? COLOR.red500
+                    : '#FFF'
+                  }
+                  maxOpacity={0.5}
+                  percent={200}
+                  onPress={this.toggleMute}
+                  style={{
+                    container: {
+                      // shadowColor: '#000',
+                      // shadowOffset: {width: 2, height: 2},
+                      // shadowOpacity: 0.3,
+                      // shadowRadius: 3,
+                    }
+                  }}
+                />
               </View>
             </View>
           }
