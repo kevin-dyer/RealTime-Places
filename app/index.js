@@ -4,9 +4,8 @@ import {
 	createSwitchNavigator,
 	createAppContainer
 } from 'react-navigation'
-import { render } from 'react-dom'
 import { Provider } from 'react-redux'
-import App from './components/App'
+// import App from './components/App'
 import configureStore from './store/configureStore'
 import Routes from './routes'
 import {
@@ -30,10 +29,12 @@ const uiTheme = {
 
 const store = configureStore()
 
-
-export default function App () =>
-	<ThemeContext.Provider value={getTheme(uiTheme)}>
-		<Provider store={store}>
-	    <Routes/>
-	  </Provider>
-	</ThemeContext.Provider>
+export default function App () {
+  return (
+    <ThemeContext.Provider value={getTheme(uiTheme)}>
+      <Provider store={store}>
+        <Routes/>
+      </Provider>
+    </ThemeContext.Provider>
+  )
+}

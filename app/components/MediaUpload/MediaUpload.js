@@ -29,7 +29,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { Input, Button } from 'react-native-elements';
 import { Dropdown } from 'react-native-material-dropdown';
 import * as Progress from 'react-native-progress';
-import PlacesNearbyPicker from '../components/PlacesNearbyPicker/PlacesNearbyPicker'
+import PlacesNearbyPicker from '../PlacesNearbyPicker/PlacesNearbyPicker'
 import {
   getFirestore,
   getImageStoreRef,
@@ -182,7 +182,7 @@ export default class MediaUpload extends Component {
     if (this.camera) {
       const options = {
         maxDuration,
-        quality: RNCamera.Constants.VideoQuality['720p']
+        quality: RNCamera.Constants.VideoQuality['720p'],
         muted: isMuted
       };
       const docKey = uuidV4()      

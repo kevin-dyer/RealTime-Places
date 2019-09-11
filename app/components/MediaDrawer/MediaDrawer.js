@@ -10,6 +10,7 @@ import {
   Animated,
   OverflowableView
 } from 'react-native';
+import { withNavigation } from 'react-navigation';
 import {
   COLOR,
   IconToggle
@@ -50,7 +51,8 @@ const {width, height} = Dimensions.get('window')
 
 const PHOTO_SIZE = 140
 const PHOTO_SCALE = 2
-export default class MediaDrawer extends Component {
+
+class MediaDrawer extends Component {
 	state = {
     fullScreen: false
 	}
@@ -316,6 +318,8 @@ export default class MediaDrawer extends Component {
     </View>
 	}
 }
+
+export default withNavigation(MediaDrawer)
 
 const styles = StyleSheet.create({
   swiperWrapper: {

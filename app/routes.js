@@ -5,7 +5,9 @@ import {
 } from 'react-navigation'
 import AuthLoadingScreen from './components/AuthLoadingScreen/AuthLoadingScreen'
 import MapSearch from './components/MapSearch/MapSearch'
-import MediaUpload from './components/MediaUpload/MediaUpload' //TODO: change file path
+import MediaUpload from './components/MediaUpload/MediaUpload'
+import SignInScreen from './components/SignIn/SignIn'
+import SignUpScreen from './components/SignUp/SignUp'
 
 const AppStack = createStackNavigator({
   MapSearch,
@@ -14,7 +16,10 @@ const AppStack = createStackNavigator({
 	initialRouteName: 'MapSearch',
 	headerMode: 'none'
 });
-const AuthStack = createStackNavigator({ SignIn: SignInScreen });
+const AuthStack = createStackNavigator({
+	SignIn: SignInScreen,
+	SignUp: SignUpScreen
+});
 
 export default createAppContainer(
   createSwitchNavigator(

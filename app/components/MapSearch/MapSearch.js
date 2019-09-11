@@ -11,7 +11,7 @@ import {
   FlatList,
   Alert
 } from 'react-native';
-import {Component} from 'react'
+import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import MapView, {
   PROVIDER_GOOGLE,
@@ -21,14 +21,19 @@ import MapView, {
 } from 'react-native-maps';
 import MediaDrawer from '../MediaDrawer/MediaDrawer'
 import Geolocation from '@react-native-community/geolocation'
+import { throttle, debounce } from 'throttle-debounce'
 import {
   clearQuery,
   firebaseLogin,
   getNearbyCheckins
-} from '../FireService' //TODO: clear on componentWillUnmount
+} from '../../FireService/FireService' //TODO: clear on componentWillUnmount
 import {
   selectCheckin
 } from '../../actions/checkins'
+import PlacesAutoComplete from '../PlacesAutoComplete/PlacesAutoComplete'
+import {PLACES_KEY} from '../../../configs'
+
+
 
 const {width, height} = Dimensions.get('window')
 const PHOTO_SIZE = 140
@@ -61,8 +66,8 @@ const stateToProps = ({
 
 type Props = {};
 
-@connect(stateToProps, {selectCheckin})
-export default class MapSearch extends Component<Props> {
+
+class MapSearch extends Component<Props> {
   constructor(props) {
     super(props)
 
@@ -99,6 +104,7 @@ export default class MapSearch extends Component<Props> {
     // })
     // .catch((error) => console.log(error.message));
 
+    console.log("MapSearch geolocation...")
     Geolocation.getCurrentPosition((location={}) => {
       // console.log("currentLocation: ", location)
 
@@ -313,7 +319,7 @@ export default class MapSearch extends Component<Props> {
   setSelectedCheckin = (docKey) => {
     const {
       selectedCheckin,
-      setSelectedCheckin
+      selectCheckin
     } = this.props
     const nextCheckin = docKey === selectedCheckin ? null : docKey
     console.log("setSelectedCheckin called! docKey: ", docKey)
@@ -322,7 +328,7 @@ export default class MapSearch extends Component<Props> {
     // this.setState({
     //   selectedCheckin: nextCheckin
     // })
-    setSelectedCheckin(nextCheckin)
+    selectCheckin(nextCheckin)
   }
 
   moveRegion = (region) => {
@@ -354,6 +360,8 @@ export default class MapSearch extends Component<Props> {
 
     // console.log("render state photos: ", photos)
     // console.log("selectedPlace: ", selectedPlace)
+
+    console.log("region: ", !!region)
 
     return (
       <View style={styles.container}>
@@ -444,4 +452,52 @@ export default class MapSearch extends Component<Props> {
     );
   }
 }
+
+export default connect(stateToProps, {
+  selectCheckin,
+})(MapSearch)
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF',
+    position: 'relative'
+  },
+  welcome: {
+    fontSize: 20,
+    textAlign: 'center',
+    margin: 10,
+  },
+  instructions: {
+    textAlign: 'center',
+    color: '#333333',
+    marginBottom: 5,
+  },
+  map: {
+    top: 0,
+    left: 0,
+    height,
+    width,
+    position: 'absolute'
+  },
+  searchContainer: {
+    // flex: 1,
+    zIndex: 2
+  },
+  swiperWrapper: {
+    width,
+    // height: PHOTO_SIZE,
+    // position: 'absolute',
+    // bottom: 0,
+    // left: 0,
+    // zIndex: 2,
+  },
+  swiperContainer: {
+    alignItems: 'flex-end',
+    // paddingRight: 20,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  }
+});
 

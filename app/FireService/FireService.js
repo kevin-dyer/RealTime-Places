@@ -39,19 +39,12 @@ export const firebaseLogin = () => {
         _imageStoreRef = firebase.storage().ref()
 
         // // Create a GeoFirestore reference
-        _geoFirestore: GeoFirestore = new GeoFirestore(firestore);
+        _geoFirestore = new GeoFirestore(_firestore);
         // // Create a GeoCollection reference
-        _geoCollection: GeoCollectionReference = geofirestore.collection('checkins');
+        _geoCollection = _geoFirestore.collection('checkins');
 
-        // this.setState({
-        //   geoFirestore: geofirestore,
-        //   geoCollection: geocollection,
-        //   user: credential.user.toJSON(),
-        //   imageStoreRef
-        // })
+        return _user.refreshToken
       }
-
-      return credential
     })
     .catch(error => {
       console.log("error: ", error)
@@ -59,6 +52,27 @@ export const firebaseLogin = () => {
     })
 }
 
+export const firebaseEmailSignUp = ({email, password}) => {
+  return firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, password)
+      // .then(() => this.props.navigation.navigate('Main'))
+      // .catch(error => this.setState({ errorMessage: error.message }))
+}
+
+export const firebaseEmailSignIn = ({email, password}) => {
+  return firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password)
+      // .then(() => this.props.navigation.navigate('Main'))
+      // .catch(error => this.setState({ errorMessage: error.message }))
+}
+
+export const firebaseSignout = () => {
+  return firebase
+    .auth()
+    .signOut()
+}
 
 
 export const clearQuery = () => {
@@ -243,7 +257,7 @@ export const saveMedia = ({
             category
           });
 
-          geoCollection.add(doc)
+          _geoCollection.add(doc)
           .then(docRef => {
             console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
 //             setSelectedCheckin(docKey)

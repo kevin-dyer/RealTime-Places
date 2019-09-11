@@ -1,25 +1,43 @@
-import React from 'react';
+import React, {Component} from 'react';
 import {
   ActivityIndicator,
-  AsyncStorage,
   StatusBar,
   StyleSheet,
   View,
 } from 'react-native';
+// import AsyncStorage from '@react-native-community/async-storage';
+import firebase from 'react-native-firebase'
+import {firebaseSignout} from '../../FireService/FireService'
 
-class AuthLoadingScreen extends React.Component {
+
+export default class AuthLoadingScreen extends Component {
   componentDidMount() {
-    this._bootstrapAsync();
+
+
+    //for testing only
+    // firebaseSignout()
+
+
+    firebase.auth().onAuthStateChanged(user => {
+      console.log("onAuthStateChanged. user: ", user)
+      this.props.navigation.navigate(user ? 'App' : 'Auth')
+    })
   }
-
-  // Fetch the token from storage then navigate to our appropriate place
-  _bootstrapAsync = async () => {
-    const userToken = await AsyncStorage.getItem('userToken');
-
-    // This will switch to the App screen or Auth screen and this loading
-    // screen will be unmounted and thrown away.
-    this.props.navigation.navigate(userToken ? 'App' : 'Auth');
-  };
+//   componentDidMount() {
+//     this._bootstrapAsync();
+//   }
+// 
+//   // Fetch the token from storage then navigate to our appropriate place
+//   _bootstrapAsync = async () => {
+//     //TODO: FOR TESTING ONLY!
+//     await AsyncStorage.setItem('userToken', ' ')
+// 
+//     const userToken = await AsyncStorage.getItem('userToken');
+// 
+//     // This will switch to the App screen or Auth screen and this loading
+//     // screen will be unmounted and thrown away.
+//     this.props.navigation.navigate(userToken ? 'App' : 'Auth');
+//   };
 
   // Render any loading content that you like here
   render() {

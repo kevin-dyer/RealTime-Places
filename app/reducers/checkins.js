@@ -13,5 +13,7 @@ export default function checkins(state=initialState, action={}) {
 				...state,
 				selectedCheckin: action.selectedCheckin
 			}
+		default:
+			return state
 	}
 }

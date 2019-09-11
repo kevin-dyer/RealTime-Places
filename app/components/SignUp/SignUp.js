@@ -4,21 +4,92 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
-  Keyboard
+  Button
 } from 'react-native';
+import {firebaseEmailSignUp} from '../../FireService/FireService'
 
 
 
-export default class SignUp extends Component {
+export default class SignUpScreen extends Component {
+  state = {
+    email: '',
+    password: '',
+    errorMessage: null
+  }
+
+  handleSignUp = () => {
+    const {
+      navigation: {
+        navigate=()=>{}
+      }={}
+    } = this.props
+    const {email, password} = this.state
+    //TODO: log into firestore via FireService
+    firebaseEmailSignUp({email, password})
+    .then(user => {
+      navigate('App')
+    })
+    .catch(error => {
+      this.setState({errorMessage: error.message})
+    })
+  }
 
 
 	render() {
-    <View style={{flex: 1}}>
-      <Text styl={{fontSize: 20}}>Sign Up</Text>
+    const {
+      navigation: {
+        navigate=()=>{}
+      }={}
+    } = this.props
+    const {email,
+      password,
+      errorMessage
+    } = this.state
 
-      <
-    </View>
+    return (
+      <View style={styles.container}>
+        <Text>Sign Up</Text>
+        {!!errorMessage &&
+          <Text style={{ color: 'red' }}>
+            {errorMessage}
+          </Text>}
+        <TextInput
+          placeholder="Email"
+          autoCapitalize="none"
+          style={styles.textInput}
+          onChangeText={email => this.setState({ email })}
+          value={email}
+        />
+        <TextInput
+          secureTextEntry
+          placeholder="Password"
+          autoCapitalize="none"
+          style={styles.textInput}
+          onChangeText={password => this.setState({ password })}
+          value={password}
+        />
+        <Button title="Sign Up" onPress={this.handleSignUp} />
+        <Button
+          title="Already have an account? Login"
+          onPress={() => navigate('Login')}
+        />
+      </View>
+    )
 	}
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  textInput: {
+    height: 40,
+    width: '90%',
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginTop: 8
+  }
+})
