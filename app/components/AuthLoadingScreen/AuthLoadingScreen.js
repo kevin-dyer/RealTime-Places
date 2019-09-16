@@ -15,7 +15,7 @@ export default class AuthLoadingScreen extends Component {
 
 
     //for testing only
-    // firebaseSignout()
+    firebaseSignout()
 
 
     firebase.auth().onAuthStateChanged(user => {

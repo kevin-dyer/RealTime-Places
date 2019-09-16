@@ -4,41 +4,51 @@ import {
   Button,
   Text,
   TextInput,
-  StyleSheet
+  StyleSheet,
+  Alert
 } from 'react-native'
 import AsyncStorage from '@react-native-community/async-storage';
-import {firebaseEmailSignIn} from '../../FireService/FireService'
+import {firebaseForgotPassword} from '../../FireService/FireService'
 
-export default class SignInScreen extends Component {
+export default class ForgotPassword extends Component {
   static navigationOptions = {
-    title: 'Please sign in',
+    title: 'Forgot Password',
   };
   state = {
     // email: '',
-    // password: '',
     email: 'thedude136895@gmail.com',
-    password: 'Password',
     errorMessage: null
   }
 
-  handleLogin = () => {
+  handlePasswordResetRequest = () => {
     const {
       navigation: {
         navigate=()=>{}
       }={}
     } = this.props
-    const {email, password} = this.state
+    const {email} = this.state
     //TODO: log into firestore via FireService
-    firebaseEmailSignIn({email, password})
+    firebaseForgotPassword(email)
     .then(user => {
-      console.log("firebase signed in user: ", user)
-      navigate('App')
+      Alert.alert(
+        'Password reset request sent!',
+        'Check your email',
+        [{
+          text: 'OK',
+          onPress: () => {
+            console.log('OK Pressed')
+            navigate('SignIn')
+          }
+        }]
+      )
     })
     .catch(error => {
+      console.log("forgotPassword error: ", error)
       this.setState({errorMessage: error.message})
     })
-    // await AsyncStorage.setItem('userToken', userToken);
-  };
+  }
+
+
 
   render() {
     const {
@@ -46,11 +56,11 @@ export default class SignInScreen extends Component {
         navigate=()=>{}
       }={}
     } = this.props
-    const {email, password} = this.state
+    const {email} = this.state
 
     return (
       <View style={styles.container}>
-        <Text>Login</Text>
+        <Text>Password Reset Request</Text>
         {this.state.errorMessage &&
           <Text style={{ color: 'red' }}>
             {this.state.errorMessage}
@@ -62,22 +72,10 @@ export default class SignInScreen extends Component {
           onChangeText={email => this.setState({ email })}
           value={email}
         />
-        <TextInput
-          secureTextEntry
-          style={styles.textInput}
-          autoCapitalize="none"
-          placeholder="Password"
-          onChangeText={password => this.setState({ password })}
-          value={password}
-        />
-        <Button title="Login" onPress={this.handleLogin} />
+        <Button title="Request new password" onPress={this.handlePasswordResetRequest} />
         <Button
-          title="Forgot your password?"
-          onPress={() => navigate('ForgotPassword')}
-        />
-        <Button
-          title="Don't have an account? Sign Up"
-          onPress={() => navigate('SignUp')}
+          title="Already know your password? Sign In"
+          onPress={() => navigate('SignIn')}
         />
       </View>
     );

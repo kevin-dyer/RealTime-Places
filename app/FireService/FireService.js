@@ -74,6 +74,17 @@ export const firebaseSignout = () => {
     .signOut()
 }
 
+export const firebaseForgotPassword = (email) => {
+  return firebase
+    .auth()
+    .sendPasswordResetEmail(email)
+    // .then(function (user) {
+    //   alert('Please check your email...')
+    // }).catch(function (e) {
+    //   console.log(e)
+    // })
+  }
+
 
 export const clearQuery = () => {
   if (_geoQuery) {

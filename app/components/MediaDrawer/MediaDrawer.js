@@ -277,24 +277,24 @@ class MediaDrawer extends Component {
           style={styles.swiperWrapper}
           contentContainerStyle={styles.swiperContainer}
           removeClippedSubviews={false}
-          ListHeaderComponent={!fullScreen &&
-            <TouchableOpacity style={{
-                height: PHOTO_SIZE,
-                width: fullScreen ? width : PHOTO_SIZE * 0.75,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: 'rgba(0,0,0,0.3)',
-                marginRight: fullScreen ? 0 : 1
-              }}
-              onPress={() => navigate('MediaUpload')}
-            >
-              <Icon
-                name="ios-camera"
-                size={40}
-                color={'rgba(0,0,0,0.5)'}
-              />
-            </TouchableOpacity>
-          }
+          // ListHeaderComponent={!fullScreen &&
+          //   <TouchableOpacity style={{
+          //       height: PHOTO_SIZE,
+          //       width: fullScreen ? width : PHOTO_SIZE * 0.75,
+          //       justifyContent: 'center',
+          //       alignItems: 'center',
+          //       backgroundColor: 'rgba(0,0,0,0.3)',
+          //       marginRight: fullScreen ? 0 : 1
+          //     }}
+          //     onPress={() => navigate('MediaUpload')}
+          //   >
+          //     <Icon
+          //       name="ios-camera"
+          //       size={40}
+          //       color={'rgba(0,0,0,0.5)'}
+          //     />
+          //   </TouchableOpacity>
+          // }
           getItemLayout={(data, index) => ({
             length: fullScreen ? height : PHOTO_SIZE + 1,
             offset: fullScreen
