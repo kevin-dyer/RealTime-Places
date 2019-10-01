@@ -13,7 +13,6 @@
 		00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302E41ABCB9EE00DB3ED1 /* libRCTVibration.a */; };
 		035518F9D4EF4295ACC65E7C /* EvilIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D68B8E4DE6F44666BC54C473 /* EvilIcons.ttf */; };
 		0C215DB02339B03F00846B2B /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
-		0C3C865E234189A400CD5472 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0CFFE4D32330894C00A95F20 /* libReact.a */; };
 		0C9881902339D0C1005676D3 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0CFFE4D32330894C00A95F20 /* libReact.a */; };
 		0C9881912339D0C5005676D3 /* libyoga.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0CFFE4D72330894C00A95F20 /* libyoga.a */; };
 		0CBDCEBC230265B000615459 /* libRNGooglePlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1982B7A822A1E053008E11AC /* libRNGooglePlaces.a */; };
@@ -902,7 +901,6 @@
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
 				11D1A2F320CAFA9E000508D9 /* libRCTAnimation.a in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
-				0C3C865E234189A400CD5472 /* libReact.a in Frameworks */,
 				00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */,
 				0C9881912339D0C5005676D3 /* libyoga.a in Frameworks */,
 				133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */,
