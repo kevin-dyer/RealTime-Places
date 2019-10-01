@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 // import AsyncStorage from '@react-native-community/async-storage';
 import firebase from 'react-native-firebase'
-import {firebaseSignout} from '../../FireService/FireService'
+import {firebaseInit, firebaseSignout} from '../../FireService/FireService'
 
 
 export default class AuthLoadingScreen extends Component {
@@ -15,12 +15,16 @@ export default class AuthLoadingScreen extends Component {
 
 
     //for testing only
-    firebaseSignout()
+    // firebaseSignout()
 
 
     firebase.auth().onAuthStateChanged(user => {
       console.log("onAuthStateChanged. user: ", user)
       this.props.navigation.navigate(user ? 'App' : 'Auth')
+
+      if (!!user) {
+        firebaseInit()
+      }
     })
   }
 //   componentDidMount() {

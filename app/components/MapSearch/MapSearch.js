@@ -32,6 +32,11 @@ import {
 } from '../../actions/checkins'
 import PlacesAutoComplete from '../PlacesAutoComplete/PlacesAutoComplete'
 import {PLACES_KEY} from '../../../configs'
+import {
+  COLOR,
+  ActionButton,
+  IconToggle
+} from 'react-native-material-ui'
 
 
 
@@ -39,22 +44,6 @@ const {width, height} = Dimensions.get('window')
 const PHOTO_SIZE = 140
 const PHOTO_SCALE = 2
 
-//util method
-function queryDataHasChanged(queryData=[], originalQueryData=[]) {
-
-  console.log("queryData: ", queryData,', originalQueryData',originalQueryData)
-  if (queryData.length !== originalQueryData.length) {
-    console.log("exiting queryDataHasChanged b/c lenghts are diff")
-    return true
-  }
-  // const maxLength = Math.max(queryData.length, originalQueryData.length)
-  for(let i = 0; i < queryData.length; i++) {
-    if (queryData[i].docKey !== originalQueryData[i].docKey) {
-      return true
-    }
-  }
-  return false
-}
 
 const stateToProps = ({
   checkins: {

@@ -8,7 +8,7 @@ import {
 } from 'geofirestore'
 import Geolocation from '@react-native-community/geolocation'
 
-let _fireStore
+let _firestore
 let _imageStoreRef
 let _user
 
@@ -35,13 +35,7 @@ export const firebaseLogin = () => {
         console.log('default app user ->', _user);
 
         // Create a Firestore reference
-        _firestore = firebase.firestore();
-        _imageStoreRef = firebase.storage().ref()
-
-        // // Create a GeoFirestore reference
-        _geoFirestore = new GeoFirestore(_firestore);
-        // // Create a GeoCollection reference
-        _geoCollection = _geoFirestore.collection('checkins');
+        
 
         return _user.refreshToken
       }
@@ -50,6 +44,16 @@ export const firebaseLogin = () => {
       console.log("error: ", error)
       throw error
     })
+}
+
+//NOTE: Called from AuthLoadingScreen
+export const firebaseInit = () => {
+    if (!_firestore) _firestore = firebase.firestore();
+    if (!_imageStoreRef) _imageStoreRef = firebase.storage().ref()
+    if (!_geoFirestore) _geoFirestore = new GeoFirestore(_firestore);
+    if (!_geoCollection) _geoCollection = _geoFirestore.collection('checkins');
+
+    console.log("firebaseLogin success, set _geoCollection to: ", _geoCollection)
 }
 
 export const firebaseEmailSignUp = ({email, password}) => {
@@ -88,7 +92,7 @@ export const firebaseForgotPassword = (email) => {
 
 export const clearQuery = () => {
   if (_geoQuery) {
-    geoQuery.cancel()
+    _geoQuery.cancel()
   }
 }
 
@@ -117,6 +121,11 @@ export const getNearbyCheckins = (region={}, onQueryData=()=>{}) => {
     return
   }
 
+  if (!_geoCollection) {
+    console.warn("_geoCollection not defined, cannot getNearbyCheckins!")
+    return
+  }
+
   const queryConfigs = {
     center: new firebase.firestore.GeoPoint(latitude, longitude),
     radius
@@ -138,7 +147,7 @@ export const getNearbyCheckins = (region={}, onQueryData=()=>{}) => {
        id: doc.id
       }
     })
-    .filter(chechin => isCheckinOnScreen(checkin, region))
+    .filter(checkin => isCheckinOnScreen(checkin, region))
     .sort((a, b) => {
       if (a.timestamp < b.timestamp) {
        return 1
@@ -156,6 +165,22 @@ export const getNearbyCheckins = (region={}, onQueryData=()=>{}) => {
       _queryData = queryData
     }
   })
+}
+
+function queryDataHasChanged(queryData=[], originalQueryData=[]) {
+
+  console.log("queryData: ", queryData,', originalQueryData',originalQueryData)
+  if (queryData.length !== originalQueryData.length) {
+    console.log("exiting queryDataHasChanged b/c lenghts are diff")
+    return true
+  }
+  // const maxLength = Math.max(queryData.length, originalQueryData.length)
+  for(let i = 0; i < queryData.length; i++) {
+    if (queryData[i].docKey !== originalQueryData[i].docKey) {
+      return true
+    }
+  }
+  return false
 }
 
 const isCheckinOnScreen = ({
