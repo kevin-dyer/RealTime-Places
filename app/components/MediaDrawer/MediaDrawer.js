@@ -1,5 +1,6 @@
 'use strict';
 import React, { Component } from 'react';
+import {connect} from 'react-redux'
 import {
   StyleSheet,
   Text,
@@ -24,6 +25,7 @@ import Video from '../../Video/Video'
 import MediaItem from '../MediaItem/MediaItem'
 import {PLACES_KEY} from '../../../configs'
 import {debounce} from 'lodash'
+import {selectCheckin} from '../../actions/checkins'
 import {getUser} from '../../FireService/FireService'
 
 const {width, height} = Dimensions.get('window')
@@ -51,6 +53,8 @@ const {width, height} = Dimensions.get('window')
 
 const PHOTO_SIZE = 140
 const PHOTO_SCALE = 2
+
+const stateToProps = ({}) => ({})
 
 class MediaDrawer extends Component {
 	state = {
@@ -92,7 +96,7 @@ class MediaDrawer extends Component {
   _renderMedia = (media={}) => {
     const {
       selectedCheckin,
-      setSelectedCheckin,
+      selectCheckin,
       // user: {
       //   uid
       // }={},
@@ -111,7 +115,7 @@ class MediaDrawer extends Component {
       // geoCollection={geoCollection}
       // imageStoreRef={imageStoreRef}
       onExpand={this.toggleFullScreen}
-      setSelectedCheckin={setSelectedCheckin}
+      setSelectedCheckin={selectCheckin}
     />
   }
 
@@ -120,7 +124,7 @@ class MediaDrawer extends Component {
     const {
       queryData=[],
       selectedCheckin,
-      setSelectedCheckin=()=>{},
+      selectCheckin=()=>{},
       moveRegion=()=>{}
     } = this.props
 
@@ -158,7 +162,7 @@ class MediaDrawer extends Component {
       }
 
       //TODO: need to set new variable to selectedCheckin
-      setSelectedCheckin(docKey)
+      selectCheckin(docKey)
     }
   }
 
@@ -216,13 +220,13 @@ class MediaDrawer extends Component {
       viewableItems=[],
       changed=[]
     }) => {
-      const {setSelectedCheckin} = this.props
+      const {selectCheckin} = this.props
       const {fullScreen} = this.state
       const checkinIsVisible = this.selectedCheckinIsVisible(viewableItems)
 
       //TODO: Remove SelectedCheckin if offscreen
       if (!checkinIsVisible) {
-        setSelectedCheckin(null)
+        selectCheckin(null)
       }
     }, 600
   )
@@ -232,7 +236,7 @@ class MediaDrawer extends Component {
     const {
       allMedia=[],
       selectedCheckin,
-      setSelectedCheckin=()=>{},
+      selectCheckin=()=>{},
       queryData=[],
       // toggleMediaUpload=()=>{}
       navigation: {
@@ -319,7 +323,7 @@ class MediaDrawer extends Component {
 	}
 }
 
-export default withNavigation(MediaDrawer)
+export default connect(stateToProps, {selectCheckin})(withNavigation(MediaDrawer))
 
 const styles = StyleSheet.create({
   swiperWrapper: {

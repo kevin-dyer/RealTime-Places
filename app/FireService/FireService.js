@@ -7,6 +7,8 @@ import {
   GeoDocumentReference
 } from 'geofirestore'
 import Geolocation from '@react-native-community/geolocation'
+import uuidV4 from 'uuid/v4'
+
 
 let _firestore
 let _imageStoreRef
@@ -240,6 +242,8 @@ function generateCheckin({
 }
 
 export const saveMedia = ({
+  docKey,
+  userUid,
   imageUri,
   videoUri,
   currentPosition: {
@@ -252,7 +256,7 @@ export const saveMedia = ({
   onProgress=()=>{}
 }) => {
   return new Promise((resolve, reject) => {
-    const docKey = uuidV4()
+    
     const checkinType = !!videoUri ? 'video' : 'image'
 
     const mediaRef = !!videoUri
@@ -278,16 +282,18 @@ export const saveMedia = ({
           console.log("Successful upload!")
           console.log('Uploaded a blob or file! snapshot.downloadURL: ', snapshot && snapshot.downloadURL);
 
-          this.setState({
-            uploadProgress: 1
-          })
+          // this.setState({
+          //   uploadProgress: 1
+          // })
+
+          onProgress(1)
           const doc = generateCheckin({
             latitude,
             longitude,
             docKey,
             type: checkinType,
             url: snapshot.downloadURL,
-            userUid: uid,
+            userUid,
             comment,
             placeNearby,
             category

@@ -219,13 +219,13 @@ class MapSearch extends Component<Props> {
           type: 'googlePhoto'
         }))})
 
-        setTimeout(() => {
-          if (photos.length > 0) {
-
-            //NOTE: this is not quite right, want to actually go to the very beginning of the list
-            this.setSelectedCheckin(0)
-          }
-        })
+//         setTimeout(() => {
+//           if (photos.length > 0) {
+// 
+//             //NOTE: this is not quite right, want to actually go to the very beginning of the list
+//             this.setSelectedCheckin(0)
+//           }
+//         })
       })
     })
     .catch(error => {
@@ -236,6 +236,7 @@ class MapSearch extends Component<Props> {
 
   onPoiClick = ({nativeEvent}={}) => {
     console.log("onPoiClick nativeEvent: ", nativeEvent)
+    const {selectCheckin} = this.props
     const {queryData=[]} = this.state
     const {
       placeId: place_id,
@@ -258,9 +259,7 @@ class MapSearch extends Component<Props> {
 
         const [{photo_reference}] = photos
 
-        setTimeout(() => {
-          this.setSelectedCheckin(photo_reference)
-        }, 500)
+        selectCheckin(photo_reference)
       }
     })
   }
@@ -330,6 +329,7 @@ class MapSearch extends Component<Props> {
   }
 
   render() {
+    const {selectCheckin} = this.props
     const {
       searchText,
       region,
@@ -387,7 +387,7 @@ class MapSearch extends Component<Props> {
                 longitude: doc.coordinates.longitude
               }}
               onPress={e => {
-                this.setSelectedCheckin(doc.docKey)
+                selectCheckin(doc.docKey)
               }}
               pinColor={doc.docKey === selectedCheckin ? COLOR.green200 : COLOR.red700}
               zIndex={doc.docKey === selectedCheckin ? 10 : 1}
@@ -418,7 +418,7 @@ class MapSearch extends Component<Props> {
         <MediaDrawer
           allMedia={allPhotos}
           selectedCheckin={selectedCheckin}
-          setSelectedCheckin={this.setSelectedCheckin}
+          // setSelectedCheckin={this.setSelectedCheckin}
           queryData={queryData} 
           // geoCollection={geoCollection}
           // imageStoreRef={imageStoreRef}

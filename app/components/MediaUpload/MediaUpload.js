@@ -1,5 +1,6 @@
 'use strict';
 import React, { Component } from 'react'
+import {connect} from 'react-redux'
 import {
   StyleSheet,
   Text,
@@ -30,6 +31,7 @@ import { Input, Button } from 'react-native-elements';
 import { Dropdown } from 'react-native-material-dropdown';
 import * as Progress from 'react-native-progress';
 import PlacesNearbyPicker from '../PlacesNearbyPicker/PlacesNearbyPicker'
+import {selectCheckin} from '../../actions/checkins'
 import {
   getFirestore,
   getImageStoreRef,
@@ -57,7 +59,9 @@ const categories = [
 ]
 
 
-export default class MediaUpload extends Component {
+const stateToProps = ({}) => ({})
+
+class MediaUpload extends Component {
   state = {
     selectedTab: 0, //or video
     isRecording: false,
@@ -127,7 +131,7 @@ export default class MediaUpload extends Component {
 
   saveMedia = () => {
     const {
-      setSelectedCheckin,
+      selectCheckin,
       animateToRegion
     } = this.props
     const {
@@ -136,12 +140,16 @@ export default class MediaUpload extends Component {
       currentPosition,
       comment,
       placeNearby,
-      category
+      category,
+      user: {uid}={}
     } = this.state
+    const docKey = uuidV4()
 
     this.setState({uploading: true})
 
     saveMedia({
+      docKey,
+      userUid: uid,
       imageUri,
       videoUri,
       currentPosition,
@@ -156,7 +164,7 @@ export default class MediaUpload extends Component {
     })
     .then(docRef => {
       console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
-      setSelectedCheckin(docKey)
+      selectCheckin(docKey)
 
       this.handleBack()
       return docRef
@@ -802,6 +810,8 @@ export default class MediaUpload extends Component {
     );
   }
 }
+
+export default connect(stateToProps, {selectCheckin})(MediaUpload)
 
 const styles = StyleSheet.create({
   container: {
