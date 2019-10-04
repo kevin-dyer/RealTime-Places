@@ -269,6 +269,7 @@ export default class MediaItem extends Component {
 
   render() {
     const {
+      item,
       item: {
         downloadURL='',
         docKey,
@@ -302,7 +303,7 @@ export default class MediaItem extends Component {
       : selected ? size * scale : size
     const key = docKey || photo_reference || index
 
-    console.log("userUid: ", userUid, ", currentUserUuid: ", currentUserUuid)
+    console.log("userUid: ", userUid, ", currentUserUuid: ", currentUserUuid, item)
 
     return (
       <TouchableOpacity

@@ -49,11 +49,12 @@ export const firebaseLogin = () => {
 }
 
 //NOTE: Called from AuthLoadingScreen
-export const firebaseInit = () => {
+export const firebaseInit = (user) => {
     if (!_firestore) _firestore = firebase.firestore();
     if (!_imageStoreRef) _imageStoreRef = firebase.storage().ref()
     if (!_geoFirestore) _geoFirestore = new GeoFirestore(_firestore);
     if (!_geoCollection) _geoCollection = _geoFirestore.collection('checkins');
+    if (!_user) _user = user
 
     console.log("firebaseLogin success, set _geoCollection to: ", _geoCollection)
 }

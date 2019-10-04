@@ -106,13 +106,15 @@ class MediaDrawer extends Component {
       // imageStoreRef
     } = this.props
     const {fullScreen} = this.state
-    const {uid} = getUser() || {}
+
+    const user = getUser() || {}
+
     return <MediaItem
       {...media}
       fullScreen={fullScreen}
       size={PHOTO_SIZE}
       scale={PHOTO_SCALE}
-      userUid={uid}
+      userUid={user.uid}
       selectedCheckin={selectedCheckin}
       // geoCollection={geoCollection}
       // imageStoreRef={imageStoreRef}

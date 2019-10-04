@@ -16,8 +16,8 @@ export default class SignInScreen extends Component {
   state = {
     // email: '',
     // password: '',
-    // email: 'thedude136895@gmail.com',
-    // password: 'Password',
+    email: 'thedude136895@gmail.com',
+    password: 'Password',
     errorMessage: null
   }
 

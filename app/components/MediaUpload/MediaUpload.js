@@ -33,6 +33,7 @@ import * as Progress from 'react-native-progress';
 import PlacesNearbyPicker from '../PlacesNearbyPicker/PlacesNearbyPicker'
 import {selectCheckin} from '../../actions/checkins'
 import {
+  getUser,
   getFirestore,
   getImageStoreRef,
   saveMedia
@@ -81,18 +82,6 @@ class MediaUpload extends Component {
   }
 
   takePicture = async function() {
-    const {
-      geoCollection,
-      // toggleMediaUpload,
-      imageStoreRef,
-      user: {uid=''}={},
-      // scrollToCheckin,
-      animateToRegion,
-      navigation: {
-        navigate
-      }={}
-    } = this.props
-
     console.log("take pic called! this.camera: ", this.camera)
     if (this.camera) {
       const options = {
@@ -142,15 +131,15 @@ class MediaUpload extends Component {
       comment,
       placeNearby,
       category,
-      user: {uid}={}
     } = this.state
     const docKey = uuidV4()
+    const user = getUser()
 
     this.setState({uploading: true})
 
     saveMedia({
       docKey,
-      userUid: uid,
+      userUid: user.uid,
       imageUri,
       videoUri,
       currentPosition,
@@ -178,14 +167,6 @@ class MediaUpload extends Component {
   }
 
   takeVideo = () => {
-    const {
-      // toggleMediaUpload,
-      geoCollection,
-      imageStoreRef,
-      user: {uid=''}={},
-      animateToRegion,
-      // scrollToCheckin
-    } = this.props
     const {isMuted} = this.state
     console.log("take VIDEO called! this.camera: ", this.camera)
     if (this.camera) {

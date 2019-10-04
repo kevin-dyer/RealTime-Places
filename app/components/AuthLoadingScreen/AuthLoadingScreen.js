@@ -23,7 +23,7 @@ export default class AuthLoadingScreen extends Component {
       this.props.navigation.navigate(user ? 'App' : 'Auth')
 
       if (!!user) {
-        firebaseInit()
+        firebaseInit(user)
       }
     })
   }
