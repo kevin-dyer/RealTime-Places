@@ -117,6 +117,7 @@ class MediaUpload extends Component {
           coords
         } = location || {}
 
+        console.log("current position: ", location)
         this.setState({
           imageUri: data.uri,
           currentPosition: coords //{latitude, longitude}

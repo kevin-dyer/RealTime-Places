@@ -12,10 +12,18 @@ import {
 import { IconToggle } from 'react-native-material-ui';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
+import { isIphoneX } from 'react-native-iphone-x-helper'
+import {
+  rateCheckin,
+  flagInappropriateContent,
+  deleteCheckin
+} from '../../FireService/FireService'
 
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window')
-const HEADER_HEIGHT = 100
+const isX = isIphoneX()
+const HEADER_HEIGHT = isX ? 150 : 100
+const HEADER_OFFSET = isX ? 80 : 30
 
 export default class MediaItem extends Component {
   state = {paused: true}
@@ -57,21 +65,10 @@ export default class MediaItem extends Component {
           },
           {text: 'OK', onPress: () => {
             console.log("calling dleteCheckin")
-            geoCollection.doc(id).delete()
-            .then(()=>{
-              console.log("checkin deleted successfully")
-            })
-            .catch(error => {
-              console.error("checkin failed to delete! error: ", error)
-            })
 
-            // images/${docKey}.jpg
-            imageStoreRef.child(`images/${docKey}.jpg`).delete()
-            .then(()=>{
-              console.log("image deleted successfully")
-            })
-            .catch(error => {
-              console.error("image failed to delete! error: ", error)
+            deleteCheckin({
+              id,
+              docKey
             })
           }, style: 'destructive'},
         ],
@@ -102,15 +99,20 @@ export default class MediaItem extends Component {
         },
         {text: 'OK', onPress: () => {
           console.log("calling flagCheckin")
-          geoCollection.doc(id).update({
-            inappropriateCount: inappropriateCount + 1
+          flagInappropriateContent({
+            id,
+            inappropriateCount
           })
-          .then(()=>{
-            console.log("checkin flagged successfully")
-          })
-          .catch(error => {
-            console.error("checkin failed to be flagged! error: ", error)
-          })
+
+          // geoCollection.doc(id).update({
+          //   inappropriateCount: inappropriateCount + 1
+          // })
+          // .then(()=>{
+          //   console.log("checkin flagged successfully")
+          // })
+          // .catch(error => {
+          //   console.error("checkin failed to be flagged! error: ", error)
+          // })
         }, style: 'destructive'},
       ],
       {cancelable: true},
@@ -123,26 +125,35 @@ export default class MediaItem extends Component {
         id,
         downloadURL,
         docKey,
-        ratings: {
-          totalCount=0,
-          positiveCount=0
-        }={}
+        ratings
+        // ratings: {
+        //   totalCount=0,
+        //   positiveCount=0
+        // }={}
       },
+      userUid,
       geoCollection,
     } = this.props
 
-    geoCollection.doc(id).update({
-      ratings: {
-        totalCount: totalCount + 1,
-        positiveCount: positiveCount + (positiveRating ? 1 : 0)
-      }
+    rateCheckin({
+      id,
+      ratings,
+      positiveRating,
+      userUid
     })
-    .then(()=>{
-      console.log("checkin rated successfully. totalCount: ", totalCount + 1, ", positiveCount: ", positiveCount + (positiveRating ? 1 : 0))
-    })
-    .catch(error => {
-      console.error("checkin failed to be flagged! error: ", error)
-    })
+
+    // geoCollection.doc(id).update({
+    //   ratings: {
+    //     totalCount: totalCount + 1,
+    //     positiveCount: positiveCount + (positiveRating ? 1 : 0)
+    //   }
+    // })
+    // .then(()=>{
+    //   console.log("checkin rated successfully. totalCount: ", totalCount + 1, ", positiveCount: ", positiveCount + (positiveRating ? 1 : 0))
+    // })
+    // .catch(error => {
+    //   console.error("checkin failed to be flagged! error: ", error)
+    // })
   }
 
   isSelected = (selectedCheckin) => {
@@ -291,6 +302,7 @@ export default class MediaItem extends Component {
       : selected ? size * scale : size
     const key = docKey || photo_reference || index
 
+    console.log("userUid: ", userUid, ", currentUserUuid: ", currentUserUuid)
 
     return (
       <TouchableOpacity
@@ -322,9 +334,8 @@ export default class MediaItem extends Component {
           <View
             style={{
               position: 'absolute',
-              top: fullScreen ? 30 : 0,
+              top: fullScreen ? HEADER_OFFSET : 0,
               right: 0,
-              // width: screenWidth
               width: '100%'
             }}
           >
@@ -350,7 +361,7 @@ export default class MediaItem extends Component {
                   <IconToggle
                     name={fullScreen ? "ios-contract" : "ios-expand"}
                     iconSet="Ionicons"
-                    size={fullScreen ? 30 : 24}
+                    size={fullScreen ? HEADER_OFFSET : 24}
                     color={'#FFF'}
                     onPress={e => onExpand(index)}
                   />
@@ -366,7 +377,7 @@ export default class MediaItem extends Component {
                   />
                 }
 
-                {(!userUid || userUid === currentUserUuid) &&
+                {(!userUid || userUid === currentUserUuid) && !photo_reference &&
                   <IconToggle
                     name="ios-trash"
                     iconSet="Ionicons"

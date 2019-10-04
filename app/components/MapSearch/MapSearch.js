@@ -122,7 +122,9 @@ class MapSearch extends Component<Props> {
   }
 
   componentWillUnmount() {
-    clearQuery()
+
+    //geoQuery.cancel() is not defined...
+    // clearQuery()
   }
 
   handleTextChange = (text) => {

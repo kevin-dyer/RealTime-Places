@@ -19,6 +19,7 @@ import {
 import Image from 'react-native-scalable-image';
 import Icon from 'react-native-vector-icons/Ionicons';
 
+
 import ImageCheckin from '../../ImageCheckin/ImageCheckin'
 import GoogleImage from '../../GoogleImage/GoogleImage'
 import Video from '../../Video/Video'
@@ -63,6 +64,7 @@ class MediaDrawer extends Component {
 
   componentDidUpdate({selectedCheckin: oldSelectedCheckin}) {
     const {selectedCheckin, allMedia=[]} = this.props
+    const {fullScreen} = this.state
 
     if ((!!selectedCheckin || Number.isInteger(selectedCheckin)) && oldSelectedCheckin !== selectedCheckin) {
       //Go to specified index if selectedCheckin is an integer
@@ -82,8 +84,8 @@ class MediaDrawer extends Component {
         this.flatListRef.scrollToIndex({
           animated: true,
           index: selectedIndex,
-          // viewOffset: -PHOTO_SIZE,
-          // viewPosition: 1
+          // viewOffset: -PHOTO_SIZE/2,
+          viewPosition: fullScreen ? 0 : 0.5
         })
       }
     }

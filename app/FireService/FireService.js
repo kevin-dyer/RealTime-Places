@@ -44,7 +44,7 @@ export const firebaseLogin = () => {
     })
     .catch(error => {
       console.log("error: ", error)
-      throw error
+      // throw error
     })
 }
 
@@ -92,9 +92,12 @@ export const firebaseForgotPassword = (email) => {
   }
 
 
+
 export const clearQuery = () => {
   if (_geoQuery) {
-    _geoQuery.cancel()
+
+    // debugger
+    // _geoQuery.cancel()
   }
 }
 
@@ -320,5 +323,73 @@ export const saveMedia = ({
         console.alert('Sorry, Try again. error: ', error);
       }
     )
+  })
+}
+
+export const rateCheckin = ({
+  id,
+  ratings: {
+    totalCount=0,
+    positiveCount=0
+  }={},
+  positiveRating,
+  userUid
+}) => {
+  return _geoCollection.doc(id).update({
+      ratings: {
+        totalCount: totalCount + 1,
+        positiveCount: positiveCount + (positiveRating ? 1 : 0)
+      }
+    })
+    .then((resp)=>{
+      console.log("checkin rated successfully. totalCount: ", totalCount + 1, ", positiveCount: ", positiveCount + (positiveRating ? 1 : 0))
+       
+      //TODO: update the current user by adding the new checkin to their list of likes/dislikes
+
+
+      return resp
+    })
+    .catch(error => {
+      console.error("checkin failed to be flagged! error: ", error)
+      // throw error
+    })
+}
+
+export const flagInappropriateContent = ({
+  id,
+  inappropriateCount=0
+}) => {
+  return _geoCollection.doc(id).update({
+    inappropriateCount: inappropriateCount + 1
+  })
+  .then((resp)=>{
+    console.log("checkin flagged successfully")
+
+    return resp
+  })
+  .catch(error => {
+    console.error("checkin failed to be flagged! error: ", error)
+  })
+}
+
+export const deleteCheckin = ({
+  id,
+  docKey
+}) => {
+  return _geoCollection.doc(id).delete()
+  .then(()=>{
+    console.log("checkin deleted successfully")
+  })
+  .catch(error => {
+    console.error("checkin failed to delete! error: ", error)
+  })
+
+  // images/${docKey}.jpg
+  imageStoreRef.child(`images/${docKey}.jpg`).delete()
+  .then(()=>{
+    console.log("image deleted successfully")
+  })
+  .catch(error => {
+    console.error("image failed to delete! error: ", error)
   })
 }

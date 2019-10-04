@@ -38,13 +38,13 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Used to take photos</string>
+	<string>Will you allow Footprint to use your camera to make checkins?</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string/>
+	<string>Will you allow Footprint to use your location while using the app?</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string/>
+	<string>Will you allow Footprint to use your location while using the app?</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Your message to user when the microphone is accessed for the first time</string>
+	<string>Will you allow Footprint to use your microphone to make checkins?</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
