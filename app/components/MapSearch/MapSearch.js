@@ -74,7 +74,6 @@ class MapSearch extends Component<Props> {
       // uploadMedia: false,
       queryData: [],
       user: {},
-      // selectedCheckin: undefined //Used to highlight photo/video
     }
   }
 
@@ -329,14 +328,13 @@ class MapSearch extends Component<Props> {
   }
 
   render() {
-    const {selectCheckin} = this.props
+    const {selectedCheckin, selectCheckin} = this.props
     const {
       searchText,
       region,
       predictions,
       currentLocation={latitude: 0, longitude: 0},
       selectedPlace,
-      selectedCheckin,
       photos=[],
       queryData=[],
       // uploadMedia,
@@ -350,7 +348,7 @@ class MapSearch extends Component<Props> {
     // console.log("render state photos: ", photos)
     // console.log("selectedPlace: ", selectedPlace)
 
-    console.log("region: ", !!region)
+    console.log("!!region: ", !!region, ", selectedCheckin: ", selectedCheckin)
 
     return (
       <View style={styles.container}>
