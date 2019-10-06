@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {connect} from 'react-redux';
 import {
   ActivityIndicator,
   StatusBar,
@@ -10,7 +11,9 @@ import firebase from 'react-native-firebase'
 import {firebaseInit, firebaseSignout} from '../../FireService/FireService'
 
 
-export default class AuthLoadingScreen extends Component {
+const stateToProps = ({}) => ({})
+
+class AuthLoadingScreen extends Component {
   componentDidMount() {
 
 
@@ -23,7 +26,7 @@ export default class AuthLoadingScreen extends Component {
       this.props.navigation.navigate(user ? 'App' : 'Auth')
 
       if (!!user) {
-        firebaseInit(user)
+        firebaseInit(user, this.props.dispatch)
       }
     })
   }
@@ -53,3 +56,5 @@ export default class AuthLoadingScreen extends Component {
     );
   }
 }
+
+export default connect(stateToProps)(AuthLoadingScreen)

@@ -1,5 +1,6 @@
 'use strict';
 import React, { Component } from 'react';
+import {connect} from 'react-redux';
 import {
   StyleSheet,
   Text,
@@ -9,14 +10,18 @@ import {
   Alert,
   Dimensions
 } from 'react-native';
-import { IconToggle } from 'react-native-material-ui';
+import {
+  IconToggle,
+  COLOR
+} from 'react-native-material-ui';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 import { isIphoneX } from 'react-native-iphone-x-helper'
 import {
-  rateCheckin,
+  likeCheckin,
   flagInappropriateContent,
-  deleteCheckin
+  deleteCheckin,
+  // getUserData
 } from '../../FireService/FireService'
 
 
@@ -25,13 +30,43 @@ const isX = isIphoneX()
 const HEADER_HEIGHT = isX ? 150 : 100
 const HEADER_OFFSET = isX ? 80 : 30
 
-export default class MediaItem extends Component {
-  state = {paused: true}
 
-  componentDidUpdate({selectedCheckin: oldCheckin}, {paused: wasPaused}) {
+const stateToProps = ({
+  login: {
+    userData={},
+    userData: {
+      liked=[],
+      flagged=[]
+    }={}
+  }={}
+}) => ({
+  userData,
+  liked,
+  flagged
+})
+
+class MediaItem extends Component {
+  state = {
+    paused: true,
+    flagging: false,
+    liking: false,
+    deleting: false,
+    mediaLoading: false
+  }
+
+  componentDidUpdate({
+    selectedCheckin: oldCheckin,
+    userData: {
+      liked: oldLiked=[]
+    }={}
+  }, {paused: wasPaused}) {
     const {
       selectedCheckin,
-      item: {type}={}
+      item: {type, id}={},
+      userData,
+      // userData: {
+      //   liked=[]
+      // }={}
     } = this.props
     const wasSelected = this.isSelected(oldCheckin)
     const isSelected = this.isSelected(selectedCheckin)
@@ -40,6 +75,24 @@ export default class MediaItem extends Component {
       console.log("no longer selected!")
       this.togglePause(true)
     }
+
+    if (isSelected) {
+      console.log("MediaItem UPDATE. userData: ", userData)
+    }
+
+    //if isLiked changed, set liking to false
+//     const wasLiked = oldLiked.includes(id)
+//     const isLiked = liked.includes(id)
+// 
+//     if (isSelected) {
+//       console.log("wasLiked: ", wasLiked, ", isLiked: ", isLiked)
+//     }
+// 
+//     if (wasLiked !== isLiked) {
+//       this.setState({
+//         liking: false
+//       })
+//     }
   }
 
   deleteCheckin = () => {
@@ -66,9 +119,13 @@ export default class MediaItem extends Component {
           {text: 'OK', onPress: () => {
             console.log("calling dleteCheckin")
 
+            this.setState({deleting: true})
+
             deleteCheckin({
               id,
               docKey
+            }).finally(() => {
+              this.setState({deleting: false})
             })
           }, style: 'destructive'},
         ],
@@ -85,8 +142,18 @@ export default class MediaItem extends Component {
         docKey,
         inappropriateCount=0
       },
+      flagged=[],
       geoCollection,
     } = this.props
+    // const {flagged} = getUserData() || {}
+    const isFlagged = flagged.includes(id)
+
+    //Prevent double flagging
+    if (isFlagged) return
+
+    this.setState({
+      flagging: true
+    })
 
     Alert.alert(
       'Inappropriate Content',
@@ -94,7 +161,12 @@ export default class MediaItem extends Component {
       [
         {
           text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
+          onPress: () => {
+            console.log('Cancel Pressed')
+            this.setState({
+              flagging: false
+            })
+          },
           style: 'cancel',
         },
         {text: 'OK', onPress: () => {
@@ -102,58 +174,53 @@ export default class MediaItem extends Component {
           flagInappropriateContent({
             id,
             inappropriateCount
+          }).finally(() => {
+            setTimeout(() => {
+              this.setState({
+                flagging: false
+              })
+            }, 300)
           })
-
-          // geoCollection.doc(id).update({
-          //   inappropriateCount: inappropriateCount + 1
-          // })
-          // .then(()=>{
-          //   console.log("checkin flagged successfully")
-          // })
-          // .catch(error => {
-          //   console.error("checkin failed to be flagged! error: ", error)
-          // })
         }, style: 'destructive'},
       ],
-      {cancelable: true},
+      {cancelable: false},
     )
   }
 
-  rateCheckin = (positiveRating) => {
+  //Toggle between liked and not liked
+  likeCheckin = () => {
     const {
       item: {
         id,
         downloadURL,
         docKey,
-        ratings
-        // ratings: {
-        //   totalCount=0,
-        //   positiveCount=0
-        // }={}
+        likeCount
       },
       userUid,
+      userData: {
+        liked=[]
+      }={},
       geoCollection,
+      likeCheckin
     } = this.props
+    const isLiked = liked.includes(id)
 
-    rateCheckin({
+    this.setState({liking: true})
+
+    console.log("calling likeCheckin with liked: ", !isLiked)
+
+    likeCheckin({
       id,
-      ratings,
-      positiveRating,
+      likeCount,
+      liked: !isLiked,
       userUid
+    }).finally(() => {
+      setTimeout(() => {
+        this.setState({
+          liking: false
+        })
+      }, 300)
     })
-
-    // geoCollection.doc(id).update({
-    //   ratings: {
-    //     totalCount: totalCount + 1,
-    //     positiveCount: positiveCount + (positiveRating ? 1 : 0)
-    //   }
-    // })
-    // .then(()=>{
-    //   console.log("checkin rated successfully. totalCount: ", totalCount + 1, ", positiveCount: ", positiveCount + (positiveRating ? 1 : 0))
-    // })
-    // .catch(error => {
-    //   console.error("checkin failed to be flagged! error: ", error)
-    // })
   }
 
   isSelected = (selectedCheckin) => {
@@ -189,13 +256,21 @@ export default class MediaItem extends Component {
       }={},
       index
     } = this.props
+    const {mediaLoading} = this.state
 
     if (type === 'googlePhoto' || type === 'image') {
       return <Image
         source={{uri: downloadURL || uri}}
         style={{
           flex: 1,
-          resizeMode: 'cover'
+          resizeMode: 'cover',
+          // display: mediaLoading ? 'none' : 'flex'
+        }}
+        onLoadStart={e => {
+          this.setState({mediaLoading: true})
+        }}
+        onLoadEnd={e => {
+          this.setState({mediaLoading: false})
         }}
       />
     } else if (type === 'video') {
@@ -235,6 +310,16 @@ export default class MediaItem extends Component {
         resizeMode={'cover'}
         repeat
         onEnd={this.togglePause}
+        onLoadStart={e => {
+          this.setState({
+            mediaLoading: true
+          })
+        }}
+        onLoad={e => {
+          this.setState({
+            mediaLoading: false
+          })
+        }}
       />
 
       <View style={{
@@ -271,6 +356,7 @@ export default class MediaItem extends Component {
     const {
       item,
       item: {
+        id,
         downloadURL='',
         docKey,
         userUid,
@@ -282,16 +368,24 @@ export default class MediaItem extends Component {
         //For google photo:
         photo_reference,
         uri,
+        likeCount=0
       }={},
       index,
       userUid: currentUserUuid,
       selectedCheckin,
+      liked=[],
+      flagged=[],
       fullScreen,
       size,
       scale,
       onExpand=()=>{},
       setSelectedCheckin=()=>{}
     } = this.props
+    const {
+      flagging,
+      liking,
+      deleting
+    } = this.state
     const selected = this.isSelected()
     const marginLeft = index > 0 ? 1 : 0
     const sideMargin = selected ? -(size * scale - size) / 2 : 0
@@ -302,8 +396,12 @@ export default class MediaItem extends Component {
       ? screenWidth
       : selected ? size * scale : size
     const key = docKey || photo_reference || index
+    const isFlagged = flagged.includes(id)
+    const isLiked = liked.includes(id)
 
-    console.log("userUid: ", userUid, ", currentUserUuid: ", currentUserUuid, item)
+    if (selected) {
+      console.log("MEdiaItem isLiked: ", isLiked, "userData.liked: ", liked)
+    }
 
     return (
       <TouchableOpacity
@@ -373,8 +471,12 @@ export default class MediaItem extends Component {
                     name="ios-alert"
                     iconSet="Ionicons"
                     size={28}
-                    color={'#FFF'}
+                    color={flagging
+                      ? COLOR.grey500
+                      : isFlagged ? COLOR.red500 : '#FFF'
+                    }
                     onPress={this.flagInappropriateContent}
+                    disabled={flagging}
                   />
                 }
 
@@ -383,7 +485,8 @@ export default class MediaItem extends Component {
                     name="ios-trash"
                     iconSet="Ionicons"
                     size={28}
-                    color={'#FFF'}
+                    color={deleting ? COLOR.grey500 : '#FFF'}
+                    disabled={deleting}
                     onPress={this.deleteCheckin}
                   />
                 }
@@ -400,19 +503,29 @@ export default class MediaItem extends Component {
             flexDirection: 'row'
           }}>
             <IconToggle
-              name="ios-thumbs-down"
-              iconSet="Ionicons"
-              size={fullScreen ? 28 : 20}
-              color={'#FFF'}
-              onPress={e => this.rateCheckin(false)}
-            />
-            <IconToggle
               name="ios-thumbs-up"
               iconSet="Ionicons"
               size={fullScreen ? 28 : 20}
-              color={'#FFF'}
-              onPress={e => this.rateCheckin(true)}
+              color={liking
+                ? COLOR.grey500
+                : isLiked ? COLOR.blue500 : '#FFF'
+              }
+              disabled={liking}
+              onPress={e => this.likeCheckin()}
             />
+
+            {likeCount > 0 &&
+              <Text style={{
+                fontSize: 10,
+                color: liking
+                  ? COLOR.grey500
+                  : isLiked ? COLOR.blue500 : '#FFF',
+                transform: [
+                  {translateX: -14},
+                  {translateY: 4}
+                ]
+              }}>{likeCount}</Text>
+            }
           </View>
         }
 
@@ -497,3 +610,7 @@ export default class MediaItem extends Component {
     )
   }
 }
+
+export default connect(stateToProps, {
+  likeCheckin
+})(MediaItem)

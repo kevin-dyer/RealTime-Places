@@ -5,10 +5,17 @@ import {
   Text,
   TextInput,
   View,
-  Button
+  Button,
+  Alert
 } from 'react-native';
-import {firebaseSignout} from '../../FireService/FireService'
-
+import {
+  firebaseSignout,
+  firebaseDeleteUser,
+  getUser
+} from '../../FireService/FireService'
+import {
+  COLOR
+} from 'react-native-material-ui';
 
 
 export default class UserSettings extends Component {
@@ -26,9 +33,8 @@ export default class UserSettings extends Component {
         navigate=()=>{}
       }={}
     } = this.props
-    const {email, password} = this.state
     //TODO: log into firestore via FireService
-    firebaseSignout({email, password})
+    firebaseSignout()
     .then(user => {
       navigate('SignIn')
     })
@@ -37,6 +43,31 @@ export default class UserSettings extends Component {
     })
   }
 
+  handleDelete = () => {
+    Alert.alert(
+      'Are you Sure?',
+      'Your account and all your data will be lost.',
+      [{
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      {
+        text: 'Delete',
+        onPress: () => {
+          firebaseDeleteUser()
+          .then(() => {
+            this.handleSignOut()
+          })
+          .catch((erro) => {
+            console.warn("error deleting account: ", erro)
+          })
+        },
+        style: 'destructive'
+      }]
+    )
+    
+  }
 
 	render() {
     const {
@@ -44,17 +75,24 @@ export default class UserSettings extends Component {
         navigate=()=>{}
       }={}
     } = this.props
-    const {email,
+    const {
       errorMessage
     } = this.state
+    const {
+      email=''
+    } = getUser()
 
     return (
       <View style={styles.container}>
+        <Text>User Profile</Text>
+        <Text>{email}</Text>
         {!!errorMessage &&
           <Text style={{ color: 'red' }}>
             {errorMessage}
           </Text>}
         <Button title="Sign Out" onPress={this.handleSignOut} />
+
+        <Button title="Delete Account" onPress={this.handleDelete} color={COLOR.red500}/>
       </View>
     )
 	}

@@ -8,11 +8,15 @@ import {
 } from 'geofirestore'
 import Geolocation from '@react-native-community/geolocation'
 import uuidV4 from 'uuid/v4'
+import {updateUserData} from '../actions/login'
 
 
 let _firestore
 let _imageStoreRef
 let _user
+let _userDataRef
+let _usersRef
+let _userData
 
 let _geoQuery
 let _geoFirestore
@@ -26,6 +30,7 @@ export const getUser = () => _user
 export const getGeoQuery = () => _geoQuery
 export const getGeoFirestore = () => _geoFirestore
 export const getGeoCollection = () => _geoCollection
+export const getUserData = () => _userData
 
 
 export const firebaseLogin = () => {
@@ -49,21 +54,62 @@ export const firebaseLogin = () => {
 }
 
 //NOTE: Called from AuthLoadingScreen
-export const firebaseInit = (user) => {
-    if (!_firestore) _firestore = firebase.firestore();
-    if (!_imageStoreRef) _imageStoreRef = firebase.storage().ref()
-    if (!_geoFirestore) _geoFirestore = new GeoFirestore(_firestore);
-    if (!_geoCollection) _geoCollection = _geoFirestore.collection('checkins');
-    if (!_user) _user = user
+export const firebaseInit = (user, dispatch) => {
 
-    console.log("firebaseLogin success, set _geoCollection to: ", _geoCollection)
+    console.log("firebaseInit, updating _dispatch to: ", dispatch)
+    _dispatch = dispatch
+    _firestore = firebase.firestore();
+    _imageStoreRef = firebase.storage().ref()
+    _geoFirestore = new GeoFirestore(_firestore);
+    _geoCollection = _geoFirestore.collection('checkins');
+    _user = user
+
+      //TODO: set up listener for changes to doc
+    _usersRef = _firestore.collection('users')
+    _userDataRef = _usersRef.doc(user.uid)
+
+
+     console.log("firebaseInit. user.uid: ", user.uid)
+    if (!_userData) {
+
+      console.log("setting _userData, _userDataRef: ", _userDataRef)
+      _userDataRef.get().then(snapshot => {
+        _userData = snapshot.data()
+
+        _dispatch(updateUserData(_userData))
+
+        if (!_userData) {
+          console.log("creating user, user.uid: ", user.uid)
+          const nextUser = {
+            uid: user.uid,
+            liked: [],
+            flagged: [],
+            checkins: []
+          }
+          _usersRef.doc(user.uid).set(nextUser).then(docRef => {
+            console.log("created userData! docRef: ", docRef)
+
+            _userData = nextUser
+            _dispatch(updateUserData(_userData))
+          }).catch(error => {
+            console.warn("error creating user. error: ", error)
+          })
+        } else {
+          console.log("_userData: ", _userData)
+        }
+      })
+      .catch(error => {
+        console.warn("Error getting userData. error: ", error)
+      })
+    }
+// 
+//     console.log("firebaseLogin success, set _geoCollection to: ", _geoCollection)
 }
 
 export const firebaseEmailSignUp = ({email, password}) => {
   return firebase
       .auth()
       .createUserWithEmailAndPassword(email, password)
-      // .then(() => this.props.navigation.navigate('Main'))
       // .catch(error => this.setState({ errorMessage: error.message }))
 }
 
@@ -76,9 +122,27 @@ export const firebaseEmailSignIn = ({email, password}) => {
 }
 
 export const firebaseSignout = () => {
+  _firestore = undefined
+  _imageStoreRef = undefined
+  _geoFirestore = undefined
+  _geoCollection = undefined
+  _user = undefined
+  _userDataRef = undefined
+  _userData = undefined
+
+
+
   return firebase
     .auth()
     .signOut()
+
+  
+}
+
+export const firebaseDeleteUser = () => {
+  return firebase
+    .auth()
+    .currentUser.delete()
 }
 
 export const firebaseForgotPassword = (email) => {
@@ -175,7 +239,7 @@ export const getNearbyCheckins = (region={}, onQueryData=()=>{}) => {
 
 function queryDataHasChanged(queryData=[], originalQueryData=[]) {
 
-  console.log("queryData: ", queryData,', originalQueryData',originalQueryData)
+  // console.log("queryData: ", queryData,', originalQueryData',originalQueryData)
   if (queryData.length !== originalQueryData.length) {
     console.log("exiting queryDataHasChanged b/c lenghts are diff")
     return true
@@ -260,12 +324,11 @@ export const saveMedia = ({
   onProgress=()=>{}
 }) => {
   return new Promise((resolve, reject) => {
-    
+    const {checkins=[]} = _userData || {}
     const checkinType = !!videoUri ? 'video' : 'image'
-
     const mediaRef = !!videoUri
-    ? _imageStoreRef.child(`images/${docKey}.mov`)
-    : _imageStoreRef.child(`images/${docKey}.jpg`)
+      ? _imageStoreRef.child(`images/${docKey}.mov`)
+      : _imageStoreRef.child(`images/${docKey}.jpg`)
 
     mediaRef.putFile(imageUri || videoUri)
     .on(
@@ -306,11 +369,19 @@ export const saveMedia = ({
           _geoCollection.add(doc)
           .then(docRef => {
             console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
-//             setSelectedCheckin(docKey)
-// 
-//             this.handleBack()
-//             return docRef
-            return resolve(docRef)
+            const nextCheckins = [...checkins, docRef.id]
+            //Add checkin to userData.checkins array
+            _userDataRef.update({
+              checkins: nextCheckins
+            }).then((userRef) => {
+              _userData.checkins = nextCheckins
+
+              _dispatch(updateUserData(_userData))
+              console.log("updated userRef: ", userRef)
+              return resolve(docRef)
+            }).catch(error => {
+              console.warn("Error adding checkin to userDataRef: ", error)
+            })
           })
           .catch(error => {
             // console.log("error adding doc: ", error)
@@ -327,46 +398,85 @@ export const saveMedia = ({
   })
 }
 
-export const rateCheckin = ({
+export const likeCheckin = ({
   id,
-  ratings: {
-    totalCount=0,
-    positiveCount=0
-  }={},
-  positiveRating,
+  likeCount,
+  // liked, //user is either liking or unliking
   userUid
 }) => {
-  return _geoCollection.doc(id).update({
-      ratings: {
-        totalCount: totalCount + 1,
-        positiveCount: positiveCount + (positiveRating ? 1 : 0)
-      }
-    })
-    .then((resp)=>{
-      console.log("checkin rated successfully. totalCount: ", totalCount + 1, ", positiveCount: ", positiveCount + (positiveRating ? 1 : 0))
-       
-      //TODO: update the current user by adding the new checkin to their list of likes/dislikes
+  return (dispatch) => {
+    const {liked: likedList=[]} = _userData || {}
+    const liked = likedList.includes(id)
 
+    //format likeCount to an integer
+    likeCount = parseInt(likeCount) || 0
 
-      return resp
-    })
-    .catch(error => {
-      console.error("checkin failed to be flagged! error: ", error)
-      // throw error
-    })
+    console.log("likeCheckin called. id: ", id)
+
+    //if already liked, we are unliking
+    let nextLikeCount = liked ? likeCount - 1 : likeCount + 1
+
+    if (nextLikeCount < 0) nextLikeCount = 0
+    return _geoCollection.doc(id).update({
+        likeCount: nextLikeCount
+      })
+      .then((docRef)=>{
+        console.log("checkin rated successfully. likeCount: ", nextLikeCount, ", previously liked: ", liked)
+        //NOTE: liked is the previous liked state of this checkin,
+        //so add if it is not already liked,
+        //otherwise filter out
+        const nextLiked = !liked
+          ? [...likedList, id]
+          : likedList.filter(checkinId => checkinId !== id)
+        //TODO: update the current user by adding the new checkin to their list of likes/dislikes
+        _userDataRef.update({
+          liked: nextLiked
+        }).then(() => {
+
+        _userData.liked = nextLiked
+
+        console.log("dispatching updateUserData, with _userData: ", _userData)
+        dispatch(updateUserData(_userData))
+
+          return docRef
+        }).catch(error => {
+          console.warn("Error adding checkin to userDataRef: ", error)
+        })
+
+        return docRef
+      })
+      .catch(error => {
+        console.error("checkin failed to be flagged! error: ", error)
+        // throw error
+      })
+  }
 }
 
 export const flagInappropriateContent = ({
   id,
   inappropriateCount=0
 }) => {
+  const {flagged=[]} = _userData || {}
   return _geoCollection.doc(id).update({
     inappropriateCount: inappropriateCount + 1
   })
-  .then((resp)=>{
+  .then((docRef)=>{
     console.log("checkin flagged successfully")
+    const nextFlagged = [...flagged, id]
+    _userDataRef.update({
+      flagged: nextFlagged
+    }).then(() => {
 
-    return resp
+      //Update cached userData
+      _userData.flagged = nextFlagged
+
+      _dispatch(updateUserData(_userData))
+      return docRef
+    }).catch(error => {
+      console.warn("Error adding checkin to userDataRef: ", error)
+    })
+
+    return docRef
   })
   .catch(error => {
     console.error("checkin failed to be flagged! error: ", error)
@@ -378,11 +488,29 @@ export const deleteCheckin = ({
   docKey
 }) => {
   return _geoCollection.doc(id).delete()
-  .then(()=>{
+  .then((resp)=>{
     console.log("checkin deleted successfully")
+    const nextCheckins = _userData.checkins.filter(checkinId => checkinId !== id)
+    _userDataRef.update({
+      checkins: nextCheckins
+    }).then((docRef) => {
+
+      _userData.checkins = nextCheckins
+
+      _dispatch(updateUserData(_userData))
+      return docRef
+    }).catch(error => {
+      console.warn("Error adding checkin to userDataRef: ", error)
+
+      return error
+    })
+
+    return resp
   })
   .catch(error => {
     console.error("checkin failed to delete! error: ", error)
+
+    return error
   })
 
   // images/${docKey}.jpg

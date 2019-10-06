@@ -350,7 +350,7 @@ class MapSearch extends Component<Props> {
     // console.log("render state photos: ", photos)
     // console.log("selectedPlace: ", selectedPlace)
 
-    console.log("!!region: ", !!region, ", selectedCheckin: ", selectedCheckin)
+    // console.log("!!region: ", !!region, ", selectedCheckin: ", selectedCheckin)
 
     return (
       <View style={styles.container}>
