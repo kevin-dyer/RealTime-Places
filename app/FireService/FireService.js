@@ -68,6 +68,15 @@ export const firebaseInit = (user, dispatch) => {
     _usersRef = _firestore.collection('users')
     _userDataRef = _usersRef.doc(user.uid)
 
+    //test
+    fetch("https://us-central1-realtime-places-239604.cloudfunctions.net/sendMail?dest=thedude136895@gmail.com")
+    .then(resp => {
+      console.log("send mail resP: ", resp)
+    })
+    .catch(erro => {
+      console.warn("error sending mail: ", erro)
+    })
+
 
      console.log("firebaseInit. user.uid: ", user.uid)
     if (!_userData) {
