@@ -495,7 +495,11 @@ class MediaUpload extends Component {
                 right: 0,
                 padding: 8
               }}>
-                <View style={{position: 'relative', flex: 1}}>
+                <View style={{
+                  position: 'relative',
+                  flex: 1,
+                  flexDirection: 'row'
+                }}>
                   <IconToggle
                     name={flashMode === 'on'
                       ? 'ios-flash'
@@ -544,29 +548,31 @@ class MediaUpload extends Component {
                   }
                 </View>
 
-                <IconToggle
-                  name={isMuted
-                    ? 'ios-volume-off'
-                    : 'ios-volume-high'
-                  }
-                  iconSet={'Ionicons'}
-                  size={25}
-                  color={isMuted
-                    ? COLOR.red500
-                    : '#FFF'
-                  }
-                  maxOpacity={0.5}
-                  percent={200}
-                  onPress={this.toggleMute}
-                  style={{
-                    container: {
-                      // shadowColor: '#000',
-                      // shadowOffset: {width: 2, height: 2},
-                      // shadowOpacity: 0.3,
-                      // shadowRadius: 3,
+                {selectedTab === 1 &&
+                  <IconToggle
+                    name={isMuted
+                      ? 'ios-volume-off'
+                      : 'ios-volume-high'
                     }
-                  }}
-                />
+                    iconSet={'Ionicons'}
+                    size={25}
+                    color={isMuted
+                      ? COLOR.red500
+                      : '#FFF'
+                    }
+                    maxOpacity={0.5}
+                    percent={200}
+                    onPress={this.toggleMute}
+                    style={{
+                      container: {
+                        // shadowColor: '#000',
+                        // shadowOffset: {width: 2, height: 2},
+                        // shadowOpacity: 0.3,
+                        // shadowRadius: 3,
+                      }
+                    }}
+                  />
+                }
               </View>
             </View>
           }
