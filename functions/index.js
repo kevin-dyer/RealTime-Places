@@ -19,7 +19,10 @@ const oauth2Client = new OAuth2(
 oauth2Client.setCredentials({
      refresh_token: "1//04p-w7bh6GwpaCgYIARAAGAQSNwF-L9IrsHslmEW3nKRCrSRgjsi30K_D-e-uYxzF6Jc2ZqLuc9kv0KRCtk3VR2fn9BdkF62ELXs"
 });
+
+console.log("getting accessToken...")
 const accessToken = oauth2Client.getAccessToken()
+console.log("accessToken: ", accessToken)
 
 let transporter = nodemailer.createTransport({
 		service: "gmail",
@@ -43,7 +46,7 @@ let transporter = nodemailer.createTransport({
 exports.sendWelcomeEmail = functions.auth.user().onCreate((user) => {
 	console.log("sendWelcomEmail started, user.email: ", user.email)
 	const mailOptions = {
-    from: 'Footprint Support <footprint.camera@gmail.com>', // Something like: Jane Doe <janedoe@gmail.com>
+    from: 'Footprint Support <footprintlive@gmail.com>', // Something like: Jane Doe <janedoe@gmail.com>
     to: user.email,
     subject: 'Welcome to Footprint!',
     html: `<h2 style="font-size: 16px;">Welcome to Footprint!</h2>
