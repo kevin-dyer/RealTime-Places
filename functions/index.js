@@ -21,7 +21,8 @@ oauth2Client.setCredentials({
 });
 
 console.log("getting accessToken...")
-const accessToken = oauth2Client.getAccessToken()
+const accessToken = await oauth2Client.getAccessToken()
+// const {tokens} = await oauth2Client.getToken(code)
 console.log("accessToken: ", accessToken)
 
 let transporter = nodemailer.createTransport({
@@ -105,8 +106,10 @@ exports.sendMail = functions.https.onRequest((req, res) => {
   //           return res.send('Sended');
   //       });
 
+  	console.log("sendMail, dest: ", dest)
+
 	  const mailOptions = {
-	    from: 'Footprint Support <footprint.camera@gmail.com>', // Something like: Jane Doe <janedoe@gmail.com>
+	    from: 'Footprint Support <footprintlive@gmail.com>', // Something like: Jane Doe <janedoe@gmail.com>
 	    to: dest,
 	    subject: 'Welcome to Footprint!', // email subject
 	    // html: `<h2 style="font-size: 16px;">Welcome to Footprint!</h2>
@@ -117,7 +120,7 @@ exports.sendMail = functions.https.onRequest((req, res) => {
 	    // 	<div>Miles of thanks,</div>
 	    // 	<div>Team Footprint</div>
 	    // `
-	    text: 'welcome!'
+	    text: 'welcome test from sendMail!'
 	    // text: 'Now you can start sharing your footprints...your adventures and experiences around the world! And you can follow in real time the footprints of other great people like you and you will never miss a cool opportunity! Miles of thanks, Team Footprint'
 	  };
 
