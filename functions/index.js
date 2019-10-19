@@ -243,6 +243,6 @@ exports.inappropriateContentFlag = functions.https.onRequest((req, res) => {
 	    `,
 		};
 		sgMail.send(msg);
-
+		return res.send('Inappropriate content review request sent');
   });    
 });
