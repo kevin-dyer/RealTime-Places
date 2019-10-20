@@ -483,7 +483,7 @@ export const flagInappropriateContent = ({
 
       console.log("sending inappropriate content to _user.email: ", _user.email)
       //Send email notifications
-      fetch(`https://us-central1-realtime-places-239604.cloudfunctions.net/inappropriateContentFlag?dest=${_user.email}`)
+      fetch(`https://us-central1-realtime-places-239604.cloudfunctions.net/inappropriateContentFlag?userEmail=${_user.email}&checkinId=${id}&inappropriateCount=${inappropriateCount}`)
       .then(resp => {
         console.log("Inappropriate content email resp: ", resp)
       })
