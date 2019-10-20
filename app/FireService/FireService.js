@@ -69,13 +69,13 @@ export const firebaseInit = (user, dispatch) => {
     _userDataRef = _usersRef.doc(user.uid)
 
     //test
-    fetch("https://us-central1-realtime-places-239604.cloudfunctions.net/sendMail?dest=thedude136895@gmail.com")
-    .then(resp => {
-      console.log("send mail resP: ", resp)
-    })
-    .catch(erro => {
-      console.warn("error sending mail: ", erro)
-    })
+    // fetch("https://us-central1-realtime-places-239604.cloudfunctions.net/sendMail?dest=thedude136895@gmail.com")
+    // .then(resp => {
+    //   console.log("send mail resP: ", resp)
+    // })
+    // .catch(erro => {
+    //   console.warn("error sending mail: ", erro)
+    // })
 
 
      console.log("firebaseInit. user.uid: ", user.uid)
@@ -480,6 +480,16 @@ export const flagInappropriateContent = ({
       _userData.flagged = nextFlagged
 
       _dispatch(updateUserData(_userData))
+
+      console.log("sending inappropriate content to _user.email: ", _user.email)
+      //Send email notifications
+      fetch(`https://us-central1-realtime-places-239604.cloudfunctions.net/inappropriateContentFlag?dest=${_user.email}`)
+      .then(resp => {
+        console.log("Inappropriate content email resp: ", resp)
+      })
+      .catch(erro => {
+        console.log("Error sending Inappropriate content email: ", erro)
+      })
       return docRef
     }).catch(error => {
       console.warn("Error adding checkin to userDataRef: ", error)

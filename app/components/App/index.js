@@ -30,7 +30,7 @@ const PHOTO_SIZE = 140
 const PHOTO_SCALE = 2
 
 
-//NOTE: This is NO LONGER Used
+//NOTE: This COMPONENT is NO LONGER Used
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -98,40 +98,40 @@ export default class App extends Component<Props> {
     })
 
     //Firebase test
-    firebase.auth()
-      .signInAnonymously()
-      .then(credential => {
-        if (credential) {
-          console.log('default app user ->', credential.user.toJSON());
-
-          // Create a Firestore reference
-          const firestore = firebase.firestore();
-          const imageStoreRef = firebase.storage().ref()
-
-          // // Create a GeoFirestore reference
-          const geofirestore: GeoFirestore = new GeoFirestore(firestore);
-          // // Create a GeoCollection reference
-          const geocollection: GeoCollectionReference = geofirestore.collection('checkins');
-
-          this.setState({
-            geoFirestore: geofirestore,
-            geoCollection: geocollection,
-            user: credential.user.toJSON(),
-            imageStoreRef
-          })
-        }
-      })
-      .catch(error => {
-        console.log("error: ", error)
-      })
+//     firebase.auth()
+//       .signInAnonymously()
+//       .then(credential => {
+//         if (credential) {
+//           console.log('default app user ->', credential.user.toJSON());
+// 
+//           // Create a Firestore reference
+//           const firestore = firebase.firestore();
+//           const imageStoreRef = firebase.storage().ref()
+// 
+//           // // Create a GeoFirestore reference
+//           const geofirestore: GeoFirestore = new GeoFirestore(firestore);
+//           // // Create a GeoCollection reference
+//           const geocollection: GeoCollectionReference = geofirestore.collection('checkins');
+// 
+//           this.setState({
+//             geoFirestore: geofirestore,
+//             geoCollection: geocollection,
+//             user: credential.user.toJSON(),
+//             imageStoreRef
+//           })
+//         }
+//       })
+//       .catch(error => {
+//         console.log("error: ", error)
+//       })
 
           
   }
 
   componentWillUnmount() {
-    if (!!this.geoQuery) {
-      this.geoQuery.cancel()
-    }
+    // if (!!this.geoQuery) {
+    //   this.geoQuery.cancel()
+    // }
   }
 
   handleTextChange = (text) => {

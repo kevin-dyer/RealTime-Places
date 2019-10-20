@@ -28,7 +28,8 @@ import {
   getNearbyCheckins
 } from '../../FireService/FireService' //TODO: clear on componentWillUnmount
 import {
-  selectCheckin
+  selectCheckin,
+  updateNearbyCheckins
 } from '../../actions/checkins'
 import PlacesAutoComplete from '../PlacesAutoComplete/PlacesAutoComplete'
 import {PLACES_KEY} from '../../../configs'
@@ -47,10 +48,12 @@ const PHOTO_SCALE = 2
 
 const stateToProps = ({
   checkins: {
-    selectedCheckin
+    selectedCheckin,
+    nearbyCheckins=[]
   }={}
 }) => ({
-  selectedCheckin
+  selectedCheckin,
+  nearbyCheckins
 })
 
 type Props = {};
@@ -72,7 +75,7 @@ class MapSearch extends Component<Props> {
       predictions: [],
       photos: [],
       // uploadMedia: false,
-      queryData: [],
+      // queryData: [],
       user: {},
     }
   }
@@ -237,8 +240,9 @@ class MapSearch extends Component<Props> {
 
   onPoiClick = ({nativeEvent}={}) => {
     console.log("onPoiClick nativeEvent: ", nativeEvent)
-    const {selectCheckin} = this.props
-    const {queryData=[]} = this.state
+    const {
+      selectCheckin,
+    } = this.props
     const {
       placeId: place_id,
       coordinate,
@@ -256,7 +260,7 @@ class MapSearch extends Component<Props> {
       const {photos=[]} = this.state
 
       if (photos.length > 0) {
-        console.log("photos > 0 , scrolling to end of queryData")
+        console.log("photos > 0 , scrolling to end of nearbyCheckins")
 
         const [{photo_reference}] = photos
 
@@ -298,10 +302,13 @@ class MapSearch extends Component<Props> {
   //TODO: Need to throttle
   //TODO: Need to adjust the query radius based on latitude delta 
   getNearbyCheckins = debounce(1000, (region) => {
+    const {updateNearbyCheckins} = this.props
+
     return getNearbyCheckins(region, (queryData) => {
-      this.setState({
-        queryData
-      })
+      // this.setState({
+      //   queryData
+      // })
+      updateNearbyCheckins(queryData)
     })
   })
 
@@ -330,7 +337,11 @@ class MapSearch extends Component<Props> {
   }
 
   render() {
-    const {selectedCheckin, selectCheckin} = this.props
+    const {
+      selectedCheckin,
+      nearbyCheckins,
+      selectCheckin
+    } = this.props
     const {
       searchText,
       region,
@@ -338,16 +349,16 @@ class MapSearch extends Component<Props> {
       currentLocation={latitude: 0, longitude: 0},
       selectedPlace,
       photos=[],
-      queryData=[],
+      // queryData=[],
       // uploadMedia,
       // geoFirestore,
       // geoCollection,
       // imageStoreRef,
       user
     } = this.state
-    const allPhotos = [...queryData, ...photos]
+    const allPhotos = [...nearbyCheckins, ...photos]
 
-    // console.log("render state photos: ", photos)
+    console.log("render map nearbyCheckins: ", nearbyCheckins)
     // console.log("selectedPlace: ", selectedPlace)
 
     // console.log("!!region: ", !!region, ", selectedCheckin: ", selectedCheckin)
@@ -375,11 +386,15 @@ class MapSearch extends Component<Props> {
             top: 0,
             left: 0,
             right: 0,
-            bottom: !!selectedCheckin ? ((PHOTO_SIZE * PHOTO_SCALE) - 30) : (PHOTO_SIZE - 30)
+            bottom: allPhotos.length === 0
+              ? 0
+              : !!selectedCheckin
+                ? (PHOTO_SIZE * PHOTO_SCALE)
+                : PHOTO_SIZE
           }}
         >
 
-          {queryData && queryData.map(doc => {
+          {!!nearbyCheckins && nearbyCheckins.map(doc => {
             return <Marker
               key={doc.docKey}
               coordinate={{
@@ -419,7 +434,6 @@ class MapSearch extends Component<Props> {
           allMedia={allPhotos}
           selectedCheckin={selectedCheckin}
           // setSelectedCheckin={this.setSelectedCheckin}
-          queryData={queryData} 
           // geoCollection={geoCollection}
           // imageStoreRef={imageStoreRef}
           moveRegion={this.moveRegion}
@@ -444,6 +458,7 @@ class MapSearch extends Component<Props> {
 
 export default connect(stateToProps, {
   selectCheckin,
+  updateNearbyCheckins
 })(MapSearch)
 
 const styles = StyleSheet.create({
@@ -467,7 +482,7 @@ const styles = StyleSheet.create({
   map: {
     top: 0,
     left: 0,
-    height,
+    height: height - 64,
     width,
     position: 'absolute'
   },

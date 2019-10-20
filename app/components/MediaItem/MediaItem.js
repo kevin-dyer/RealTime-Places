@@ -23,6 +23,15 @@ import {
   deleteCheckin,
   // getUserData
 } from '../../FireService/FireService'
+import {
+  trackFlagged,
+  trackLiked
+} from '../../actions/login'
+import {
+  selectCheckin,
+  updateLikeCount
+} from '../../actions/checkins'
+
 
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window')
@@ -38,11 +47,21 @@ const stateToProps = ({
       liked=[],
       flagged=[]
     }={}
+  }={},
+  checkins: {
+    selectedCheckin
   }={}
+}, {
+  item: {
+    docKey,
+    photo_reference
+  }={},
+  index
 }) => ({
   userData,
   liked,
-  flagged
+  flagged,
+  isSelected: selectedCheckin === (docKey || photo_reference || index)
 })
 
 class MediaItem extends Component {
@@ -67,18 +86,19 @@ class MediaItem extends Component {
       // userData: {
       //   liked=[]
       // }={}
+      isSelected
     } = this.props
-    const wasSelected = this.isSelected(oldCheckin)
-    const isSelected = this.isSelected(selectedCheckin)
+    // const wasSelected = this.isSelected(oldCheckin)
+    // const isSelected = this.isSelected(selectedCheckin)
 
     if (!wasPaused && !isSelected) {
       console.log("no longer selected!")
       this.togglePause(true)
     }
 
-    if (isSelected) {
-      console.log("MediaItem UPDATE. userData: ", userData)
-    }
+    // if (isSelected) {
+    //   console.log("MediaItem UPDATE. userData: ", userData)
+    // }
 
     //if isLiked changed, set liking to false
 //     const wasLiked = oldLiked.includes(id)
@@ -124,7 +144,7 @@ class MediaItem extends Component {
             deleteCheckin({
               id,
               docKey
-            }).finally(() => {
+            }).catch(() => {
               this.setState({deleting: false})
             })
           }, style: 'destructive'},
@@ -144,6 +164,7 @@ class MediaItem extends Component {
       },
       flagged=[],
       geoCollection,
+      trackFlagged
     } = this.props
     // const {flagged} = getUserData() || {}
     const isFlagged = flagged.includes(id)
@@ -180,6 +201,8 @@ class MediaItem extends Component {
                 flagging: false
               })
             }, 300)
+
+            trackFlagged(id)
           })
         }, style: 'destructive'},
       ],
@@ -201,7 +224,9 @@ class MediaItem extends Component {
         liked=[]
       }={},
       geoCollection,
-      likeCheckin
+      likeCheckin,
+      trackLiked,
+      updateLikeCount
     } = this.props
     const isLiked = liked.includes(id)
 
@@ -220,31 +245,10 @@ class MediaItem extends Component {
           liking: false
         })
       }, 300)
+
+      trackLiked(id)
+      updateLikeCount(id, !isLiked)
     })
-  }
-
-  isSelected = (selectedCheckin) => {
-    const {
-      selectedCheckin: defaultSelectedCheckin,
-      item: {
-        docKey,
-        photo_reference,
-      },
-      index
-    } = this.props
-
-    if (!selectedCheckin) {
-      selectedCheckin = defaultSelectedCheckin
-    }
-
-    if (!!docKey && docKey === selectedCheckin) {
-      return true
-      //TODO: update selecting GoogleImage to set photo_reference as selectedCheckin
-    } else if (!!photo_reference && photo_reference === selectedCheckin) {
-      return true
-    }
-
-    return false
   }
 
   _renderMedia = (selected) => {
@@ -352,6 +356,18 @@ class MediaItem extends Component {
     this.setState({paused: nextPaused})
   }
 
+  getKey = () => {
+    const {
+      item: {
+        docKey,
+        photo_reference
+      }={},
+      index
+    } = this.props
+
+    return docKey || photo_reference || index
+  }
+
   render() {
     const {
       item,
@@ -378,15 +394,17 @@ class MediaItem extends Component {
       fullScreen,
       size,
       scale,
+      isSelected: selected,
       onExpand=()=>{},
-      setSelectedCheckin=()=>{}
+      // setSelectedCheckin=()=>{}
+      selectCheckin=()=>{}
     } = this.props
     const {
       flagging,
       liking,
       deleting
     } = this.state
-    const selected = this.isSelected()
+    // const selected = this.isSelected()
     const marginLeft = index > 0 ? 1 : 0
     const sideMargin = selected ? -(size * scale - size) / 2 : 0
     const containerHeight = fullScreen
@@ -395,13 +413,15 @@ class MediaItem extends Component {
     const containerWidth = fullScreen
       ? screenWidth
       : selected ? size * scale : size
-    const key = docKey || photo_reference || index
+    const key = this.getKey()
     const isFlagged = flagged.includes(id)
     const isLiked = liked.includes(id)
 
     if (selected) {
       console.log("MEdiaItem isLiked: ", isLiked, "userData.liked: ", liked)
     }
+
+
 
     return (
       <TouchableOpacity
@@ -414,7 +434,7 @@ class MediaItem extends Component {
           // marginRight: sideMargin,
           // zIndex: selected ? 200 : 1
         }}
-        onPress={e => !fullScreen && setSelectedCheckin(key)}
+        onPress={e => !fullScreen && selectCheckin(key)}
         activeOpacity={1}
       >
         {fullScreen &&
@@ -612,5 +632,9 @@ class MediaItem extends Component {
 }
 
 export default connect(stateToProps, {
-  likeCheckin
+  likeCheckin,
+  trackFlagged,
+  trackLiked,
+  updateLikeCount,
+  selectCheckin
 })(MediaItem)

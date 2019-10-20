@@ -24,8 +24,8 @@ const AppStack = createBottomTabNavigator({
   MediaUpload,
   UserSettings
 }, {
-	// initialRouteName: 'MapSearch',
-  initialRouteName: 'MediaUpload',
+	initialRouteName: 'MapSearch',
+  // initialRouteName: 'MediaUpload',
 	headerMode: 'none',
 	defaultNavigationOptions: ({ navigation }) => ({
     tabBarIcon: ({ focused, horizontal, tintColor }) => {

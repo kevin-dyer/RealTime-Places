@@ -55,7 +55,11 @@ const {width, height} = Dimensions.get('window')
 const PHOTO_SIZE = 140
 const PHOTO_SCALE = 2
 
-const stateToProps = ({}) => ({})
+const stateToProps = ({
+  checkins: {
+    nearbyCheckins=[]
+  }={}
+}) => ({})
 
 class MediaDrawer extends Component {
 	state = {
@@ -98,7 +102,7 @@ class MediaDrawer extends Component {
   _renderMedia = (media={}) => {
     const {
       selectedCheckin,
-      selectCheckin,
+      // selectCheckin,
       // user: {
       //   uid
       // }={},
@@ -119,14 +123,14 @@ class MediaDrawer extends Component {
       // geoCollection={geoCollection}
       // imageStoreRef={imageStoreRef}
       onExpand={this.toggleFullScreen}
-      setSelectedCheckin={selectCheckin}
+      // setSelectedCheckin={selectCheckin}
     />
   }
 
   //TODO: rename this method to include selecting place
   scrollToCheckin=(docKey) => {
     const {
-      queryData=[],
+      nearbyCheckins,
       selectedCheckin,
       selectCheckin=()=>{},
       moveRegion=()=>{}
@@ -134,14 +138,14 @@ class MediaDrawer extends Component {
 
 
     //FIX THIS
-    const index = queryData.findIndex(checkin =>
+    const index = nearbyCheckins.findIndex(checkin =>
       checkin.docKey === docKey
     )
 
-    console.log("scrollToCheckin docKey: ", docKey, ", index: ", index, ", queryData: ", queryData)
+    console.log("scrollToCheckin docKey: ", docKey, ", index: ", index, ", nearbyCheckins: ", nearbyCheckins)
 
     if (index > -1) {
-      const checkin = queryData[index]
+      const checkin = nearbyCheckins[index]
       //NOTE: do not scroll if checkin is already selected
       if (selectedCheckin !== checkin.docKey) {
         this.flatListRef.scrollToIndex({
@@ -241,14 +245,14 @@ class MediaDrawer extends Component {
       allMedia=[],
       selectedCheckin,
       selectCheckin=()=>{},
-      queryData=[],
+      nearbyCheckins=[],
       // toggleMediaUpload=()=>{}
       navigation: {
         navigate
       }={}
     } = this.props
     const {fullScreen} = this.state
-    const queryLength = queryData.length
+    const queryLength = nearbyCheckins.length
 
     // console.log("allMedia: ", allMedia)
 
