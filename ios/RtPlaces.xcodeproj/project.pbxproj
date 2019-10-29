@@ -13,7 +13,6 @@
 		00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302E41ABCB9EE00DB3ED1 /* libRCTVibration.a */; };
 		035518F9D4EF4295ACC65E7C /* EvilIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D68B8E4DE6F44666BC54C473 /* EvilIcons.ttf */; };
 		0C215DB02339B03F00846B2B /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
-		0CBDCEBC230265B000615459 /* libRNGooglePlaces.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1982B7A822A1E053008E11AC /* libRNGooglePlaces.a */; };
 		11D1A2F320CAFA9E000508D9 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 78C398B91ACF4ADC00677621 /* libRCTLinking.a */; };
 		139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 139105C11AF99BAD00B5F7CC /* libRCTSettings.a */; };
@@ -463,13 +462,6 @@
 			remoteGlobalIDString = C20761531AC75C9EFA2D4BD137C836E0;
 			remoteInfo = RNFS;
 		};
-		1982B7A722A1E053008E11AC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RNGooglePlaces;
-		};
 		199419492296FC6E0031B3AB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 19EC3BDB2290CEDE00355359 /* Pods.xcodeproj */;
@@ -842,7 +834,6 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = RtPlaces/main.m; sourceTree = "<group>"; };
 		1909749022B8653D002A742B /* movToMp4.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = movToMp4.xcodeproj; path = "../node_modules/react-native-mov-to-mp4/movToMp4.xcodeproj"; sourceTree = "<group>"; };
 		1941322323430533006BAF66 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
-		1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNGooglePlaces.xcodeproj; path = "../node_modules/react-native-google-places/ios/RNGooglePlaces.xcodeproj"; sourceTree = "<group>"; };
 		19D0ECD022A2F4DD005440D7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		19DEE5FD22D08C05000DAB6B /* RNCGeolocation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCGeolocation.xcodeproj; path = "../node_modules/@react-native-community/geolocation/ios/RNCGeolocation.xcodeproj"; sourceTree = "<group>"; };
 		19DEE67022DBFAEB000DAB6B /* ART.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ART.xcodeproj; path = "../node_modules/react-native/Libraries/ART/ART.xcodeproj"; sourceTree = "<group>"; };
@@ -915,7 +906,6 @@
 				1909750622B86562002A742B /* libmovToMp4.a in Frameworks */,
 				19DEE66F22D08C55000DAB6B /* libRNCGeolocation.a in Frameworks */,
 				19DEE67922DBFB2A000DAB6B /* libART.a in Frameworks */,
-				0CBDCEBC230265B000615459 /* libRNGooglePlaces.a in Frameworks */,
 				1941325623430547006BAF66 /* libReact.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1059,14 +1049,6 @@
 				1941325123430534006BAF66 /* libjsiexecutor.a */,
 				1941325323430534006BAF66 /* libjsi-tvOS.a */,
 				1941325523430534006BAF66 /* libjsiexecutor-tvOS.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		1982B7A422A1E052008E11AC /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				1982B7A822A1E053008E11AC /* libRNGooglePlaces.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1264,7 +1246,6 @@
 				19DEE67022DBFAEB000DAB6B /* ART.xcodeproj */,
 				19DEE5FD22D08C05000DAB6B /* RNCGeolocation.xcodeproj */,
 				1909749022B8653D002A742B /* movToMp4.xcodeproj */,
-				1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */,
 				19EC3BED2290CEFA00355359 /* Pods.xcodeproj */,
 				19EC3B8E2290C66000355359 /* RNCamera.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
@@ -1530,10 +1511,6 @@
 				{
 					ProductGroup = 19941AAC2297A1D60031B3AB /* Products */;
 					ProjectRef = 23712C50095F473395E74AF6 /* RNFirebase.xcodeproj */;
-				},
-				{
-					ProductGroup = 1982B7A422A1E052008E11AC /* Products */;
-					ProjectRef = 1982B7A322A1E052008E11AC /* RNGooglePlaces.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -1937,13 +1914,6 @@
 			fileType = archive.ar;
 			path = libRNFS.a;
 			remoteRef = 1982B77622A1DD57008E11AC /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		1982B7A822A1E053008E11AC /* libRNGooglePlaces.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRNGooglePlaces.a;
-			remoteRef = 1982B7A722A1E053008E11AC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		1994194A2296FC6E0031B3AB /* libFirebaseCore.a */ = {
@@ -2379,8 +2349,6 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RtPlaces/Pods-RtPlaces-resources.sh",
 				"${PODS_ROOT}/GoogleMaps/Maps/Frameworks/GoogleMaps.framework/Resources/GoogleMaps.bundle",
-				"${PODS_ROOT}/GooglePlacePicker/Frameworks/GooglePlacePicker.framework/Resources/GooglePlacePicker.bundle",
-				"${PODS_ROOT}/GooglePlaces/Frameworks/GooglePlaces.framework/Resources/GooglePlaces.bundle",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Entypo.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf",
@@ -2402,8 +2370,6 @@
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleMaps.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GooglePlacePicker.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GooglePlaces.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AntDesign.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Entypo.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EvilIcons.ttf",
@@ -2572,7 +2538,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = L7R74UFCM8;
 				HEADER_SEARCH_PATHS = (
@@ -2605,7 +2571,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = L7R74UFCM8;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",

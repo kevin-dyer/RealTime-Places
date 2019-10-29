@@ -433,24 +433,8 @@ class MapSearch extends Component<Props> {
         <MediaDrawer
           allMedia={allPhotos}
           selectedCheckin={selectedCheckin}
-          // setSelectedCheckin={this.setSelectedCheckin}
-          // geoCollection={geoCollection}
-          // imageStoreRef={imageStoreRef}
           moveRegion={this.moveRegion}
-          // toggleMediaUpload={this.toggleMediaUpload}
         />
-
-        {/*uploadMedia && !!geoCollection &&
-          <MediaUpload
-            // geoFirestore={geoFirestore}
-            // geoCollection={geoCollection}
-            // imageStoreRef={imageStoreRef}
-            toggleMediaUpload={this.toggleMediaUpload}
-            user={user}
-            setSelectedCheckin={this.setSelectedCheckin}
-            animateToRegion={this.moveRegion}
-          />
-        */}
       </View>
     );
   }

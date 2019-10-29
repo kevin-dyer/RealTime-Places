@@ -13,8 +13,8 @@
 #import <Firebase.h>
 #import <GoogleMaps/GoogleMaps.h>
 
-// @import GoogleMaps;
-@import GooglePlaces;
+@import GoogleMaps;
+// @import GooglePlaces;
 
 @implementation AppDelegate
 
@@ -22,7 +22,7 @@
 {
   [FIRApp configure];
   [GMSServices provideAPIKey:@"AIzaSyDmz4uaXNIblbjRdzPztmLGgHxXpmu1mi0"]; //Google Maps Android SDK Key
-  [GMSPlacesClient provideAPIKey:@"AIzaSyDmz4uaXNIblbjRdzPztmLGgHxXpmu1mi0"];
+  // [GMSPlacesClient provideAPIKey:@"AIzaSyDmz4uaXNIblbjRdzPztmLGgHxXpmu1mi0"];
 
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge

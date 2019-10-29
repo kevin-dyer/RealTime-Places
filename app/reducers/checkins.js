@@ -16,9 +16,7 @@ export default function checkins(state=initialState, action={}) {
 		console.log("SELECT_CHECKIN reducer called. action.selectedCheckin: ", action.selectedCheckin)
 			return {
 				...state,
-				selectedCheckin: state.selectedCheckin === action.selectedCheckin
-					? undefined
-					: action.selectedCheckin
+				selectedCheckin: state.selectedCheckin === action.selectedCheckin ? undefined : action.selectedCheckin
 			}
 
 		case UPDATE_NEARBY_CHECKINS:

@@ -59,8 +59,8 @@ target 'RtPlaces' do
   # pod 'GoogleUtilities', '5.3.7'
   # pod 'GoogleAppMeasurement'
 
-  pod 'GooglePlaces'
-  pod 'GooglePlacePicker'
+  # pod 'GooglePlaces'
+  # pod 'GooglePlacePicker'
  
   # Third party deps podspec link 
   pod 'react-native-camera', path: '../node_modules/react-native-camera'

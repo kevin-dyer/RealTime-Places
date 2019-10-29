@@ -26,8 +26,21 @@ import Video from '../../Video/Video'
 import MediaItem from '../MediaItem/MediaItem'
 import {PLACES_KEY} from '../../../configs'
 import {debounce} from 'lodash'
-import {selectCheckin} from '../../actions/checkins'
-import {getUser} from '../../FireService/FireService'
+import {
+  selectCheckin,
+  updateLikeCount
+} from '../../actions/checkins'
+import {
+  likeCheckin,
+  flagInappropriateContent,
+  deleteCheckin,
+  // getUserData,
+  getUser
+} from '../../FireService/FireService'
+import {
+  trackFlagged,
+  trackLiked
+} from '../../actions/login'
 
 const {width, height} = Dimensions.get('window')
 
@@ -58,44 +71,56 @@ const PHOTO_SCALE = 2
 const stateToProps = ({
   checkins: {
     nearbyCheckins=[]
-  }={}
-}) => ({})
+  }={},
+  login: {
+    userData={},
+    userData: {
+      liked=[],
+      flagged=[]
+    }={}
+  }={},
+}) => ({
+  userData,
+  liked,
+  flagged,
+})
 
 class MediaDrawer extends Component {
 	state = {
     fullScreen: false
 	}
 
-  componentDidUpdate({selectedCheckin: oldSelectedCheckin}) {
-    const {selectedCheckin, allMedia=[]} = this.props
-    const {fullScreen} = this.state
-
-    if ((!!selectedCheckin || Number.isInteger(selectedCheckin)) && oldSelectedCheckin !== selectedCheckin) {
-      //Go to specified index if selectedCheckin is an integer
-      if (Number.isInteger(selectedCheckin) && selectedCheckin < allMedia.length) {
-        this.flatListRef.scrollToIndex({
-          animated: true,
-          index: selectedCheckin
-        })
-        return
-      }
-      const selectedIndex = allMedia.findIndex(media => 
-        media.docKey === selectedCheckin || media.photo_reference === selectedCheckin
-      )
-
-      if (selectedIndex > -1) {
-        console.log("scrolling to index: ", selectedIndex, this.flatListRef)
-        this.flatListRef.scrollToIndex({
-          animated: true,
-          index: selectedIndex,
-          // viewOffset: -PHOTO_SIZE/2,
-          viewPosition: fullScreen ? 0 : 0.5
-        })
-      }
-    }
-    //TODO: if selectedCheckin changes, then scroll to it
-    //NOTE: might still need a way to scroll to something
-  }
+//TODO: add back once memory leak is solved
+//   componentDidUpdate({selectedCheckin: oldSelectedCheckin}) {
+//     const {selectedCheckin, allMedia=[]} = this.props
+//     const {fullScreen} = this.state
+// 
+//     if ((!!selectedCheckin || Number.isInteger(selectedCheckin)) && oldSelectedCheckin !== selectedCheckin) {
+//       //Go to specified index if selectedCheckin is an integer
+//       if (Number.isInteger(selectedCheckin) && selectedCheckin < allMedia.length) {
+//         this.flatListRef.scrollToIndex({
+//           animated: true,
+//           index: selectedCheckin
+//         })
+//         return
+//       }
+//       const selectedIndex = allMedia.findIndex(media => 
+//         media.docKey === selectedCheckin || media.photo_reference === selectedCheckin
+//       )
+// 
+//       if (selectedIndex > -1) {
+//         console.log("scrolling to index: ", selectedIndex, this.flatListRef)
+//         this.flatListRef.scrollToIndex({
+//           animated: true,
+//           index: selectedIndex,
+//           // viewOffset: -PHOTO_SIZE/2,
+//           viewPosition: fullScreen ? 0 : 0.5
+//         })
+//       }
+//     }
+//     //TODO: if selectedCheckin changes, then scroll to it
+//     //NOTE: might still need a way to scroll to something
+//   }
 
   //TODO: Check if userUid is correct
   //TODO: pass in geoCollection and imageStoreRef
@@ -107,8 +132,22 @@ class MediaDrawer extends Component {
       //   uid
       // }={},
       // geoCollection,
-      // imageStoreRef
+      // imageStoreRef,
+      selectCheckin,
+      likeCheckin,
+      trackFlagged,
+      trackLiked,
+      updateLikeCount,
+
+
     } = this.props
+    const {
+      item: {
+        docKey,
+        photo_reference
+      },
+      index
+    } = media
     const {fullScreen} = this.state
 
     const user = getUser() || {}
@@ -124,6 +163,13 @@ class MediaDrawer extends Component {
       // imageStoreRef={imageStoreRef}
       onExpand={this.toggleFullScreen}
       // setSelectedCheckin={selectCheckin}
+
+      selectCheckin={selectCheckin}
+      likeCheckin={likeCheckin}
+      trackFlagged={trackFlagged}
+      trackLiked={trackLiked}
+      updateLikeCount={updateLikeCount}
+      isSelected={selectedCheckin === (docKey || photo_reference || index)}
     />
   }
 
@@ -331,7 +377,20 @@ class MediaDrawer extends Component {
 	}
 }
 
-export default connect(stateToProps, {selectCheckin})(withNavigation(MediaDrawer))
+// export default connect(stateToProps, {
+//   selectCheckin,
+//   likeCheckin,
+//   trackFlagged,
+//   trackLiked,
+//   updateLikeCount,
+// })(withNavigation(MediaDrawer))
+export default withNavigation(connect(stateToProps, {
+  selectCheckin,
+  likeCheckin,
+  trackFlagged,
+  trackLiked,
+  updateLikeCount,
+})(MediaDrawer))
 
 const styles = StyleSheet.create({
   swiperWrapper: {

@@ -40,31 +40,31 @@ const HEADER_HEIGHT = isX ? 150 : 100
 const HEADER_OFFSET = isX ? 80 : 30
 
 
-const stateToProps = ({
-  login: {
-    userData={},
-    userData: {
-      liked=[],
-      flagged=[]
-    }={}
-  }={},
-  checkins: {
-    selectedCheckin
-  }={}
-}, {
-  item: {
-    docKey,
-    photo_reference
-  }={},
-  index
-}) => ({
-  userData,
-  liked,
-  flagged,
-  isSelected: selectedCheckin === (docKey || photo_reference || index)
-})
+// const stateToProps = ({
+//   login: {
+//     userData={},
+//     userData: {
+//       liked=[],
+//       flagged=[]
+//     }={}
+//   }={},
+//   checkins: {
+//     selectedCheckin
+//   }={}
+// }, {
+//   item: {
+//     docKey,
+//     photo_reference
+//   }={},
+//   index
+// }) => ({
+//   userData,
+//   liked,
+//   flagged,
+//   isSelected: selectedCheckin === (docKey || photo_reference || index)
+// })
 
-class MediaItem extends Component {
+export default class MediaItem extends Component {
   state = {
     paused: true,
     flagging: false,
@@ -631,10 +631,10 @@ class MediaItem extends Component {
   }
 }
 
-export default connect(stateToProps, {
-  likeCheckin,
-  trackFlagged,
-  trackLiked,
-  updateLikeCount,
-  selectCheckin
-})(MediaItem)
+// export default connect(stateToProps, {
+//   likeCheckin,
+//   trackFlagged,
+//   trackLiked,
+//   updateLikeCount,
+//   selectCheckin
+// })(MediaItem)
