@@ -21,7 +21,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>3</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -39,6 +39,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Will you allow Footprint to use your camera to make checkins?</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Will you allow Footprint to use your location while using the app?</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Will you allow Footprint to use your location while using the app?</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

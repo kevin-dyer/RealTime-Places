@@ -13,10 +13,10 @@ import {firebaseEmailSignUp} from '../../FireService/FireService'
 
 export default class SignUpScreen extends Component {
   state = {
-    // email: '',
-    // password: '',
-    email: 'dyer.kevin136@gmail.com',
-    password: 'password',
+    email: '',
+    password: '',
+    // email: 'dyer.kevin136@gmail.com',
+    // password: 'password',
     errorMessage: null
   }
 
