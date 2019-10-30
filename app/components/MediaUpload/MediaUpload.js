@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
   Dimensions,
   Image,
@@ -81,40 +82,43 @@ class MediaUpload extends Component {
     isMuted: false
   }
 
-  takePicture = async function() {
-    console.log("take pic called! this.camera: ", this.camera)
-    if (this.camera) {
+  takePicture = function() {
+
+    // console.log("take pic called! this.camera: ", this.camera)
+    if (!!this.camera) {
       const options = {
         quality: 0.2,
       };
 
       this.setState({
         isRecording: true
-      })
-      const data = await this.camera.takePictureAsync(options);
+      }, async () => {
+        const data = await this.camera.takePictureAsync(options);
 
-      this.setState({
-        isRecording: false
-      })
-
-
-      console.log("set imageUri to data.uri: ", data.uri)
-
-      Geolocation.getCurrentPosition((location={}) => {
-        const {
-          coords: {latitude, longitude},
-          coords
-        } = location || {}
-
-        console.log("current position: ", location)
         this.setState({
-          imageUri: data.uri,
-          currentPosition: coords //{latitude, longitude}
+          isRecording: false
         })
-      }, (error) => {
-        console.error("error getting current position: ", error)
-      }, {
-        enableHighAccuracy: true
+
+
+
+        console.log("set imageUri to data.uri: ", data.uri)
+
+        Geolocation.getCurrentPosition((location={}) => {
+          const {
+            coords: {latitude, longitude},
+            coords
+          } = location || {}
+
+          console.log("current position: ", location)
+          this.setState({
+            imageUri: data.uri,
+            currentPosition: coords //{latitude, longitude}
+          })
+        }, (error) => {
+          console.error("error getting current position: ", error)
+        }, {
+          enableHighAccuracy: true
+        })
       })
     }
   };
@@ -179,50 +183,53 @@ class MediaUpload extends Component {
 
       this.videoStopped = false
 
-      setTimeout(async () => {
+      setTimeout(() => {
         console.log("setTimeout finished, starting recording")
         if (this.videoStopped) {
           console.log("touchEnd called before recording started")
           return
         }
-        this.setState({isRecording: true, recordingStartTime: Date.now()})
-
-        this.startVideoProgress()
-
-        console.log("starting to take video")
-        const data = await this.camera.recordAsync(options);
-        console.log("video data: ", data);
-
-        if (!!this.vidProgressTimer) {
-          clearInterval(this.vidProgressTimer)
-        }
-
         this.setState({
-          videoProgress: 0,
-          recordingStartTime: null,
-          isRecording: false,
-        })
+          isRecording: true,
+          recordingStartTime: Date.now()
+        }, async () => {
+          this.startVideoProgress()
 
-        // this.camera.pausePreview()
+          console.log("starting to take video")
+          const data = await this.camera.recordAsync(options);
+          console.log("video data: ", data);
 
-        //TODO: test if this works!
-        MovToMp4.convertMovToMp4(data.uri, docKey + ".mp4", (mp4Path) => {
-          //here you can upload the video...
-          console.log("mp4 conversion mp4Path: ", mp4Path);
+          if (!!this.vidProgressTimer) {
+            clearInterval(this.vidProgressTimer)
+          }
 
-          Geolocation.getCurrentPosition((location={}) => {
-            console.log("currentPostion location: ", location)
-            const {
-              coords: {
-                latitude,
-                longitude
-              }={},
-              coords
-            } = location || {}
+          this.setState({
+            videoProgress: 0,
+            recordingStartTime: null,
+            isRecording: false,
+          })
 
-            this.setState({
-              videoUri: data.uri,
-              currentPosition: coords
+          // this.camera.pausePreview()
+
+          //TODO: test if this works!
+          MovToMp4.convertMovToMp4(data.uri, docKey + ".mp4", (mp4Path) => {
+            //here you can upload the video...
+            console.log("mp4 conversion mp4Path: ", mp4Path);
+
+            Geolocation.getCurrentPosition((location={}) => {
+              console.log("currentPostion location: ", location)
+              const {
+                coords: {
+                  latitude,
+                  longitude
+                }={},
+                coords
+              } = location || {}
+
+              this.setState({
+                videoUri: data.uri,
+                currentPosition: coords
+              })
             })
           })
         })
@@ -609,13 +616,16 @@ class MediaUpload extends Component {
           />
 
           {!imageUri && !videoUri &&
-            <>
+            <View style={{
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+              }}>
               <View
                 style={{
                   flex: 1,
                   justifyContent: 'center',
-                  alignItems: 'center',
-                  marginBottom: 120
+                  alignItems: 'center'
                 }}
                 onTouchStart={e => {
                   console.log("onTouchStart called! e: ", e)
@@ -647,14 +657,6 @@ class MediaUpload extends Component {
                         this.takePicture()
                       }
                     }}
-                    style={{
-                      container: {
-                        // shadowColor: '#000',
-                        // shadowOffset: {width: 2, height: 2},
-                        // shadowOpacity: 0.3,
-                        // shadowRadius: 3,
-                      }
-                    }}
                   >
                     <Icon
                       name="md-radio-button-off"
@@ -671,7 +673,6 @@ class MediaUpload extends Component {
                       progress={videoProgress}
                       borderWidth={0}
                       thickness={3}
-                      // style={{position: 'absolute', top: 0, left: 0}}
                       style={{
                         pointerEvents: 'none',
                         position: 'absolute',
@@ -683,9 +684,7 @@ class MediaUpload extends Component {
                 </View>
               </View>
               <View style={{
-                position: 'absolute',
-                bottom: 20,
-                left: 0,
+                marginBottom: 10,
                 width,
                 paddingLeft: 40,
                 paddingRight: 40
@@ -706,7 +705,7 @@ class MediaUpload extends Component {
                   disabled={isRecording}
                 />
               </View>
-            </>
+            </View>
           }
 
           {(!!imageUri || !!videoUri) &&
