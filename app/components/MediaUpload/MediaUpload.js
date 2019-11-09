@@ -99,17 +99,12 @@ class MediaUpload extends Component {
           isRecording: false
         })
 
-
-
-        console.log("set imageUri to data.uri: ", data.uri)
-
         Geolocation.getCurrentPosition((location={}) => {
           const {
             coords: {latitude, longitude},
             coords
           } = location || {}
 
-          console.log("current position: ", location)
           this.setState({
             imageUri: data.uri,
             currentPosition: coords //{latitude, longitude}
@@ -157,7 +152,7 @@ class MediaUpload extends Component {
       }
     })
     .then(docRef => {
-      console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
+      // console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
       selectCheckin(docKey)
 
       this.handleBack()
@@ -172,7 +167,6 @@ class MediaUpload extends Component {
 
   takeVideo = () => {
     const {isMuted} = this.state
-    console.log("take VIDEO called! this.camera: ", this.camera)
     if (this.camera) {
       const options = {
         maxDuration,
@@ -184,9 +178,8 @@ class MediaUpload extends Component {
       this.videoStopped = false
 
       setTimeout(() => {
-        console.log("setTimeout finished, starting recording")
         if (this.videoStopped) {
-          console.log("touchEnd called before recording started")
+          // console.log("touchEnd called before recording started")
           return
         }
         this.setState({
@@ -195,9 +188,7 @@ class MediaUpload extends Component {
         }, async () => {
           this.startVideoProgress()
 
-          console.log("starting to take video")
           const data = await this.camera.recordAsync(options);
-          console.log("video data: ", data);
 
           if (!!this.vidProgressTimer) {
             clearInterval(this.vidProgressTimer)
@@ -214,10 +205,10 @@ class MediaUpload extends Component {
           //TODO: test if this works!
           MovToMp4.convertMovToMp4(data.uri, docKey + ".mp4", (mp4Path) => {
             //here you can upload the video...
-            console.log("mp4 conversion mp4Path: ", mp4Path);
+            // console.log("mp4 conversion mp4Path: ", mp4Path);
 
             Geolocation.getCurrentPosition((location={}) => {
-              console.log("currentPostion location: ", location)
+              // console.log("currentPostion location: ", location)
               const {
                 coords: {
                   latitude,
@@ -245,7 +236,7 @@ class MediaUpload extends Component {
       this.camera.stopRecording()
 
       if (!!this.vidProgressTimer) {
-        console.log("stopVideo called, calling clearInterval")
+        // console.log("stopVideo called, calling clearInterval")
         clearInterval(this.vidProgressTimer)
       }
     }
@@ -291,7 +282,7 @@ class MediaUpload extends Component {
   toggleReplay = () => {
     const {videoPaused} = this.state
 
-    console.log("toggleReplay caled, videoPaused: ", videoPaused)
+    // console.log("toggleReplay caled, videoPaused: ", videoPaused)
     if (!!this.player) {
       this.setState({videoPaused: !videoPaused})
     }
@@ -299,9 +290,9 @@ class MediaUpload extends Component {
 
   startVideoProgress = () => {
     const {recordingStartTime} = this.state
-    console.log("startVideoProgress called")
+    // console.log("startVideoProgress called")
     this.vidProgressTimer = setInterval(() => {
-      console.log("startVideoProgress, recordingStartTime: ", recordingStartTime, ", final: ", ((Date.now() - recordingStartTime) / 1000) / maxDuration)
+      // console.log("startVideoProgress, recordingStartTime: ", recordingStartTime, ", final: ", ((Date.now() - recordingStartTime) / 1000) / maxDuration)
       this.setState({
         videoProgress: ((Date.now() - recordingStartTime) / 1000) / maxDuration
       })
@@ -322,7 +313,7 @@ class MediaUpload extends Component {
   }
 
   handleCategoryChange = (text) => {
-    console.log("handleCategoryChange called. text: ", text.value)
+    // console.log("handleCategoryChange called. text: ", text.value)
     this.setState({
       category: text.value
     })
@@ -347,7 +338,7 @@ class MediaUpload extends Component {
     } = this.state
     // const videoProgress = Math.floor((Date.now() - recordingStartTime) / 1000) / 15
     // console.log("render imageUri: ", imageUri)
-    console.log("render videoProgress: ", videoProgress, ", selectedTab: ", selectedTab)
+    // console.log("render videoProgress: ", videoProgress, ", selectedTab: ", selectedTab)
 
     return (
       <KeyboardAvoidingView
@@ -491,7 +482,7 @@ class MediaUpload extends Component {
                   buttonNegative: 'Cancel',
                 }}
                 onGoogleVisionBarcodesDetected={({ barcodes }) => {
-                  console.log(barcodes);
+                  // console.log(barcodes);
                 }}
                 ratio={'1:1'}
               />
@@ -628,17 +619,13 @@ class MediaUpload extends Component {
                   alignItems: 'center'
                 }}
                 onTouchStart={e => {
-                  console.log("onTouchStart called! e: ", e)
     
                   if (selectedTab === 1) {
-                    console.log("handle recording")
                     this.takeVideo()
                   }
                   return e
                 }}
-                onTouchEnd={e => {
-                  console.log("onTouchEnd Called e: ", e)
-    
+                onTouchEnd={e => {    
                   if (selectedTab === 1) {
                     this.stopVideo()
                   }
@@ -769,7 +756,10 @@ class MediaUpload extends Component {
                     value={value}
                   />
                 }}
-                onFocus={e => {console.log("dropdown onFocus"); Keyboard.dismiss();}}
+                onFocus={e => {
+                  // console.log("dropdown onFocus");
+                  Keyboard.dismiss();
+                }}
               />
 
               <View style={{

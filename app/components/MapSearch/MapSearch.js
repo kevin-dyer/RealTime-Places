@@ -19,13 +19,16 @@ import MapView, {
   AnimatedRegion,
   Animated
 } from 'react-native-maps';
-import MediaDrawer from '../MediaDrawer/MediaDrawer'
+// import MediaDrawer from '../MediaDrawer/MediaDrawer'
+import DrawerTest from '../MediaDrawer/DrawerTest'
+
 import Geolocation from '@react-native-community/geolocation'
 import { throttle, debounce } from 'throttle-debounce'
 import {
   clearQuery,
   firebaseLogin,
-  getNearbyCheckins
+  getNearbyCheckins,
+  isCheckinOnScreen
 } from '../../FireService/FireService' //TODO: clear on componentWillUnmount
 import {
   selectCheckin,
@@ -77,6 +80,7 @@ class MapSearch extends Component<Props> {
       // uploadMedia: false,
       // queryData: [],
       user: {},
+      offScreenCheckins: new Set()
     }
   }
 
@@ -95,13 +99,13 @@ class MapSearch extends Component<Props> {
     // })
     // .catch((error) => console.log(error.message));
 
-    console.log("MapSearch geolocation...")
+    // console.log("MapSearch geolocation...")
     Geolocation.getCurrentPosition((location={}) => {
       // console.log("currentLocation: ", location)
 
       const {coords: {latitude, longitude}} = location || {}
 
-      console.log("setting region to latitude, longitude: ", latitude, longitude)
+      // console.log("setting region to latitude, longitude: ", latitude, longitude)
 
       this.setState({
         currentLocation: {latitude, longitude},
@@ -139,7 +143,7 @@ class MapSearch extends Component<Props> {
         return resp.json()
       }
     }).then(resp => {
-      console.log("prediction resp.predictions: ", resp.predictions, ', resp; ', resp)
+      // console.log("prediction resp.predictions: ", resp.predictions, ', resp; ', resp)
       this.setState({ predictions: resp.predictions })
     })
     .catch(error => {
@@ -155,14 +159,14 @@ class MapSearch extends Component<Props> {
        }={},
       place_id
     } = place
-    console.log("handlePlaceSelect. place: ", place)
+    // console.log("handlePlaceSelect. place: ", place)
 
     // this.setState({
     //   searchText: `${primaryText} ${secondaryText}`,
     //   predictions: []
     // })
 
-    console.log("fetching place details place_id: ", place_id)
+    // console.log("fetching place details place_id: ", place_id)
 
     // Keyboard.dismiss()
 
@@ -190,7 +194,7 @@ class MapSearch extends Component<Props> {
       } = resp || {}
       const latDelta = Math.abs(northeast.lat - southwest.lat)
       const lngDelta = Math.abs(northeast.lng - southwest.lng)
-      console.log("place details result: ", result)
+      // console.log("place details result: ", result)
       this.setState({
         selectedPlace: {
           ...result,
@@ -199,7 +203,7 @@ class MapSearch extends Component<Props> {
         }
       })
 
-      console.log("place select lat: ", lat, ", lng: ", lng, ", northeast: ", northeast, ", southwest: ", southwest,", latDelta: ", latDelta, ", lngDelta: ", lngDelta)
+      // console.log("place select lat: ", lat, ", lng: ", lng, ", northeast: ", northeast, ", southwest: ", southwest,", latDelta: ", latDelta, ", lngDelta: ", lngDelta)
 
       if (!disableRegionChange) {
         // this.state.region.timing({
@@ -211,7 +215,7 @@ class MapSearch extends Component<Props> {
         })
       }
 
-      console.log("places photos: ", photos)
+      // console.log("places photos: ", photos)
 
       //TODO: split photos by size (thumb vs full size (screenWidth))
       return this.fetchPlacePhotos(photos).then(photoUrls => {
@@ -239,7 +243,7 @@ class MapSearch extends Component<Props> {
   }
 
   onPoiClick = ({nativeEvent}={}) => {
-    console.log("onPoiClick nativeEvent: ", nativeEvent)
+    // console.log("onPoiClick nativeEvent: ", nativeEvent)
     const {
       selectCheckin,
     } = this.props
@@ -260,7 +264,7 @@ class MapSearch extends Component<Props> {
       const {photos=[]} = this.state
 
       if (photos.length > 0) {
-        console.log("photos > 0 , scrolling to end of nearbyCheckins")
+        // console.log("photos > 0 , scrolling to end of nearbyCheckins")
 
         const [{photo_reference}] = photos
 
@@ -295,9 +299,37 @@ class MapSearch extends Component<Props> {
 
 
   onRegionChange = (region) => {
-    // console.log("calling onRegionChange. region: ", region)
+    const {nearbyCheckins} = this.props
     this.state.region.setValue(region);
+
+    this.updateOffscreenCheckins(region)
   }
+
+  updateOffscreenCheckins = debounce(300, (region) => {
+    const {nearbyCheckins} = this.props
+    const {offScreenCheckins: offscreenState} = this.state
+
+    let hasChanged = false
+    //TODO: compile Set of offScreenCheckins
+    const offScreenCheckins = nearbyCheckins.filter((checkin) => {
+      const isOffScreen = !isCheckinOnScreen(checkin, region)
+
+      if (isOffScreen && !offscreenState.has(checkin.docKey)) {
+        hasChanged = true
+      }
+      return isOffScreen
+    }).map(checkin => checkin.docKey)
+
+    if (offScreenCheckins.length !== offscreenState.size) {
+      hasChanged = true
+    }
+
+    if (hasChanged) {
+      this.setState({
+        offScreenCheckins: new Set(offScreenCheckins)
+      })
+    }
+  })
 
   //TODO: Need to throttle
   //TODO: Need to adjust the query radius based on latitude delta 
@@ -318,12 +350,8 @@ class MapSearch extends Component<Props> {
       selectCheckin
     } = this.props
     const nextCheckin = docKey === selectedCheckin ? null : docKey
-    console.log("setSelectedCheckin called! docKey: ", docKey)
+    // console.log("setSelectedCheckin called! docKey: ", docKey)
 
-    //Unselect checkin if already selected
-    // this.setState({
-    //   selectedCheckin: nextCheckin
-    // })
     selectCheckin(nextCheckin)
   }
 
@@ -331,7 +359,6 @@ class MapSearch extends Component<Props> {
     const {region: stateRegion} = this.state
     if (!!stateRegion) {
 
-      console.log("calling  moveRegion stateRegion.timing")
       stateRegion.timing(region).start()
     }
   }
@@ -354,14 +381,12 @@ class MapSearch extends Component<Props> {
       // geoFirestore,
       // geoCollection,
       // imageStoreRef,
-      user
+      user,
+      offScreenCheckins
     } = this.state
-    const allPhotos = [...nearbyCheckins, ...photos]
-
-    console.log("render map nearbyCheckins: ", nearbyCheckins)
-    // console.log("selectedPlace: ", selectedPlace)
-
-    // console.log("!!region: ", !!region, ", selectedCheckin: ", selectedCheckin)
+    const visibleCheckins = nearbyCheckins.filter(checkin => !offScreenCheckins.has(checkin.docKey))
+    // const allPhotos = [...nearbyCheckins, ...photos]
+    const allPhotos = [...visibleCheckins, ...photos]
 
     return (
       <View style={styles.container}>
@@ -386,11 +411,12 @@ class MapSearch extends Component<Props> {
             top: 0,
             left: 0,
             right: 0,
-            bottom: allPhotos.length === 0
-              ? 0
-              : !!selectedCheckin
-                ? (PHOTO_SIZE * PHOTO_SCALE)
-                : PHOTO_SIZE
+            // bottom: allPhotos.length === 0
+            //   ? 0
+            //   : !!selectedCheckin
+            //     ? (PHOTO_SIZE * PHOTO_SCALE)
+            //     : PHOTO_SIZE
+            bottom: PHOTO_SIZE
           }}
         >
 
@@ -430,10 +456,9 @@ class MapSearch extends Component<Props> {
           onPlaceSelect={this.handlePlaceSelect}
         />
 
-        <MediaDrawer
+        <DrawerTest
           allMedia={allPhotos}
           selectedCheckin={selectedCheckin}
-          moveRegion={this.moveRegion}
         />
       </View>
     );

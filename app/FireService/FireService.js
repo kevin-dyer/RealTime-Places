@@ -262,7 +262,7 @@ function queryDataHasChanged(queryData=[], originalQueryData=[]) {
   return false
 }
 
-const isCheckinOnScreen = ({
+export const isCheckinOnScreen = ({
   coordinates: {
     latitude: checkinLat,
     longitude: checkinLng

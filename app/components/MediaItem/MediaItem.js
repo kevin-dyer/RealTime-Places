@@ -8,7 +8,8 @@ import {
   View,
   Image,
   Alert,
-  Dimensions
+  Dimensions,
+  Animated
 } from 'react-native';
 import {
   IconToggle,
@@ -38,6 +39,7 @@ const {width: screenWidth, height: screenHeight} = Dimensions.get('window')
 const isX = isIphoneX()
 const HEADER_HEIGHT = isX ? 150 : 100
 const HEADER_OFFSET = isX ? 80 : 30
+const ANIMATION_TIME = 500
 
 
 // const stateToProps = ({
@@ -69,16 +71,24 @@ export default class MediaItem extends Component {
     paused: true,
     flagging: false,
     liking: false,
+    didLike: true, //used to increase likeCount
     deleting: false,
-    mediaLoading: false
+    mediaLoading: false,
+    mediaWidth: new Animated.Value(0.01)
   }
 
+  componentDidMount() {
+    // this.animateEnter()
+  }
   componentDidUpdate({
     selectedCheckin: oldCheckin,
     userData: {
       liked: oldLiked=[]
-    }={}
-  }, {paused: wasPaused}) {
+    }={},
+    toRemove: wasToRemove
+  }, {
+    paused: wasPaused
+  }) {
     const {
       selectedCheckin,
       item: {type, id}={},
@@ -86,14 +96,21 @@ export default class MediaItem extends Component {
       // userData: {
       //   liked=[]
       // }={}
-      isSelected
+      isSelected,
+      toRemove
     } = this.props
     // const wasSelected = this.isSelected(oldCheckin)
     // const isSelected = this.isSelected(selectedCheckin)
 
     if (!wasPaused && !isSelected) {
-      console.log("no longer selected!")
+      // console.log("no longer selected!")
       this.togglePause(true)
+    }
+
+    if (!wasToRemove && toRemove) {
+
+      // console.log("media toRemove, calling animateExit")
+      this.animateExit()
     }
 
     // if (isSelected) {
@@ -113,6 +130,38 @@ export default class MediaItem extends Component {
 //         liking: false
 //       })
 //     }
+  }
+
+  animateEnter = () => {
+    const {size} = this.props
+
+    // console.log("animateEnter called, setting to size: ", size)
+
+    Animated.timing(this.state.mediaWidth, {
+      toValue: 1,
+      duration: ANIMATION_TIME,
+      // isInteraction: false,
+      // useNativeDriver: true
+    }).start(() => {
+      // console.log("Enter Animation is complete!")
+    })
+  }
+
+  animateExit = () => {
+    const {
+      item,
+      removeMedia=()=>{},
+    } = this.props
+
+    Animated.timing(this.state.mediaWidth, {
+      toValue: 0,
+      duration: ANIMATION_TIME,
+      // isInteraction: false,
+      // useNativeDriver: true
+    }).start(() => {
+      // console.log("Exit Animation is complete!")
+      removeMedia(item)
+    })
   }
 
   deleteCheckin = () => {
@@ -137,8 +186,6 @@ export default class MediaItem extends Component {
             style: 'cancel',
           },
           {text: 'OK', onPress: () => {
-            console.log("calling dleteCheckin")
-
             this.setState({deleting: true})
 
             deleteCheckin({
@@ -183,7 +230,6 @@ export default class MediaItem extends Component {
         {
           text: 'Cancel',
           onPress: () => {
-            console.log('Cancel Pressed')
             this.setState({
               flagging: false
             })
@@ -191,7 +237,6 @@ export default class MediaItem extends Component {
           style: 'cancel',
         },
         {text: 'OK', onPress: () => {
-          console.log("calling flagCheckin")
           flagInappropriateContent({
             id,
             inappropriateCount
@@ -232,7 +277,7 @@ export default class MediaItem extends Component {
 
     this.setState({liking: true})
 
-    console.log("calling likeCheckin with liked: ", !isLiked)
+    // console.log("calling likeCheckin with liked: ", !isLiked)
 
     likeCheckin({
       id,
@@ -242,7 +287,8 @@ export default class MediaItem extends Component {
     }).finally(() => {
       setTimeout(() => {
         this.setState({
-          liking: false
+          liking: false,
+          didLike: true
         })
       }, 300)
 
@@ -275,6 +321,13 @@ export default class MediaItem extends Component {
         }}
         onLoadEnd={e => {
           this.setState({mediaLoading: false})
+
+          //console.log("onLoadEnd called!")
+          this.animateEnter()
+        }}
+
+        onLoad={e => {
+          // console.log("image onLoad called!")
         }}
       />
     } else if (type === 'video') {
@@ -323,6 +376,8 @@ export default class MediaItem extends Component {
           this.setState({
             mediaLoading: false
           })
+
+          this.animateEnter()
         }}
       />
 
@@ -402,11 +457,13 @@ export default class MediaItem extends Component {
     const {
       flagging,
       liking,
-      deleting
+      didLike,
+      deleting,
+      mediaWidth=0
     } = this.state
     // const selected = this.isSelected()
     const marginLeft = index > 0 ? 1 : 0
-    const sideMargin = selected ? -(size * scale - size) / 2 : 0
+    const sideMargin = (selected && index > 0) ? -(size * scale - size) / 2 : 0
     const containerHeight = fullScreen
       ? screenHeight
       : selected ? size * scale : size
@@ -418,19 +475,39 @@ export default class MediaItem extends Component {
     const isLiked = liked.includes(id)
 
     if (selected) {
-      console.log("MEdiaItem isLiked: ", isLiked, "userData.liked: ", liked)
+      // console.log("MEdiaItem isLiked: ", isLiked, "userData.liked: ", liked)
     }
-
+    // const translateX = mediaWidth.interpolate({
+    //   inputRange: [0, 1],
+    //   outputRange: [size/2, 0]
+    // })
+    const widthVal = mediaWidth.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, containerWidth]
+    })
+    const trueLikeCount = likeCount + (isLiked && didLike ? 1 : 0)
 
 
     return (
+      <Animated.View style={{
+        transform: [
+          // {scaleX: mediaWidth},
+          // {translateX}
+        ],
+        // width: size,
+        width: widthVal,
+        height: containerHeight,
+        overflow: 'hidden',
+        marginLeft: fullScreen ? 0 : marginLeft + sideMargin,
+      }}>
       <TouchableOpacity
         key={key}
         style={{
           position: 'relative',
-          height: containerHeight,
-          width: containerWidth,
-          marginLeft: fullScreen ? 0 : marginLeft + sideMargin,
+          flex: 1,
+          // height: containerHeight,
+          // width: containerWidth,
+          
           // marginRight: sideMargin,
           // zIndex: selected ? 200 : 1
         }}
@@ -447,6 +524,8 @@ export default class MediaItem extends Component {
 
           </View>
         }
+
+
         {this._renderMedia(selected)}
 
         {(selected || fullScreen) &&
@@ -534,7 +613,7 @@ export default class MediaItem extends Component {
               onPress={e => this.likeCheckin()}
             />
 
-            {likeCount > 0 &&
+            {trueLikeCount > 0 &&
               <Text style={{
                 fontSize: 10,
                 color: liking
@@ -544,7 +623,7 @@ export default class MediaItem extends Component {
                   {translateX: -14},
                   {translateY: 4}
                 ]
-              }}>{likeCount}</Text>
+              }}>{trueLikeCount}</Text>
             }
           </View>
         }
@@ -627,6 +706,7 @@ export default class MediaItem extends Component {
           </View>
         }
       </TouchableOpacity>
+      </Animated.View>
     )
   }
 }

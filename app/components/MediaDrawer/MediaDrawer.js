@@ -87,8 +87,22 @@ const stateToProps = ({
 
 class MediaDrawer extends Component {
 	state = {
-    fullScreen: false
+    fullScreen: false,
+    // allMedia: []
 	}
+
+  // componentDidMount() {
+  //   const {allMedia=[]} = this.props
+  //   this.setState({allMedia})
+  // }
+
+  // componentDidUpdate({allMedia: prevMedia}) {
+  //   const {allMedia=[]} = this.props
+  // }
+
+  // addItem = () => {
+  //   //TODO: animate in 
+  // }
 
 //TODO: add back once memory leak is solved
 //   componentDidUpdate({selectedCheckin: oldSelectedCheckin}) {

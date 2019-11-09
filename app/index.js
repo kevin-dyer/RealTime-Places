@@ -16,6 +16,8 @@ import {
   IconToggle
 } from 'react-native-material-ui'
 
+console.disableYellowBox = true;
+
 const uiTheme = {
   palette: {
     primaryColor: COLOR.blue500,
