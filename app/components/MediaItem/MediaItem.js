@@ -565,7 +565,7 @@ export default class MediaItem extends Component {
                   />
                 }
 
-                {userUid !== currentUserUuid &&
+                {userUid !== currentUserUuid && !photo_reference &&
                   <IconToggle
                     name="ios-alert"
                     iconSet="Ionicons"
@@ -594,7 +594,7 @@ export default class MediaItem extends Component {
           </View>
         }
 
-        {(selected || fullScreen) &&
+        {(selected || fullScreen) && !photo_reference &&
           <View style={{
             position: 'absolute',
             bottom: fullScreen ? screenHeight - screenWidth - HEADER_HEIGHT : 20,

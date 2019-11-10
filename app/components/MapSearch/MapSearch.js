@@ -400,7 +400,7 @@ class MapSearch extends Component<Props> {
             latitudeDelta: 0.04,
             longitudeDelta: 0.04
           }}
-          onRegionChange={this.onRegionChange}
+          // onRegionChange={this.onRegionChange}
           onRegionChangeComplete={this.getNearbyCheckins}
           onPoiClick={this.onPoiClick}
           showsUserLocation={true}

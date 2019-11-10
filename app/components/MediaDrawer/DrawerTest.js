@@ -265,15 +265,16 @@ class DrawerTest extends Component {
   }
 
   toggleFullScreen = (index) => {
-    this.setState({fullScreen: !this.state.fullScreen})
+    const nextFullScreen = !this.state.fullScreen
+    this.setState({fullScreen: nextFullScreen})
 
     if (!!this.scrollViewRef && !isNaN(index)) {
       // console.log("toggleFullScreen calling scrollToIndex: ", index)
       setTimeout(() => { 
         this.scrollViewRef.scrollTo({
           animated: false,
-          x: PHOTO_SIZE * index,
-          y: PHOTO_SIZE * index
+          x: !nextFullScreen ? PHOTO_SIZE * index - width / 2 + PHOTO_SIZE / 2 : 0,
+          y: nextFullScreen ? height * index : 0
         })
       }, 200)
     }

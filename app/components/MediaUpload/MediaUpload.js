@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Keyboard
 } from 'react-native';
+import {withNavigationFocus} from 'react-navigation'
 import {
   COLOR,
   IconToggle,
@@ -80,6 +81,32 @@ class MediaUpload extends Component {
     nearbyPlaces: [],
     category: undefined,
     isMuted: false
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.isFocused && !this.props.isFocused) {
+      this.clearForm()
+    }
+  }
+
+  clearForm = () => {
+    this.setState({
+      // selectedTab: 0, //or video
+      isRecording: false,
+      // flashMode: 'auto',
+      imageUri: '',
+      videoUri: '',
+      currentPosition: {},
+      uploadProgress: 0,// 0 - 100
+      recordingStartTime: 0,
+      videoProgress: 0,
+      videoPaused: true,
+      comment: '',
+      placeNearby: undefined,
+      nearbyPlaces: [],
+      category: undefined,
+      // isMuted: false
+    })
   }
 
   takePicture = function() {
@@ -340,6 +367,7 @@ class MediaUpload extends Component {
     // console.log("render imageUri: ", imageUri)
     // console.log("render videoProgress: ", videoProgress, ", selectedTab: ", selectedTab)
 
+    console.log("this.props.navigation: ", this.props.navigation.isFocused())
     return (
       <KeyboardAvoidingView
         style={styles.container}
@@ -788,7 +816,7 @@ class MediaUpload extends Component {
   }
 }
 
-export default connect(stateToProps, {selectCheckin})(MediaUpload)
+export default connect(stateToProps, {selectCheckin})(withNavigationFocus(MediaUpload))
 
 const styles = StyleSheet.create({
   container: {
