@@ -1,5 +1,6 @@
 'use strict';
 import React, { Component } from 'react';
+import {connect} from 'react-redux'
 import {
   StyleSheet,
   Text,
@@ -11,26 +12,41 @@ import {
 } from 'react-native';
 import { IconToggle } from 'react-native-material-ui';
 import Autocomplete from 'react-native-autocomplete-input'
+import {updateAutocompleteSearch} from '../../actions/search'
 import {PLACES_KEY} from '../../../configs'
 const {width, height} = Dimensions.get('window')
 
 
+const stateToProps = ({
+  search: {searchText=''}={}
+}) => {
+  return {
+    searchText
+  }
+}
 
-export default class PlacesAutoComplete extends Component {
+class PlacesAutoComplete extends Component {
   state={
-    textSearch: '',
+    // textSearch: '',
     predictions: []
   }
   handleTextChange = (text) => {
-    this.setState({searchText: text})
+    // this.setState({searchText: text})
+    const {updateAutocompleteSearch} = this.props
 
-    fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${PLACES_KEY}`)
+    updateAutocompleteSearch(text)
+
+    this.fetchPredictions(text)
+  }
+
+  fetchPredictions = (text) => {
+    return fetch(`https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${PLACES_KEY}`)
     .then(resp => {
       if (resp.ok) {
         return resp.json()
       }
     }).then(resp => {
-      console.log("prediction resp.predictions: ", resp.predictions, ', resp; ', resp)
+      // console.log("prediction resp.predictions: ", resp.predictions, ', resp; ', resp)
       this.setState({ predictions: resp.predictions })
     })
     .catch(error => {
@@ -39,7 +55,8 @@ export default class PlacesAutoComplete extends Component {
   }
 
   clearSearch = () => {
-    this.setState({searchText: '', predictions: []})
+    this.setState({predictions: []})
+    this.props.updateAutocompleteSearch('')
   }
 
   handlePlaceSelect = (place={}) => {
@@ -50,10 +67,14 @@ export default class PlacesAutoComplete extends Component {
       }={},
       place_id
     } = place
+    const {updateAutocompleteSearch} = this.props
+
+    console.log("handlePlaceSelect autocomplete place: ", place)
     const {onPlaceSelect=()=> {}} = this.props
 
+    updateAutocompleteSearch(`${primaryText} ${secondaryText}`)
     this.setState({
-      searchText: `${primaryText} ${secondaryText}`,
+      // searchText: `${primaryText} ${secondaryText}`,
       predictions: []
     })
 
@@ -62,8 +83,10 @@ export default class PlacesAutoComplete extends Component {
     return onPlaceSelect(place, false)
   }
 
+
   _renderTextInput = (props) => {
-    const {searchText, predictions} = this.state
+    const {searchText} = this.props
+    const {predictions} = this.state
     return <View style={{
       position: 'relative'
     }}>
@@ -89,7 +112,6 @@ export default class PlacesAutoComplete extends Component {
         shadowOpacity={0.3}
         shadowRadius={4}
       />
-
       {!!searchText &&
         <View style={{
           position: 'absolute',
@@ -137,7 +159,11 @@ export default class PlacesAutoComplete extends Component {
   }
 
 	render() {
-    const {predictions, searchText} = this.state
+    const {searchText} = this.props
+    const {
+      predictions=[]
+    } = this.state
+
 		return <View style={{
       position: 'absolute',
       width: width - 40,
@@ -151,6 +177,13 @@ export default class PlacesAutoComplete extends Component {
         data={predictions}
         value={searchText}
         onChangeText={this.handleTextChange}
+        onFocus={e => {
+          console.log("Autocomplete onFocus called! searchText: ", searchText, ", predictions: ", predictions)
+          if (!!searchText && predictions.length === 0) {
+            console.log("calling fetchPredictions!")
+            this.fetchPredictions(searchText)
+          }
+        }}
         renderTextInput={this._renderTextInput}
         renderItem={this._renderItem}
         containerStyle={{
@@ -172,3 +205,7 @@ export default class PlacesAutoComplete extends Component {
     </View>
 	}
 }
+
+export default connect(stateToProps, {
+  updateAutocompleteSearch
+})(PlacesAutoComplete)

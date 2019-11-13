@@ -1,13 +1,16 @@
 import {
 	SELECT_CHECKIN,
 	UPDATE_NEARBY_CHECKINS,
-	UPDATE_LIKE_COUNT
+	UPDATE_LIKE_COUNT,
+	UPDATE_REGION
 } from '../actions/checkins'
 
 
 const initialState = {
 	selectedCheckin: undefined,
-	nearbyCheckins: []
+	// nearbyCheckins: []
+	nearbyCheckins: new Map(),
+	region: undefined
 }
 
 export default function checkins(state=initialState, action={}) {
@@ -20,9 +23,24 @@ export default function checkins(state=initialState, action={}) {
 			}
 
 		case UPDATE_NEARBY_CHECKINS:
+			//TODO: change nearbyCheckins into a Map
+			//		Only add checkins, do not remove
+			// NOTE: may need to optimize this to clear nearbyCheckins as list grows
+			const nextCheckins = new Map(state.nearbyCheckins)
+			action.nearbyCheckins.forEach((checkin, index) => {
+				const key = checkin.docKey || checkin.photo_reference
+
+				// if (!!key && !nextCheckins.has(key)) {
+				// 	nextCheckins.set(key, checkin)
+				// } else {
+				// 	console.error("checkin key not found. checkin: ", checkin)
+				// }
+				nextCheckins.set(key, checkin)
+			})
+
 			return {
 				...state,
-				nearbyCheckins: action.nearbyCheckins
+				nearbyCheckins: nextCheckins
 			}
 
 		case UPDATE_LIKE_COUNT:
@@ -40,6 +58,12 @@ export default function checkins(state=initialState, action={}) {
 					}
 					return checkin
 				})
+			}
+
+		case UPDATE_REGION:
+			return {
+				...state,
+				region: action.region
 			}
 
 		default:

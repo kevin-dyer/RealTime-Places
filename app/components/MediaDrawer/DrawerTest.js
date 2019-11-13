@@ -49,9 +49,9 @@ const PHOTO_SIZE = 140
 const PHOTO_SCALE = 2
 
 const stateToProps = ({
-  checkins: {
-    nearbyCheckins=[]
-  }={},
+  // checkins: {
+  //   nearbyCheckins=new Map()
+  // }={},
   login: {
     userData={},
     userData: {
@@ -316,14 +316,12 @@ class DrawerTest extends Component {
       // allMedia=[],
       selectedCheckin,
       selectCheckin=()=>{},
-      nearbyCheckins=[],
       // toggleMediaUpload=()=>{}
       navigation: {
         navigate
       }={}
     } = this.props
     const {fullScreen, allMedia=[]} = this.state
-    const queryLength = nearbyCheckins.length
 
     return <View style={{
       position: 'absolute',

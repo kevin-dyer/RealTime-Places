@@ -39,7 +39,7 @@ export const firebaseLogin = () => {
     .then(credential => {
       if (credential) {
         _user = credential.user.toJSON()
-        console.log('default app user ->', _user);
+        // console.log('default app user ->', _user);
 
         // Create a Firestore reference
         
@@ -56,7 +56,7 @@ export const firebaseLogin = () => {
 //NOTE: Called from AuthLoadingScreen
 export const firebaseInit = (user, dispatch) => {
 
-    console.log("firebaseInit, updating _dispatch to: ", dispatch)
+    // console.log("firebaseInit, updating _dispatch to: ", dispatch)
     _dispatch = dispatch
     _firestore = firebase.firestore();
     _imageStoreRef = firebase.storage().ref()
@@ -78,17 +78,17 @@ export const firebaseInit = (user, dispatch) => {
     // })
 
 
-     console.log("firebaseInit. user.uid: ", user.uid)
+     // console.log("firebaseInit. user.uid: ", user.uid)
     if (!_userData) {
 
-      console.log("setting _userData, _userDataRef: ", _userDataRef)
+      // console.log("setting _userData, _userDataRef: ", _userDataRef)
       _userDataRef.get().then(snapshot => {
         _userData = snapshot.data()
 
         _dispatch(updateUserData(_userData))
 
         if (!_userData) {
-          console.log("creating user, user.uid: ", user.uid)
+          // console.log("creating user, user.uid: ", user.uid)
           const nextUser = {
             uid: user.uid,
             liked: [],
@@ -96,7 +96,7 @@ export const firebaseInit = (user, dispatch) => {
             checkins: []
           }
           _usersRef.doc(user.uid).set(nextUser).then(docRef => {
-            console.log("created userData! docRef: ", docRef)
+            // console.log("created userData! docRef: ", docRef)
 
             _userData = nextUser
             _dispatch(updateUserData(_userData))
@@ -104,7 +104,7 @@ export const firebaseInit = (user, dispatch) => {
             console.warn("error creating user. error: ", error)
           })
         } else {
-          console.log("_userData: ", _userData)
+          // console.log("_userData: ", _userData)
         }
       })
       .catch(error => {
@@ -226,17 +226,17 @@ export const getNearbyCheckins = (region={}, onQueryData=()=>{}) => {
        id: doc.id
       }
     })
-    .filter(checkin => isCheckinOnScreen(checkin, region))
-    .sort((a, b) => {
-      if (a.timestamp < b.timestamp) {
-       return 1
-      } else if (a.timestamp > b.timestamp) {
-       return -1
-      } else {
-       return 0
-      }
-    })
-    .slice(0, maxDocs)
+    // .filter(checkin => isCheckinOnScreen(checkin, region))
+    // .sort((a, b) => {
+    //   if (a.timestamp < b.timestamp) {
+    //    return 1
+    //   } else if (a.timestamp > b.timestamp) {
+    //    return -1
+    //   } else {
+    //    return 0
+    //   }
+    // })
+    // .slice(0, maxDocs)
 
      //Attempt to only update state if results have changed
     if (queryDataHasChanged(queryData, _queryData)) {
@@ -250,7 +250,7 @@ function queryDataHasChanged(queryData=[], originalQueryData=[]) {
 
   // console.log("queryData: ", queryData,', originalQueryData',originalQueryData)
   if (queryData.length !== originalQueryData.length) {
-    console.log("exiting queryDataHasChanged b/c lenghts are diff")
+    // console.log("exiting queryDataHasChanged b/c lenghts are diff")
     return true
   }
   // const maxLength = Math.max(queryData.length, originalQueryData.length)
@@ -355,8 +355,8 @@ export const saveMedia = ({
         // })
         // console.log("upload progress: ", (snapshot.bytesTransferred / snapshot.totalBytes) * 100)
         if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
-          console.log("Successful upload!")
-          console.log('Uploaded a blob or file! snapshot.downloadURL: ', snapshot && snapshot.downloadURL);
+          // console.log("Successful upload!")
+          // console.log('Uploaded a blob or file! snapshot.downloadURL: ', snapshot && snapshot.downloadURL);
 
           // this.setState({
           //   uploadProgress: 1
@@ -377,7 +377,7 @@ export const saveMedia = ({
 
           _geoCollection.add(doc)
           .then(docRef => {
-            console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
+            // console.log("added doc to geocollection. docRef: ", docRef, ", ref id: ", docRef.id)
             const nextCheckins = [...checkins, docRef.id]
             //Add checkin to userData.checkins array
             _userDataRef.update({
@@ -386,7 +386,7 @@ export const saveMedia = ({
               _userData.checkins = nextCheckins
 
               _dispatch(updateUserData(_userData))
-              console.log("updated userRef: ", userRef)
+              // console.log("updated userRef: ", userRef)
               return resolve(docRef)
             }).catch(error => {
               console.warn("Error adding checkin to userDataRef: ", error)
@@ -420,7 +420,7 @@ export const likeCheckin = ({
     //format likeCount to an integer
     likeCount = parseInt(likeCount) || 0
 
-    console.log("likeCheckin called. id: ", id)
+    // console.log("likeCheckin called. id: ", id)
 
     //if already liked, we are unliking
     let nextLikeCount = liked ? likeCount - 1 : likeCount + 1
@@ -430,7 +430,7 @@ export const likeCheckin = ({
         likeCount: nextLikeCount
       })
       .then((docRef)=>{
-        console.log("checkin rated successfully. likeCount: ", nextLikeCount, ", previously liked: ", liked)
+        // console.log("checkin rated successfully. likeCount: ", nextLikeCount, ", previously liked: ", liked)
         //NOTE: liked is the previous liked state of this checkin,
         //so add if it is not already liked,
         //otherwise filter out
@@ -444,7 +444,7 @@ export const likeCheckin = ({
 
         _userData.liked = nextLiked
 
-        console.log("dispatching updateUserData, with _userData: ", _userData)
+        // console.log("dispatching updateUserData, with _userData: ", _userData)
         dispatch(updateUserData(_userData))
 
           return docRef
@@ -466,26 +466,30 @@ export const flagInappropriateContent = ({
   inappropriateCount=0
 }) => {
   const {flagged=[]} = _userData || {}
+
+  // console.log("FireService. calling flagInappropriateContent. id: ", id, ", inappropriateCount: ", inappropriateCount, ", flagged: ", flagged)
   return _geoCollection.doc(id).update({
     inappropriateCount: inappropriateCount + 1
   })
   .then((docRef)=>{
-    console.log("checkin flagged successfully")
+    // console.log("checkin flagged successfully")
     const nextFlagged = [...flagged, id]
     _userDataRef.update({
       flagged: nextFlagged
     }).then(() => {
 
+      // console.log("upserData flagged updated successfully, now calling email api")
       //Update cached userData
       _userData.flagged = nextFlagged
 
       _dispatch(updateUserData(_userData))
 
-      console.log("sending inappropriate content to _user.email: ", _user.email)
+      // console.log("sending inappropriate content to _user.email: ", _user.email)
       //Send email notifications
       fetch(`https://us-central1-realtime-places-239604.cloudfunctions.net/inappropriateContentFlag?userEmail=${_user.email}&checkinId=${id}&inappropriateCount=${inappropriateCount}`)
       .then(resp => {
-        console.log("Inappropriate content email resp: ", resp)
+        // console.log("Inappropriate content email resp: ", resp)
+        return resp
       })
       .catch(erro => {
         console.log("Error sending Inappropriate content email: ", erro)
@@ -499,6 +503,7 @@ export const flagInappropriateContent = ({
   })
   .catch(error => {
     console.error("checkin failed to be flagged! error: ", error)
+    throw error
   })
 }
 
@@ -508,7 +513,7 @@ export const deleteCheckin = ({
 }) => {
   return _geoCollection.doc(id).delete()
   .then((resp)=>{
-    console.log("checkin deleted successfully")
+    // console.log("checkin deleted successfully")
     const nextCheckins = _userData.checkins.filter(checkinId => checkinId !== id)
     _userDataRef.update({
       checkins: nextCheckins
@@ -535,7 +540,7 @@ export const deleteCheckin = ({
   // images/${docKey}.jpg
   imageStoreRef.child(`images/${docKey}.jpg`).delete()
   .then(()=>{
-    console.log("image deleted successfully")
+    // console.log("image deleted successfully")
   })
   .catch(error => {
     console.error("image failed to delete! error: ", error)

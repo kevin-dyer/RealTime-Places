@@ -108,7 +108,7 @@ exports.inappropriateContentFlag = functions.https.onRequest((req, res) => {
   	const checkinId = query.checkinId
   	const inappropriateCount = query.inappropriateCount
 
-  	sendFlagConfirmation(dest)
+  	sendFlagConfirmation(userEmail)
   	notifyAdminFlag(userEmail, checkinId, inappropriateCount)
   	
 		return res.send('Inappropriate content review request sent');

@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  TextInput,
   View,
   Dimensions,
   Image,
@@ -19,6 +20,11 @@ import {
   IconToggle,
   // Badge
 } from 'react-native-material-ui'
+import {
+  TextField,
+  FilledTextField,
+  OutlinedTextField,
+} from 'react-native-material-textfield';
 import { RNCamera } from 'react-native-camera'
 import uuidV4 from 'uuid/v4'
 import RNFS from 'react-native-fs'
@@ -33,7 +39,7 @@ import { Input, Button } from 'react-native-elements';
 import { Dropdown } from 'react-native-material-dropdown';
 import * as Progress from 'react-native-progress';
 import PlacesNearbyPicker from '../PlacesNearbyPicker/PlacesNearbyPicker'
-import {selectCheckin} from '../../actions/checkins'
+import {selectCheckin, categoryOptions} from '../../actions/checkins'
 import {
   getUser,
   getFirestore,
@@ -55,11 +61,6 @@ const flashModeOrder = {
   // auto: 'torch',
   // torch: 'off',
 };
-const categories = [
-  {value: 'surfing'},
-  {value: 'fishing'},
-  {value: 'other'}
-]
 
 
 const stateToProps = ({}) => ({})
@@ -329,7 +330,7 @@ class MediaUpload extends Component {
   //Callback from PlacesNearbyPicker
   onPlaceSelect = (place) => {
     this.setState({
-      placeNearby: place
+      placeNearby: {name: place}
     })
   }
 
@@ -339,10 +340,10 @@ class MediaUpload extends Component {
     })
   }
 
-  handleCategoryChange = (text) => {
-    // console.log("handleCategoryChange called. text: ", text.value)
+  handleCategoryChange = (categoryId) => {
+    console.log("handleCategoryChange called. categoryId: ", categoryId)
     this.setState({
-      category: text.value
+      category: categoryId.value
     })
   }
 
@@ -361,7 +362,8 @@ class MediaUpload extends Component {
       currentPosition,
       placeNearby,
       uploading,
-      isMuted
+      isMuted,
+      comment
     } = this.state
     // const videoProgress = Math.floor((Date.now() - recordingStartTime) / 1000) / 15
     // console.log("render imageUri: ", imageUri)
@@ -734,60 +736,116 @@ class MediaUpload extends Component {
               }}
             >
 
-              <Input
-                placeholder='Add a Comment'
-                leftIcon={
-                  <Icon
-                    name='ios-create'
-                    size={24}
-                    color='black'
-                  />
-                }
-                inputStyle={{
-                  height: null
-                }}
+              <OutlinedTextField
+                label='Add a Comment'
+                // leftIcon={
+                //   <Icon
+                //     name='ios-create'
+                //     size={24}
+                //     color='black'
+                //   />
+                // }
+                // inputStyle={{
+                //   height: null
+                // }}
                 multiline={true}
                 containerStyle={{marginTop: 30}}
-                leftIconContainerStyle={{marginRight: 20}}
-                numberOfLines={3}
+                // leftIconContainerStyle={{marginRight: 20}}
+                // numberOfLines={3}
                 blurOnSubmit={true}
                 returnKeyType={'done'}
                 onChangeText={this.handleCommentChange}
+                value={comment}
               />
 
 
-              <PlacesNearbyPicker
-                onPlaceSelect={this.onPlaceSelect}
-                currentPosition={currentPosition}
-                selectedPlace={placeNearby}
+              {/* <PlacesNearbyPicker */}
+              {/*   onPlaceSelect={this.onPlaceSelect} */}
+              {/*   currentPosition={currentPosition} */}
+              {/*   selectedPlace={placeNearby} */}
+              {/* /> */}
+
+              {/* <TextInput */}
+              {/*   style={styles.textInput} */}
+              {/*   onChangeText={text => onChangeText(text)} */}
+              {/*   value={value} */}
+              {/* /> */}
+
+              <OutlinedTextField
+                label='Tag Place'
+                // keyboardType='phone-pad'
+                // formatText={this.formatText}
+                // onSubmitEditing={this.onSubmit}
+                ref={this.fieldRef}
+                onChangeText={this.onPlaceSelect}
               />
 
               <Dropdown
-                data={categories}
+                label="Select a Category"
+                data={categoryOptions}
                 onChangeText={this.handleCategoryChange}
-                labelExtractor={({value}) => value}
-                valueExtractor={(value) => value}
-                renderBase={props => {
-                  const {value: {value=''}={}} = props
-                  return <Input
-                    placeholder="Select a category"
-                    leftIcon={
-                      <Icon
-                        name='ios-albums'
-                        size={24}
-                        color='black'
-                      />
-                    }
-                    containerStyle={{marginTop: 30}}
-                    leftIconContainerStyle={{marginRight: 20}}
-                    {...props}
-                    value={value}
-                  />
-                }}
+                labelExtractor={({title='', text=''}) => `${title}${!!text ? `- ${text}` : ''}`}
+                valueExtractor={(categoryId) => {
+                  // console.log("valueExtractor categoryId: ", categoryId)
+                  return categoryId.value
+                  }}
+//                 renderBase={props => {
+//                   const {value: {value='', title=''}={}} = props
+//                   // console.log("category title: ", title)
+//                   const nextProps = {
+//                     // ...props,
+//                     // onFocus: props.onFocus,
+//                     // onChangeText: props.onChangeText,
+//                     label: "Select a category",
+//                     value: props.value
+//                   }
+// 
+//                   delete nextProps.title
+// 
+//                   console.log("category props.title: ", props.title)
+// 
+//                   return <OutlinedTextField
+//                     // leftIcon={
+//                     //   <Icon
+//                     //     name='ios-albums'
+//                     //     size={24}
+//                     //     color='black'
+//                     //   />
+//                     // }
+//                     // containerStyle={{marginTop: 30}}
+//                     // leftIconContainerStyle={{marginRight: 20}}
+//                     // {...nextProps}
+//                     // {...props}
+//                     label="Select a Category"
+//                     value={props.title}
+//                     ref={this.categoryRef}
+//                   />
+//                 }}
                 onFocus={e => {
                   // console.log("dropdown onFocus");
                   Keyboard.dismiss();
                 }}
+                containerStyle={{
+                  margin:0,
+                  padding: 0,
+                  paddingLeft: 8,
+                  paddingRight: 8,
+                  borderWidth: 1,
+                  borderRadius: 4,
+                  borderColor: 'rgba(0, 0, 0, 0.28)',
+                  // height: 40
+                }}
+                inputContainerStyle={{
+                  margin: 0,
+                  padding: 0,
+                  height: 48,
+                  top: -15
+                  }}
+                  pickerStyle={{
+                    margin: 0,
+                  padding: 0
+                    }}
+                lineWidth={0}
               />
 
               <View style={{
@@ -834,6 +892,11 @@ const styles = StyleSheet.create({
     height: width,
     width
   },
+  textInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1
+  }
   // capture: {
   //   flex: 0,
   //   backgroundColor: '#fff',

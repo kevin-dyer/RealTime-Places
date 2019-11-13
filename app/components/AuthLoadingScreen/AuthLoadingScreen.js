@@ -22,7 +22,7 @@ class AuthLoadingScreen extends Component {
 
 
     firebase.auth().onAuthStateChanged(user => {
-      console.log("onAuthStateChanged. user: ", user)
+      // console.log("onAuthStateChanged. user: ", user)
       this.props.navigation.navigate(user ? 'App' : 'Auth')
 
       if (!!user) {

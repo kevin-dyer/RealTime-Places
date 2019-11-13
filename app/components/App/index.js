@@ -143,7 +143,7 @@ export default class App extends Component<Props> {
         return resp.json()
       }
     }).then(resp => {
-      console.log("prediction resp.predictions: ", resp.predictions, ', resp; ', resp)
+      // console.log("prediction resp.predictions: ", resp.predictions, ', resp; ', resp)
       this.setState({ predictions: resp.predictions })
     })
     .catch(error => {
@@ -159,14 +159,14 @@ export default class App extends Component<Props> {
        }={},
       place_id
     } = place
-    console.log("handlePlaceSelect. place: ", place)
+    // console.log("handlePlaceSelect. place: ", place)
 
     // this.setState({
     //   searchText: `${primaryText} ${secondaryText}`,
     //   predictions: []
     // })
 
-    console.log("fetching place details place_id: ", place_id)
+    // console.log("fetching place details place_id: ", place_id)
 
     // Keyboard.dismiss()
 
@@ -194,7 +194,7 @@ export default class App extends Component<Props> {
       } = resp || {}
       const latDelta = Math.abs(northeast.lat - southwest.lat)
       const lngDelta = Math.abs(northeast.lng - southwest.lng)
-      console.log("place details result: ", result)
+      // console.log("place details result: ", result)
       this.setState({
         selectedPlace: {
           ...result,
@@ -203,7 +203,7 @@ export default class App extends Component<Props> {
         }
       })
 
-      console.log("place select lat: ", lat, ", lng: ", lng, ", northeast: ", northeast, ", southwest: ", southwest,", latDelta: ", latDelta, ", lngDelta: ", lngDelta)
+      // console.log("place select lat: ", lat, ", lng: ", lng, ", northeast: ", northeast, ", southwest: ", southwest,", latDelta: ", latDelta, ", lngDelta: ", lngDelta)
 
       if (!disableRegionChange) {
         // this.state.region.timing({
@@ -215,7 +215,7 @@ export default class App extends Component<Props> {
         })
       }
 
-      console.log("places photos: ", photos)
+      // console.log("places photos: ", photos)
 
       //TODO: split photos by size (thumb vs full size (screenWidth))
       return this.fetchPlacePhotos(photos).then(photoUrls => {

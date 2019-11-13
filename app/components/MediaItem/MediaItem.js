@@ -18,6 +18,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import Video from 'react-native-video';
 import { isIphoneX } from 'react-native-iphone-x-helper'
+import moment from 'moment'
 import {
   likeCheckin,
   flagInappropriateContent,
@@ -30,7 +31,8 @@ import {
 } from '../../actions/login'
 import {
   selectCheckin,
-  updateLikeCount
+  updateLikeCount,
+  getCategoryById
 } from '../../actions/checkins'
 
 
@@ -39,7 +41,7 @@ const {width: screenWidth, height: screenHeight} = Dimensions.get('window')
 const isX = isIphoneX()
 const HEADER_HEIGHT = isX ? 150 : 100
 const HEADER_OFFSET = isX ? 80 : 30
-const ANIMATION_TIME = 500
+const ANIMATION_TIME = 300
 
 
 // const stateToProps = ({
@@ -240,14 +242,16 @@ export default class MediaItem extends Component {
           flagInappropriateContent({
             id,
             inappropriateCount
+          }).then(resp => {
+            trackFlagged(id)
+
+            return resp
           }).finally(() => {
             setTimeout(() => {
               this.setState({
                 flagging: false
               })
             }, 300)
-
-            trackFlagged(id)
           })
         }, style: 'destructive'},
       ],
@@ -423,6 +427,42 @@ export default class MediaItem extends Component {
     return docKey || photo_reference || index
   }
 
+  getTimeSinceLabel = (timestamp) => {
+    const dateTime = moment(timestamp)
+
+    let dateLabel = dateTime.toNow(true)
+    let shortLabel
+
+    if (dateLabel === 'a few seconds') {
+      shortLabel = 'now'
+    } else if (dateLabel === 'a minute') {
+      shortLabel = '1m'
+    } else if (dateLabel === 'an hour') {
+      shortLabel = '1h'
+    } else if (dateLabel === 'a day') {
+      shortLabel = '1d'
+    } else if (dateLabel === 'a month') {
+      shortLabel = '1mo'
+    } else if (dateLabel === 'a year') {
+      shortLabel = '1y'
+    } else {
+      shortLabel = dateLabel.replace(/\sseconds?/, 's')
+      shortLabel = shortLabel.replace(/\sminutes?/, 'm')
+      shortLabel = shortLabel.replace(/\shours?/, 'h')
+      shortLabel = shortLabel.replace(/\sdays?/, 'd')
+      shortLabel = shortLabel.replace(/\smonths?/, 'mo')
+      shortLabel = shortLabel.replace(/\syears?/, 'y')
+    }
+
+    return shortLabel
+  }
+
+  getFullDateLabel = (timestamp) => {
+    const dateTime = moment(timestamp).format("dddd, MMMM Do YYYY, h:mm:ss a");
+
+    return dateTime
+  }
+
   render() {
     const {
       item,
@@ -435,11 +475,12 @@ export default class MediaItem extends Component {
         placeNearby: {
           name: placeName=''
         }={},
-        category='',
+        category: categoryId='',
         //For google photo:
         photo_reference,
         uri,
-        likeCount=0
+        likeCount=0,
+        timestamp
       }={},
       index,
       userUid: currentUserUuid,
@@ -473,10 +514,11 @@ export default class MediaItem extends Component {
     const key = this.getKey()
     const isFlagged = flagged.includes(id)
     const isLiked = liked.includes(id)
+    const {title: categoryTitle=''} = getCategoryById(categoryId) || {}
 
-    if (selected) {
-      // console.log("MEdiaItem isLiked: ", isLiked, "userData.liked: ", liked)
-    }
+    const timeSinceLabel = this.getTimeSinceLabel(timestamp)
+    const fullDateLabel = this.getFullDateLabel(timestamp)
+
     // const translateX = mediaWidth.interpolate({
     //   inputRange: [0, 1],
     //   outputRange: [size/2, 0]
@@ -528,7 +570,6 @@ export default class MediaItem extends Component {
 
         {this._renderMedia(selected)}
 
-        {(selected || fullScreen) &&
           <View
             style={{
               position: 'absolute',
@@ -554,76 +595,128 @@ export default class MediaItem extends Component {
                   />
                 }
               </View>
-              <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                {!fullScreen &&
-                  <IconToggle
-                    name={fullScreen ? "ios-contract" : "ios-expand"}
-                    iconSet="Ionicons"
-                    size={fullScreen ? HEADER_OFFSET : 24}
-                    color={'#FFF'}
-                    onPress={e => onExpand(index)}
-                  />
-                }
-
-                {userUid !== currentUserUuid && !photo_reference &&
-                  <IconToggle
-                    name="ios-alert"
-                    iconSet="Ionicons"
-                    size={28}
-                    color={flagging
-                      ? COLOR.grey500
-                      : isFlagged ? COLOR.red500 : '#FFF'
+              <View style={{flexDirection: 'row', justifyContent: 'space-between', flex: 1}}>
+                <View style={{
+                  // flex: 1,
+                  alignSelf: 'center'
+                }}>
+                  {!fullScreen &&
+                    <View style={{}}>
+                      {!!docKey &&
+                        <View style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                            borderRadius: 30,
+                            margin: 6,
+                            padding: 2,
+                            paddingLeft: 6,
+                            paddingRight: 6,
+                        }}>
+                          <Text style={{
+                            color: '#000',
+                            fontSize: 11,
+                            fontWeight: '600'
+                          }}>{timeSinceLabel}{selected || fullScreen ? ' ago' : ''}</Text>
+                        </View>
+                      }
+                    </View>
+                  }
+                </View>
+                {(selected || fullScreen) &&
+                  <View style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center'
+                  }}>
+                    {!fullScreen &&
+                      <IconToggle
+                        name={fullScreen ? "ios-contract" : "ios-expand"}
+                        iconSet="Ionicons"
+                        size={fullScreen ? HEADER_OFFSET : 22}
+                        color={'#FFF'}
+                        onPress={e => onExpand(index)}
+                      />
                     }
-                    onPress={this.flagInappropriateContent}
-                    disabled={flagging}
-                  />
-                }
 
-                {(!userUid || userUid === currentUserUuid) && !photo_reference &&
-                  <IconToggle
-                    name="ios-trash"
-                    iconSet="Ionicons"
-                    size={28}
-                    color={deleting ? COLOR.grey500 : '#FFF'}
-                    disabled={deleting}
-                    onPress={this.deleteCheckin}
-                  />
+                    {userUid !== currentUserUuid && !photo_reference &&
+                      <IconToggle
+                        name="ios-alert"
+                        iconSet="Ionicons"
+                        size={26}
+                        color={flagging
+                          ? COLOR.grey500
+                          : isFlagged ? COLOR.red500 : '#FFF'
+                        }
+                        onPress={this.flagInappropriateContent}
+                        disabled={flagging}
+                      />
+                    }
+
+                    {(!userUid || userUid === currentUserUuid) && !photo_reference &&
+                      <IconToggle
+                        name="ios-trash"
+                        iconSet="Ionicons"
+                        size={26}
+                        color={deleting ? COLOR.grey500 : '#FFF'}
+                        disabled={deleting}
+                        onPress={this.deleteCheckin}
+                      />
+                    }
+                  </View>
                 }
               </View>
             </View>
           </View>
-        }
 
-        {(selected || fullScreen) && !photo_reference &&
+        {(selected || fullScreen) && !!docKey &&
           <View style={{
             position: 'absolute',
             bottom: fullScreen ? screenHeight - screenWidth - HEADER_HEIGHT : 20,
             right: 0,
-            flexDirection: 'row'
+            flexDirection: 'row',
+            alignItems: 'center'
           }}>
-            <IconToggle
-              name="ios-thumbs-up"
-              iconSet="Ionicons"
-              size={fullScreen ? 28 : 20}
-              color={liking
-                ? COLOR.grey500
-                : isLiked ? COLOR.blue500 : '#FFF'
-              }
-              disabled={liking}
-              onPress={e => this.likeCheckin()}
-            />
-
-            {trueLikeCount > 0 &&
-              <Text style={{
-                fontSize: 10,
-                color: liking
+            <View style={{flexDirection: 'row'}}>
+              <IconToggle
+                name="ios-thumbs-up"
+                iconSet="Ionicons"
+                size={fullScreen ? 26 : 20}
+                color={liking
                   ? COLOR.grey500
-                  : isLiked ? COLOR.blue500 : '#FFF',
-                transform: [
-                  {translateX: -14},
-                  {translateY: 4}
-                ]
-              }}>{trueLikeCount}</Text>
+                  : isLiked ? COLOR.blue500 : '#FFF'
+                }
+                disabled={liking}
+                onPress={e => this.likeCheckin()}
+              />
+
+              {trueLikeCount > 0 &&
+                <Text style={{
+                  fontSize: 10,
+                  color: liking
+                    ? COLOR.grey500
+                    : isLiked ? COLOR.blue500 : '#FFF',
+                  transform: [
+                    {translateX: -14},
+                    {translateY: 4}
+                  ]
+                }}>{trueLikeCount}</Text>
+              }
+            </View>
+
+            {fullScreen &&
+              <IconToggle
+                name="ios-locate"
+                iconSet="Ionicons"
+                size={fullScreen ? 26 : 20}
+                color={'#FFF'}
+                onPress={e => {
+
+                  if (selectedCheckin !== docKey) {
+                    selectCheckin(docKey)
+                  }
+                  onExpand(index)
+                }}
+              />
             }
           </View>
         }
@@ -633,11 +726,31 @@ export default class MediaItem extends Component {
             style={{
               width: screenWidth,
               height: screenHeight - screenWidth - HEADER_HEIGHT,
-              backgroundColor: '#000',
+              backgroundColor: '#f7f7f7',
               padding: 18,
               flexDirection: 'column',
             }}
           >
+            {!!docKey && !!fullDateLabel && <View style={{
+              flexDirection: 'row',
+              alignItems: 'center'
+            }}>
+              <Icon
+                name='ios-clock'
+                color={"#000"}
+                size={16}
+              />
+              <Text style={{
+                color: '#404040',
+                // marginLeft: 20,
+                fontSize: 14,
+                marginLeft: 12
+              }}>
+                {fullDateLabel}
+              </Text>
+            </View>}
+
+
             {!!comment && <View style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
@@ -648,12 +761,12 @@ export default class MediaItem extends Component {
                 <Icon
                   name='ios-create'
                   size={16}
-                  color='white'
+                  color='#000'
                 />
 
                 <Text
                   style={{
-                    color: '#FFF',
+                    color: '#000',
                     marginLeft: 20,
                     fontSize: 14
                   }}
@@ -671,18 +784,18 @@ export default class MediaItem extends Component {
                 <Icon
                   name='ios-pin'
                   size={16}
-                  color='white'
+                  color='#000'
                 />
 
                 <Text
                   style={{
-                    color: '#FFF',
+                    color: '#000',
                     marginLeft: 20
                   }}
                 >{placeName}</Text>
               </View>}
 
-            {!!category && <View style={{
+            {!!categoryTitle && <View style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 marginTop: 16,
@@ -692,15 +805,17 @@ export default class MediaItem extends Component {
                 <Icon
                   name='ios-albums'
                   size={16}
-                  color='white'
+                  color='#000'
                 />
   
                 <Text
                   style={{
-                    color: '#FFF',
+                    color: '#000',
                     marginLeft: 20
                   }}
-                >{category}</Text>
+
+                  //TODO: fix this
+                >{categoryTitle}</Text>
               </View>}
             
           </View>

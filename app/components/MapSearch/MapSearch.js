@@ -32,8 +32,10 @@ import {
 } from '../../FireService/FireService' //TODO: clear on componentWillUnmount
 import {
   selectCheckin,
-  updateNearbyCheckins
+  updateNearbyCheckins,
+  updateRegion
 } from '../../actions/checkins'
+import {updateAutocompleteSearch} from '../../actions/search'
 import PlacesAutoComplete from '../PlacesAutoComplete/PlacesAutoComplete'
 import {PLACES_KEY} from '../../../configs'
 import {
@@ -47,19 +49,62 @@ import {
 const {width, height} = Dimensions.get('window')
 const PHOTO_SIZE = 140
 const PHOTO_SCALE = 2
+const maxDocs = 16
 
 
 const stateToProps = ({
   checkins: {
+    region,
     selectedCheckin,
-    nearbyCheckins=[]
+    nearbyCheckins=new Map()
   }={}
 }) => ({
   selectedCheckin,
-  nearbyCheckins
+  nearbyCheckins: Array.from(nearbyCheckins.values())
+    .filter(checkin => !!region ? isCheckinOnScreen(checkin, region) : true )
+    .sort((a, b) => {
+      if (a.timestamp < b.timestamp) {
+       return 1
+      } else if (a.timestamp > b.timestamp) {
+       return -1
+      } else {
+       return 0
+      }
+    })
+    .slice(0, maxDocs),
+  regionInState: region
 })
 
 type Props = {};
+
+const MapWrapper = ({
+  region,
+  initialRegion,
+  onRegionChange,
+  onRegionChangeComplete,
+  onPoiClick,
+  children
+}) => <Animated
+          provider={PROVIDER_GOOGLE}
+          style={styles.map}
+          region={region}
+          initialRegion={initialRegion}
+          onRegionChange={onRegionChange}
+          onRegionChangeComplete={onRegionChangeComplete}
+          onPoiClick={onPoiClick}
+          showsUserLocation={true}
+          showsMyLocationButton={true}
+          showsCompass={true}
+          showsScale={true}
+          mapPadding={{
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: PHOTO_SIZE
+          }}
+        >
+          {children}
+        </Animated>
 
 
 class MapSearch extends Component<Props> {
@@ -157,9 +202,15 @@ class MapSearch extends Component<Props> {
          main_text: primaryText='',
          secondary_text: secondaryText=''
        }={},
-      place_id
+      place_id,
+      coordinate: {
+        latitude,
+        longitude
+      }={}
     } = place
+    const {updateAutocompleteSearch} = this.props
     // console.log("handlePlaceSelect. place: ", place)
+    updateAutocompleteSearch(`${primaryText} ${secondaryText}`)
 
     // this.setState({
     //   searchText: `${primaryText} ${secondaryText}`,
@@ -169,6 +220,22 @@ class MapSearch extends Component<Props> {
     // console.log("fetching place details place_id: ", place_id)
 
     // Keyboard.dismiss()
+
+    //Set initial POI marker optimistically, if lat and lng exist
+    if (!!latitude && !!longitude) {
+      this.setState({
+        selectedPlace: {
+          title: primaryText,
+          description: secondaryText,
+          geometry: {
+            location: {
+              lat: latitude,
+              lng: longitude
+            }
+          }
+        }
+      })
+    }
 
     return fetch(`https://maps.googleapis.com/maps/api/place/details/json?placeid=${place_id}&key=${PLACES_KEY}&fields=geometry,photo`)
     .then(resp => {
@@ -258,14 +325,16 @@ class MapSearch extends Component<Props> {
       place_id,
       structured_formatting: {
         main_text: name
-      }
-    }, true)
+      },
+      coordinate
+    }, false)
     .then(resp => {
       const {photos=[]} = this.state
 
       if (photos.length > 0) {
         // console.log("photos > 0 , scrolling to end of nearbyCheckins")
 
+        //selecting first image in POI photos
         const [{photo_reference}] = photos
 
         selectCheckin(photo_reference)
@@ -299,13 +368,10 @@ class MapSearch extends Component<Props> {
 
 
   onRegionChange = (region) => {
-    const {nearbyCheckins} = this.props
     this.state.region.setValue(region);
-
-    this.updateOffscreenCheckins(region)
   }
 
-  updateOffscreenCheckins = debounce(300, (region) => {
+  updateOffscreenCheckins = debounce(0, (region) => {
     const {nearbyCheckins} = this.props
     const {offScreenCheckins: offscreenState} = this.state
 
@@ -333,7 +399,7 @@ class MapSearch extends Component<Props> {
 
   //TODO: Need to throttle
   //TODO: Need to adjust the query radius based on latitude delta 
-  getNearbyCheckins = debounce(1000, (region) => {
+  getNearbyCheckins = (region) => {
     const {updateNearbyCheckins} = this.props
 
     return getNearbyCheckins(region, (queryData) => {
@@ -342,6 +408,16 @@ class MapSearch extends Component<Props> {
       // })
       updateNearbyCheckins(queryData)
     })
+  }
+
+  onRegionChangeComplete = debounce(0, (region) => {
+    const {updateRegion} = this.props
+
+    console.log("onRegionChangeComplete region: ", region)
+    //TODO: why is this going pack to current location?
+    this.getNearbyCheckins(region)
+    this.updateOffscreenCheckins(region)
+    updateRegion(region)
   })
 
   setSelectedCheckin = (docKey) => {
@@ -359,6 +435,7 @@ class MapSearch extends Component<Props> {
     const {region: stateRegion} = this.state
     if (!!stateRegion) {
 
+      console.log("moveRegion called!")
       stateRegion.timing(region).start()
     }
   }
@@ -367,14 +444,26 @@ class MapSearch extends Component<Props> {
     const {
       selectedCheckin,
       nearbyCheckins,
-      selectCheckin
+      selectCheckin,
+      regionInState
     } = this.props
     const {
       searchText,
       region,
       predictions,
-      currentLocation={latitude: 0, longitude: 0},
+      currentLocation={
+        latitude: 37.7749, //TODO: default to undefined if SF preset is not desired
+        longitude: 122.4194
+      },
       selectedPlace,
+      selectedPlace: {
+        geometry: {
+          location: {
+            lat: placeLat,
+            lng: placeLng
+          }={}
+        }={}
+      }={},
       photos=[],
       // queryData=[],
       // uploadMedia,
@@ -382,17 +471,24 @@ class MapSearch extends Component<Props> {
       // geoCollection,
       // imageStoreRef,
       user,
-      offScreenCheckins
+      offScreenCheckins,
+      autocompleteDefault
     } = this.state
     const visibleCheckins = nearbyCheckins.filter(checkin => !offScreenCheckins.has(checkin.docKey))
     // const allPhotos = [...nearbyCheckins, ...photos]
-    const allPhotos = [...visibleCheckins, ...photos]
+    const isSelectedPlaceVisible = !!selectedPlace && isCheckinOnScreen({
+      coordinates: {
+        latitude: placeLat,
+        longitude: placeLng
+      }
+    }, regionInState)
+
+    const filteredPlacePhotos = isSelectedPlaceVisible ? photos : []
+    const allPhotos = [...visibleCheckins, ...filteredPlacePhotos]
 
     return (
       <View style={styles.container}>
-        {!!region && <Animated
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
+        <MapWrapper
           region={region}
           initialRegion={{
             latitude: currentLocation.latitude,
@@ -400,25 +496,39 @@ class MapSearch extends Component<Props> {
             latitudeDelta: 0.04,
             longitudeDelta: 0.04
           }}
-          // onRegionChange={this.onRegionChange}
-          onRegionChangeComplete={this.getNearbyCheckins}
+          onRegionChange={this.onRegionChange}
+          onRegionChangeComplete={this.onRegionChangeComplete}
           onPoiClick={this.onPoiClick}
-          showsUserLocation={true}
-          showsMyLocationButton={true}
-          showsCompass={true}
-          showsScale={true}
-          mapPadding={{
-            top: 0,
-            left: 0,
-            right: 0,
-            // bottom: allPhotos.length === 0
-            //   ? 0
-            //   : !!selectedCheckin
-            //     ? (PHOTO_SIZE * PHOTO_SCALE)
-            //     : PHOTO_SIZE
-            bottom: PHOTO_SIZE
-          }}
         >
+        {/* <Animated */}
+        {/*   provider={PROVIDER_GOOGLE} */}
+        {/*   style={styles.map} */}
+        {/*   region={region} */}
+        {/*   initialRegion={{ */}
+        {/*     latitude: currentLocation.latitude, */}
+        {/*     longitude: currentLocation.longitude, */}
+        {/*     latitudeDelta: 0.04, */}
+        {/*     longitudeDelta: 0.04 */}
+        {/*   }} */}
+        {/*   onRegionChange={this.onRegionChange} */}
+        {/*   onRegionChangeComplete={this.onRegionChangeComplete} */}
+        {/*   onPoiClick={this.onPoiClick} */}
+        {/*   showsUserLocation={true} */}
+        {/*   showsMyLocationButton={true} */}
+        {/*   showsCompass={true} */}
+        {/*   showsScale={true} */}
+        {/*   mapPadding={{ */}
+        {/*     top: 0, */}
+        {/*     left: 0, */}
+        {/*     right: 0, */}
+        {/*     // bottom: allPhotos.length === 0 */}
+        {/*     //   ? 0 */}
+        {/*     //   : !!selectedCheckin */}
+        {/*     //     ? (PHOTO_SIZE * PHOTO_SCALE) */}
+        {/*     //     : PHOTO_SIZE */}
+        {/*     bottom: PHOTO_SIZE */}
+        {/*   }} */}
+        {/* > */}
 
           {!!nearbyCheckins && nearbyCheckins.map(doc => {
             return <Marker
@@ -450,10 +560,12 @@ class MapSearch extends Component<Props> {
           }
 
           
-        </Animated>}
+        {/* </Animated> */}
+        </MapWrapper>
 
         <PlacesAutoComplete
           onPlaceSelect={this.handlePlaceSelect}
+          defaultValue={autocompleteDefault}
         />
 
         <DrawerTest
@@ -467,7 +579,9 @@ class MapSearch extends Component<Props> {
 
 export default connect(stateToProps, {
   selectCheckin,
-  updateNearbyCheckins
+  updateNearbyCheckins,
+  updateRegion,
+  updateAutocompleteSearch
 })(MapSearch)
 
 const styles = StyleSheet.create({
