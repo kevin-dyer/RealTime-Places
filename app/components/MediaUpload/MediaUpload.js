@@ -343,7 +343,7 @@ class MediaUpload extends Component {
   }
 
   handleCategoryChange = (categoryId) => {
-    console.log("handleCategoryChange called. categoryId: ", categoryId)
+    // console.log("handleCategoryChange called. categoryId: ", categoryId)
     this.setState({
       category: categoryId.value
     })
@@ -371,7 +371,7 @@ class MediaUpload extends Component {
     // console.log("render imageUri: ", imageUri)
     // console.log("render videoProgress: ", videoProgress, ", selectedTab: ", selectedTab)
 
-    console.log("this.props.navigation: ", this.props.navigation.isFocused())
+    // console.log("this.props.navigation: ", this.props.navigation.isFocused())
     return (
       <KeyboardAvoidingView
         style={styles.container}

@@ -205,10 +205,10 @@ class MapSearch extends Component<Props> {
       }={}
     } = this.props
 
-    console.log("current lat, lng: ", latitude, longitude, ", old: ", prevLat, prevLng, ", this.props.navigation.state.params: ", this.props.navigation.state.params)
+    // console.log("current lat, lng: ", latitude, longitude, ", old: ", prevLat, prevLng, ", this.props.navigation.state.params: ", this.props.navigation.state.params)
 
     if (prevLat !== latitude || prevLng !== longitude) {
-      console.log("moving region to your last checkin!")
+      // console.log("moving region to your last checkin!")
       this.moveRegion({
         latitude,
         longitude,
