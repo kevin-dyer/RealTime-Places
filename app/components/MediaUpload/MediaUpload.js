@@ -195,6 +195,7 @@ class MediaUpload extends Component {
 
   takeVideo = () => {
     const {isMuted} = this.state
+
     if (this.camera) {
       const options = {
         maxDuration,
@@ -523,11 +524,13 @@ class MediaUpload extends Component {
                 position: 'absolute',
                 bottom: 0,
                 right: 0,
-                padding: 8
+                padding: 8,
+                flexDirection: 'row',
+                justifyContent: 'flex-end'
               }}>
                 <View style={{
                   position: 'relative',
-                  flex: 1,
+                  // flex: 1,
                   flexDirection: 'row'
                 }}>
                   <IconToggle

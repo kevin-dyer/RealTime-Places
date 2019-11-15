@@ -184,7 +184,7 @@ export default class MediaItem extends Component {
         [
           {
             text: 'Cancel',
-            onPress: () => console.log('Cancel Pressed'),
+            onPress: () => {},
             style: 'cancel',
           },
           {text: 'OK', onPress: () => {
@@ -248,7 +248,7 @@ export default class MediaItem extends Component {
             return resp
           }).finally(() => {
 
-            console.log("Setting flagging to false")
+            // console.log("Setting flagging to false")
             // setTimeout(() => {
               this.setState({
                 flagging: false
