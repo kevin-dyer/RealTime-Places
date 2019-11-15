@@ -97,7 +97,7 @@ class MediaUpload extends Component {
       // flashMode: 'auto',
       imageUri: '',
       videoUri: '',
-      currentPosition: {},
+      // currentPosition: {}, //NOTE: save currentPostion to add to navigation props
       uploadProgress: 0,// 0 - 100
       recordingStartTime: 0,
       videoProgress: 0,
@@ -236,7 +236,6 @@ class MediaUpload extends Component {
             // console.log("mp4 conversion mp4Path: ", mp4Path);
 
             Geolocation.getCurrentPosition((location={}) => {
-              // console.log("currentPostion location: ", location)
               const {
                 coords: {
                   latitude,
@@ -303,8 +302,11 @@ class MediaUpload extends Component {
         navigate
       }={}
     } = this.props
+    const {currentPosition} = this.state
 
-    navigate('MapSearch')
+    navigate('MapSearch', {
+      currentLocation: currentPosition
+    })
   }
 
   toggleReplay = () => {

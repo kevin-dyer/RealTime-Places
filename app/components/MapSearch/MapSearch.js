@@ -179,6 +179,45 @@ class MapSearch extends Component<Props> {
     })
   }
 
+  componentDidUpdate({
+    navigation: {
+      state: {
+        params: {
+          currentLocation: {
+            latitude: prevLat,
+            longitude: prevLng
+          }={}
+        }={}
+      }={}
+    }={}
+  }={}) {
+    const {
+      navigation: {
+        state: {
+          params: {
+            currentLocation,
+            currentLocation: {
+              latitude,
+              longitude
+            }={}
+          }={}
+        }={}
+      }={}
+    } = this.props
+
+    console.log("current lat, lng: ", latitude, longitude, ", old: ", prevLat, prevLng, ", this.props.navigation.state.params: ", this.props.navigation.state.params)
+
+    if (prevLat !== latitude || prevLng !== longitude) {
+      console.log("moving region to your last checkin!")
+      this.moveRegion({
+        latitude,
+        longitude,
+        latitudeDelta: 0.04,
+        longitudeDelta: 0.04
+      })
+    }
+  }
+
   componentWillUnmount() {
 
     //geoQuery.cancel() is not defined...
