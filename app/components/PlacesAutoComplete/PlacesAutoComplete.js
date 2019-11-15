@@ -55,8 +55,15 @@ class PlacesAutoComplete extends Component {
   }
 
   clearSearch = () => {
+    const {
+      updateAutocompleteSearch=()=>{},
+      onClear=()=>{} //NOTE: this is passed in from MapSearch, it should 
+    } = this.props
+
     this.setState({predictions: []})
-    this.props.updateAutocompleteSearch('')
+    
+    updateAutocompleteSearch('')
+    onClear()
   }
 
   handlePlaceSelect = (place={}) => {

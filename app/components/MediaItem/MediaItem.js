@@ -247,11 +247,13 @@ export default class MediaItem extends Component {
 
             return resp
           }).finally(() => {
-            setTimeout(() => {
+
+            console.log("Setting flagging to false")
+            // setTimeout(() => {
               this.setState({
                 flagging: false
               })
-            }, 300)
+            // }, 300)
           })
         }, style: 'destructive'},
       ],
@@ -428,6 +430,7 @@ export default class MediaItem extends Component {
   }
 
   getTimeSinceLabel = (timestamp) => {
+    const {isSelected} = this.props
     const dateTime = moment(timestamp)
 
     let dateLabel = dateTime.toNow(true)
@@ -454,7 +457,7 @@ export default class MediaItem extends Component {
       shortLabel = shortLabel.replace(/\syears?/, 'y')
     }
 
-    return shortLabel
+    return `${shortLabel}${isSelected && shortLabel !== 'now' ? ' ago' : ''}`
   }
 
   getFullDateLabel = (timestamp) => {
@@ -597,8 +600,7 @@ export default class MediaItem extends Component {
               </View>
               <View style={{flexDirection: 'row', justifyContent: 'space-between', flex: 1}}>
                 <View style={{
-                  // flex: 1,
-                  alignSelf: 'center'
+                  alignSelf: 'flex-start'
                 }}>
                   {!fullScreen &&
                     <View style={{}}>
@@ -609,13 +611,13 @@ export default class MediaItem extends Component {
                             margin: 6,
                             padding: 2,
                             paddingLeft: 6,
-                            paddingRight: 6,
+                            paddingRight: 6
                         }}>
                           <Text style={{
                             color: '#000',
                             fontSize: 11,
                             fontWeight: '600'
-                          }}>{timeSinceLabel}{selected || fullScreen ? ' ago' : ''}</Text>
+                          }}>{timeSinceLabel}</Text>
                         </View>
                       }
                     </View>

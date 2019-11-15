@@ -784,7 +784,7 @@ class MediaUpload extends Component {
                 label="Select a Category"
                 data={categoryOptions}
                 onChangeText={this.handleCategoryChange}
-                labelExtractor={({title='', text=''}) => `${title}${!!text ? `- ${text}` : ''}`}
+                labelExtractor={({title='', text=''}) => `${title}`}
                 valueExtractor={(categoryId) => {
                   // console.log("valueExtractor categoryId: ", categoryId)
                   return categoryId.value

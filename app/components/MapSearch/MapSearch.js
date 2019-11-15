@@ -77,34 +77,38 @@ const stateToProps = ({
 
 type Props = {};
 
-const MapWrapper = ({
-  region,
-  initialRegion,
-  onRegionChange,
-  onRegionChangeComplete,
-  onPoiClick,
-  children
-}) => <Animated
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
-          region={region}
-          initialRegion={initialRegion}
-          onRegionChange={onRegionChange}
-          onRegionChangeComplete={onRegionChangeComplete}
-          onPoiClick={onPoiClick}
-          showsUserLocation={true}
-          showsMyLocationButton={true}
-          showsCompass={true}
-          showsScale={true}
-          mapPadding={{
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: PHOTO_SIZE
-          }}
-        >
-          {children}
-        </Animated>
+// const MapWrapper = ({
+//   // region,
+//   initialRegion,
+//   onRegionChange,
+//   onRegionChangeComplete,
+//   onPoiClick,
+//   children
+// }) => {
+//   console.log("Rendering Animated Map!")
+//   return <MapView
+//           provider={PROVIDER_GOOGLE}
+//           style={styles.map}
+//           // region={region}
+//           initialRegion={initialRegion}
+//           onRegionChange={onRegionChange}
+//           onRegionChangeComplete={onRegionChangeComplete}
+//           onPoiClick={onPoiClick}
+//           showsUserLocation={true}
+//           showsMyLocationButton={true}
+//           showsCompass={true}
+//           showsScale={true}
+//           loadingEnabled={true}
+//           mapPadding={{
+//             top: 0,
+//             left: 0,
+//             right: 0,
+//             bottom: PHOTO_SIZE
+//           }}
+//         >
+//           {children}
+//         </MapView>
+// }
 
 
 class MapSearch extends Component<Props> {
@@ -116,10 +120,7 @@ class MapSearch extends Component<Props> {
       selectedPlace: undefined,
       //TODO: comment out lat and long
       region: undefined,
-      currentLocation: {
-        latitude: 0,
-        longitude: 0
-      },
+      currentLocation: undefined,
       predictions: [],
       photos: [],
       // uploadMedia: false,
@@ -131,6 +132,12 @@ class MapSearch extends Component<Props> {
 
   componentDidMount() {
 
+    // setTimeout(()=>{
+    //   console.log("setting testValue to true")
+    //   this.setState({
+    //     testValue: true
+    //   })
+    // }, 7000)
     //Get phone's current location
     // // - useful for determining the verified location of user when uploading media
     // RNGooglePlaces.getCurrentPlace()
@@ -158,13 +165,12 @@ class MapSearch extends Component<Props> {
         //   latitude: coords.latitude,
         //   longitude: coords.longitude
         // }
-
-        region: new AnimatedRegion({
-          latitude,
-          longitude,
-          latitudeDelta: .02,
-          longitudeDelta: .02,
-        })
+        // region: new AnimatedRegion({
+        //   latitude,
+        //   longitude,
+        //   latitudeDelta: .02,
+        //   longitudeDelta: .02,
+        // })
       })
     }, (error) => {
       console.error("error getting current position: ", error)
@@ -343,7 +349,12 @@ class MapSearch extends Component<Props> {
   }
 
   clearSearch = () => {
-    this.setState({searchText: '', predictions: []})
+    this.setState({
+      searchText: '',
+      predictions: [],
+      photos: [],
+      selectedPlace: undefined
+    })
   }
 
   //NOTE: maxHeight will change in different views
@@ -368,10 +379,26 @@ class MapSearch extends Component<Props> {
 
 
   onRegionChange = (region) => {
-    this.state.region.setValue(region);
+    // this.state.region.setValue(region);
   }
 
-  updateOffscreenCheckins = debounce(0, (region) => {
+  onRegionChangeComplete = (region={}) => {
+    const {updateRegion, regionInState={}} = this.props
+
+    // console.log("onRegionChangeComplete region: ", region, ", regionInState: ", regionInState)
+    //TODO: why is this going pack to current location?
+
+    //NOTE: this does not catch the bug either
+    if (regionInState.latitude !== region.latitude && regionInState.longitude !== region.longitude) {
+      this.getNearbyCheckins(region)
+      this.updateOffscreenCheckins(region)
+      updateRegion(region)
+    } else {
+      // console.log("onRegionChangeComplete NO UPDATES, region did not change")
+    }
+  }
+
+  updateOffscreenCheckins = (region) => {
     const {nearbyCheckins} = this.props
     const {offScreenCheckins: offscreenState} = this.state
 
@@ -395,7 +422,7 @@ class MapSearch extends Component<Props> {
         offScreenCheckins: new Set(offScreenCheckins)
       })
     }
-  })
+  }
 
   //TODO: Need to throttle
   //TODO: Need to adjust the query radius based on latitude delta 
@@ -410,16 +437,6 @@ class MapSearch extends Component<Props> {
     })
   }
 
-  onRegionChangeComplete = debounce(0, (region) => {
-    const {updateRegion} = this.props
-
-    console.log("onRegionChangeComplete region: ", region)
-    //TODO: why is this going pack to current location?
-    this.getNearbyCheckins(region)
-    this.updateOffscreenCheckins(region)
-    updateRegion(region)
-  })
-
   setSelectedCheckin = (docKey) => {
     const {
       selectedCheckin,
@@ -432,11 +449,14 @@ class MapSearch extends Component<Props> {
   }
 
   moveRegion = (region) => {
-    const {region: stateRegion} = this.state
-    if (!!stateRegion) {
-
-      console.log("moveRegion called!")
-      stateRegion.timing(region).start()
+    // const {region: stateRegion} = this.state
+//     if (!!stateRegion) {
+// 
+//       console.log("moveRegion called!")
+//       stateRegion.timing(region).start()
+//     }
+    if (!!this.mapRef) {
+      this.mapRef.animateToRegion(region, 500)
     }
   }
 
@@ -451,10 +471,15 @@ class MapSearch extends Component<Props> {
       searchText,
       region,
       predictions,
-      currentLocation={
-        latitude: 37.7749, //TODO: default to undefined if SF preset is not desired
-        longitude: 122.4194
-      },
+      // currentLocation={
+      //   latitude: 37.7749, //TODO: default to undefined if SF preset is not desired
+      //   longitude: 122.4194
+      // },
+      currentLocation,
+      currentLocation: {
+        latitude: currentLat=37.7749, //NOTE: hardcoded to SF
+        longitude: currentLng=122.4194
+      }={},
       selectedPlace,
       selectedPlace: {
         geometry: {
@@ -472,7 +497,9 @@ class MapSearch extends Component<Props> {
       // imageStoreRef,
       user,
       offScreenCheckins,
-      autocompleteDefault
+      autocompleteDefault,
+
+      // testValue
     } = this.state
     const visibleCheckins = nearbyCheckins.filter(checkin => !offScreenCheckins.has(checkin.docKey))
     // const allPhotos = [...nearbyCheckins, ...photos]
@@ -485,87 +512,76 @@ class MapSearch extends Component<Props> {
 
     const filteredPlacePhotos = isSelectedPlaceVisible ? photos : []
     const allPhotos = [...visibleCheckins, ...filteredPlacePhotos]
+    const initialRegion = {
+      latitude: currentLat,
+      longitude: currentLng,
+      latitudeDelta: 0.04,
+      longitudeDelta: 0.04
+    }
+    // console.log("initialRegion: ", initialRegion)
 
     return (
       <View style={styles.container}>
-        <MapWrapper
-          region={region}
-          initialRegion={{
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-            latitudeDelta: 0.04,
-            longitudeDelta: 0.04
-          }}
-          onRegionChange={this.onRegionChange}
-          onRegionChangeComplete={this.onRegionChangeComplete}
-          onPoiClick={this.onPoiClick}
-        >
-        {/* <Animated */}
-        {/*   provider={PROVIDER_GOOGLE} */}
-        {/*   style={styles.map} */}
-        {/*   region={region} */}
-        {/*   initialRegion={{ */}
-        {/*     latitude: currentLocation.latitude, */}
-        {/*     longitude: currentLocation.longitude, */}
-        {/*     latitudeDelta: 0.04, */}
-        {/*     longitudeDelta: 0.04 */}
-        {/*   }} */}
-        {/*   onRegionChange={this.onRegionChange} */}
-        {/*   onRegionChangeComplete={this.onRegionChangeComplete} */}
-        {/*   onPoiClick={this.onPoiClick} */}
-        {/*   showsUserLocation={true} */}
-        {/*   showsMyLocationButton={true} */}
-        {/*   showsCompass={true} */}
-        {/*   showsScale={true} */}
-        {/*   mapPadding={{ */}
-        {/*     top: 0, */}
-        {/*     left: 0, */}
-        {/*     right: 0, */}
-        {/*     // bottom: allPhotos.length === 0 */}
-        {/*     //   ? 0 */}
-        {/*     //   : !!selectedCheckin */}
-        {/*     //     ? (PHOTO_SIZE * PHOTO_SCALE) */}
-        {/*     //     : PHOTO_SIZE */}
-        {/*     bottom: PHOTO_SIZE */}
-        {/*   }} */}
-        {/* > */}
 
-          {!!nearbyCheckins && nearbyCheckins.map(doc => {
-            return <Marker
-              key={doc.docKey}
-              coordinate={{
-                latitude: doc.coordinates.latitude,
-                longitude: doc.coordinates.longitude
-              }}
-              onPress={e => {
-                selectCheckin(doc.docKey)
-              }}
-              pinColor={doc.docKey === selectedCheckin ? COLOR.green200 : COLOR.red700}
-              zIndex={doc.docKey === selectedCheckin ? 10 : 1}
-            />
-          })}
+        {!!currentLocation &&
+          <MapView
+            ref={mapRef => this.mapRef = mapRef}
+            provider={PROVIDER_GOOGLE}
+            style={styles.map}
+            // region={region}
+            initialRegion={initialRegion}
+            // onRegionChange={this.onRegionChange}
+            onRegionChangeComplete={this.onRegionChangeComplete}
+            onPoiClick={this.onPoiClick}
+            showsUserLocation={true}
+            showsMyLocationButton={true}
+            showsCompass={true}
+            showsScale={true}
+            mapPadding={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: PHOTO_SIZE
+            }}
+          >
 
-          {!!selectedPlace &&
-            <Marker
-              ref={selectedMarker => this.selectedMarker = selectedMarker}
-              key="selectedPlace"
-              title={selectedPlace.title}
-              description={selectedPlace.description}
-              coordinate={{
-                latitude: selectedPlace.geometry.location.lat,
-                longitude: selectedPlace.geometry.location.lng
-              }}
-              pinColor={COLOR.yellow600}
-            />
-          }
+            {!!nearbyCheckins && nearbyCheckins.map(doc => {
+              return <Marker
+                key={doc.docKey}
+                coordinate={{
+                  latitude: doc.coordinates.latitude,
+                  longitude: doc.coordinates.longitude
+                }}
+                onPress={e => {
+                  selectCheckin(doc.docKey)
+                }}
+                pinColor={doc.docKey === selectedCheckin ? COLOR.green200 : COLOR.red700}
+                zIndex={doc.docKey === selectedCheckin ? 10 : 1}
+              />
+            })}
 
-          
-        {/* </Animated> */}
-        </MapWrapper>
+            {!!selectedPlace &&
+              <Marker
+                ref={selectedMarker => this.selectedMarker = selectedMarker}
+                key="selectedPlace"
+                title={selectedPlace.title}
+                description={selectedPlace.description}
+                coordinate={{
+                  latitude: selectedPlace.geometry.location.lat,
+                  longitude: selectedPlace.geometry.location.lng
+                }}
+                pinColor={COLOR.yellow600}
+              />
+            }
+
+            
+          </MapView>
+        }
 
         <PlacesAutoComplete
           onPlaceSelect={this.handlePlaceSelect}
           defaultValue={autocompleteDefault}
+          onClear={this.clearSearch}
         />
 
         <DrawerTest

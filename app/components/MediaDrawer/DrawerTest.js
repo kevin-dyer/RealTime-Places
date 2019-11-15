@@ -221,7 +221,8 @@ class DrawerTest extends Component {
       likeCheckin,
       trackFlagged,
       trackLiked,
-      updateLikeCount
+      updateLikeCount,
+      flagged=[]
     } = this.props
     const {
       item,
@@ -247,6 +248,7 @@ class DrawerTest extends Component {
       scale={PHOTO_SCALE}
       userUid={user.uid}
       liked={liked}
+      flagged={flagged}
       selectedCheckin={selectedCheckin}
       // geoCollection={geoCollection}
       // imageStoreRef={imageStoreRef}
