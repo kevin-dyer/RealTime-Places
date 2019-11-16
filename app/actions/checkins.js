@@ -3,6 +3,7 @@ export const SELECT_CHECKIN = 'SELECT_CHECKIN'
 export const UPDATE_NEARBY_CHECKINS = 'UPDATE_NEARBY_CHECKINS'
 export const UPDATE_LIKE_COUNT = 'UPDATE_LIKE_COUNT'
 export const UPDATE_REGION = 'UPDATE_REGION'
+export const DELETE_CHECKIN = 'DELETE_CHECKIN'
 
 export const categoryOptions = [
   {
@@ -60,3 +61,8 @@ export const updateRegion = (region) => {
 		region
 	}
 }
+
+export const deleteCheckinFromState = (docKey) => ({
+  type: DELETE_CHECKIN,
+  docKey
+})

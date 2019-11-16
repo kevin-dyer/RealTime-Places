@@ -174,7 +174,8 @@ export default class MediaItem extends Component {
         docKey
       },
       geoCollection,
-      imageStoreRef
+      imageStoreRef,
+      deleteCheckinFromState
     } = this.props
 
     if (!!id) {
@@ -196,6 +197,8 @@ export default class MediaItem extends Component {
             }).catch(() => {
               this.setState({deleting: false})
             })
+
+            deleteCheckinFromState(docKey)
           }, style: 'destructive'},
         ],
         {cancelable: true},

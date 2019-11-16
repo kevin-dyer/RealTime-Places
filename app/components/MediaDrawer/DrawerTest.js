@@ -28,7 +28,8 @@ import {PLACES_KEY} from '../../../configs'
 import {debounce} from 'lodash'
 import {
   selectCheckin,
-  updateLikeCount
+  updateLikeCount,
+  deleteCheckinFromState
 } from '../../actions/checkins'
 import {
   likeCheckin,
@@ -222,7 +223,8 @@ class DrawerTest extends Component {
       trackFlagged,
       trackLiked,
       updateLikeCount,
-      flagged=[]
+      flagged=[],
+      deleteCheckinFromState
     } = this.props
     const {
       item,
@@ -263,6 +265,7 @@ class DrawerTest extends Component {
       isSelected={selectedCheckin === (docKey || photo_reference || index)}
       toRemove={toRemove}
       removeMedia={this.removeMedia}
+      deleteCheckinFromState={deleteCheckinFromState}
     />
   }
 
@@ -365,6 +368,7 @@ export default withNavigation(connect(stateToProps, {
   trackFlagged,
   trackLiked,
   updateLikeCount,
+  deleteCheckinFromState
 })(DrawerTest))
 
 const styles = StyleSheet.create({

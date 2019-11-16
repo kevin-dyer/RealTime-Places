@@ -2,7 +2,8 @@ import {
 	SELECT_CHECKIN,
 	UPDATE_NEARBY_CHECKINS,
 	UPDATE_LIKE_COUNT,
-	UPDATE_REGION
+	UPDATE_REGION,
+	DELETE_CHECKIN
 } from '../actions/checkins'
 
 
@@ -43,28 +44,39 @@ export default function checkins(state=initialState, action={}) {
 				nearbyCheckins: nextCheckins
 			}
 
-		case UPDATE_LIKE_COUNT:
+		case UPDATE_LIKE_COUNT: {
 			console.log("UPDATE_LIKE_COUNT reducer. action: ", action)
+			const nextCheckins = new Map(state.nearbyCheckins)
+			const checkinToUpdate = state.nearbyCheckins.find(checkin => {
+				return checkin.id === action.checkinId
+			})
+			const key = checkinToUpdate.docKey
+			nextCheckins.set(key, {
+				...checkinToUpdate,
+				likeCount: action.liked
+					? (checkinToUpdate.likeCount || 0) + 1
+					: checkinToUpdate.likeCount - 1
+			})
 			return {
 				...state,
-				nearbyCheckins: state.nearbyCheckins.map(checkin => {
-					if (checkin.id === action.checkinId) {
-						return {
-							...checkin,
-							likeCount: action.liked
-								? (checkin.likeCount || 0) + 1
-								: checkin.likeCount - 1
-						}
-					}
-					return checkin
-				})
+				nearbyCheckins: nextCheckins
 			}
+		}
 
 		case UPDATE_REGION:
 			return {
 				...state,
 				region: action.region
 			}
+
+		case DELETE_CHECKIN: {
+			const nextCheckins = new Map(state.nearbyCheckins)
+			nextCheckins.delete(action.docKey)
+			return {
+				...state,
+				nearbyCheckins: nextCheckins
+			}
+		}
 
 		default:
 			return state
