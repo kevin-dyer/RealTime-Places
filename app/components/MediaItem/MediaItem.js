@@ -76,18 +76,22 @@ export default class MediaItem extends Component {
     didLike: true, //used to increase likeCount
     deleting: false,
     mediaLoading: false,
-    mediaWidth: new Animated.Value(0.01)
+    mediaWidth: new Animated.Value(0.01),
+    scale: new Animated.Value(0)
   }
 
   componentDidMount() {
     // this.animateEnter()
+    this.animateScale()
   }
   componentDidUpdate({
     selectedCheckin: oldCheckin,
     userData: {
       liked: oldLiked=[]
     }={},
-    toRemove: wasToRemove
+    toRemove: wasToRemove,
+    isSelected: wasSelected,
+    fullScreen: wasFullScreen
   }, {
     paused: wasPaused
   }) {
@@ -99,7 +103,8 @@ export default class MediaItem extends Component {
       //   liked=[]
       // }={}
       isSelected,
-      toRemove
+      toRemove,
+      fullScreen
     } = this.props
     // const wasSelected = this.isSelected(oldCheckin)
     // const isSelected = this.isSelected(selectedCheckin)
@@ -113,6 +118,12 @@ export default class MediaItem extends Component {
 
       // console.log("media toRemove, calling animateExit")
       this.animateExit()
+    }
+
+    //TODO: call animateScale when isSelected or fullScreen changes
+    // console.log("wasFullScreen: ", wasFullScreen, ", fullScreen: ", fullScreen)
+    if (wasSelected !== isSelected || wasFullScreen !== fullScreen) {
+      this.animateScale()
     }
 
     // if (isSelected) {
@@ -139,9 +150,9 @@ export default class MediaItem extends Component {
 
     // console.log("animateEnter called, setting to size: ", size)
 
-    Animated.timing(this.state.mediaWidth, {
+    Animated.spring(this.state.mediaWidth, {
       toValue: 1,
-      duration: ANIMATION_TIME,
+      // duration: ANIMATION_TIME,
       // isInteraction: false,
       // useNativeDriver: true
     }).start(() => {
@@ -155,15 +166,35 @@ export default class MediaItem extends Component {
       removeMedia=()=>{},
     } = this.props
 
-    Animated.timing(this.state.mediaWidth, {
+    Animated.spring(this.state.mediaWidth, {
       toValue: 0,
-      duration: ANIMATION_TIME,
+      // duration: ANIMATION_TIME,
       // isInteraction: false,
       // useNativeDriver: true
     }).start(() => {
       // console.log("Exit Animation is complete!")
       removeMedia(item)
     })
+  }
+
+  animateScale = () => {
+    const {
+      isSelected,
+      fullScreen
+    } = this.props
+    // const {fullScreen} = this.state
+
+    //TODO: assign animated value 0, 1(selected), 2(fullScreen)
+    const scale = fullScreen
+      ? 3
+      : isSelected
+        ? 2
+        : 1
+
+    console.log("AnimateScale setting to: ", scale)
+    Animated.spring(this.state.scale, {
+      toValue: scale
+    }).start()
   }
 
   deleteCheckin = () => {
@@ -506,17 +537,18 @@ export default class MediaItem extends Component {
       liking,
       didLike,
       deleting,
-      mediaWidth=0
+      mediaWidth=0,
+      scale: scaleVal=1
     } = this.state
     // const selected = this.isSelected()
-    const marginLeft = index > 0 ? 1 : 0
-    const sideMargin = (selected && index > 0) ? -(size * scale - size) / 2 : 0
-    const containerHeight = fullScreen
-      ? screenHeight
-      : selected ? size * scale : size
-    const containerWidth = fullScreen
-      ? screenWidth
-      : selected ? size * scale : size
+    // const marginLeft = index > 0 ? 1 : 0
+    // const sideMargin = (selected && index > 0) ? -(size * scale - size) / 2 : 0
+    // const containerHeight = fullScreen
+    //   ? screenHeight
+    //   : selected ? size * scale : size
+    // const containerWidth = fullScreen
+    //   ? screenWidth
+    //   : selected ? size * scale : size
     const key = this.getKey()
     const isFlagged = flagged.includes(id)
     const isLiked = liked.includes(id)
@@ -529,9 +561,14 @@ export default class MediaItem extends Component {
     //   inputRange: [0, 1],
     //   outputRange: [size/2, 0]
     // })
-    const widthVal = mediaWidth.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, containerWidth]
+    const mediaScale = Animated.multiply(mediaWidth, scaleVal)
+    const sizeWidth = mediaScale.interpolate({
+      inputRange: [0, 1, 2, 3],
+      outputRange: [0, size, size * scale, screenWidth]
+    })
+    const sizeHeight = mediaScale.interpolate({
+      inputRange: [0,1,2,3],
+      outputRange: [0, size, size * scale, screenHeight]
     })
     const trueLikeCount = likeCount + (isLiked && didLike ? 1 : 0)
 
@@ -543,10 +580,12 @@ export default class MediaItem extends Component {
           // {translateX}
         ],
         // width: size,
-        width: widthVal,
-        height: containerHeight,
+        // width: sizeVal,
+        // height: containerHeight,
+        width: sizeWidth,
+        height: sizeHeight,
         overflow: 'hidden',
-        marginLeft: fullScreen ? 0 : marginLeft + sideMargin,
+        // marginLeft: fullScreen ? 0 : marginLeft + sideMargin,
       }}>
       <TouchableOpacity
         key={key}

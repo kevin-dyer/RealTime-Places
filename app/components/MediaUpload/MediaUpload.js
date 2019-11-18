@@ -502,6 +502,7 @@ class MediaUpload extends Component {
                 style={styles.preview}
                 type={RNCamera.Constants.Type.back}
                 flashMode={flashMode}
+                captureAudio={!isMuted}
                 androidCameraPermissionOptions={{
                   title: 'Permission to use camera',
                   message: 'We need your permission to use your camera',

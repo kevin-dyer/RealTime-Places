@@ -152,18 +152,22 @@ class DrawerTest extends Component {
         return key === selectedCheckin
       })
       //Go to specified index if selectedCheckin is an integer
-      if (Number.isInteger(selectedCheckin) && selectedCheckin < allMedia.length) {
+      if (Number.isInteger(selectedIndex) && selectedIndex < allMedia.length) {
         // this.scrollViewRef.scrollToIndex({
         //   animated: true,
         //   index: selectedCheckin
         // })
 
-        // console.log("scrolling to index: ", selectedIndex)
+        
 
-        this.scrollViewRef.scrollTo({
-          animated: true,
-          x: selectedIndex * PHOTO_SIZE - width / 2 + PHOTO_SIZE / 2
-        })
+        // this.scrollViewRef.scrollTo({
+        //   animated: true,
+        //   x: selectedIndex * PHOTO_SIZE,// - width / 2 + PHOTO_SIZE / 2
+        //   // viewOffset: -PHOTO_SIZE/2,
+        //   // viewPosition: fullScreen ? 0 : 0.5
+        // })
+        console.log("scrolling to new selectedIndex: ", selectedIndex)
+        this.scrollToMedia(selectedIndex)
         return
       }
 
@@ -175,14 +179,24 @@ class DrawerTest extends Component {
         //   viewPosition: fullScreen ? 0 : 0.5
         // })
 
-        this.scrollViewRef.scrollTo({
-          animated: true,
-          x: selectedIndex * PHOTO_SIZE - width / 2 + PHOTO_SIZE / 2
-          // viewOffset: -PHOTO_SIZE/2,
-          // viewPosition: fullScreen ? 0 : 0.5
-        })
+        console.log("scrolling to index: ", selectedIndex)
+        // this.scrollViewRef.scrollTo({
+        //   animated: true,
+        //   x: selectedIndex * PHOTO_SIZE - (width - PHOTO_SIZE * PHOTO_SCALE) / 2, //assuming always scrolling to selected
+        // })
+        this.scrollToMedia(selectedIndex)
       }
     }
+  }
+
+  scrollToMedia = (selectedIndex) => {
+    const {fullScreen} = this.state
+
+    this.scrollViewRef.scrollTo({
+      animated: true,
+      x: !fullScreen ? selectedIndex * (PHOTO_SIZE + 1) - (width - PHOTO_SIZE * PHOTO_SCALE) / 2 : 0, //assuming always scrolling to selected
+      y: fullScreen ? height * selectedIndex : 0
+    })
   }
 
   removeMedia = (mediaToRemove) => {
@@ -276,11 +290,12 @@ class DrawerTest extends Component {
     if (!!this.scrollViewRef && !isNaN(index)) {
       // console.log("toggleFullScreen calling scrollToIndex: ", index)
       setTimeout(() => { 
-        this.scrollViewRef.scrollTo({
-          animated: false,
-          x: !nextFullScreen ? PHOTO_SIZE * index - width / 2 + PHOTO_SIZE / 2 : 0,
-          y: nextFullScreen ? height * index : 0
-        })
+        // this.scrollViewRef.scrollTo({
+        //   animated: false,
+        //   x: !nextFullScreen ? PHOTO_SIZE * index - width / 2 + PHOTO_SIZE / 2 : 0,
+        //   y: nextFullScreen ? height * index : 0
+        // })
+        this.scrollToMedia(index)
       }, 200)
     }
   }

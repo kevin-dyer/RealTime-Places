@@ -10,6 +10,8 @@ import Geolocation from '@react-native-community/geolocation'
 import uuidV4 from 'uuid/v4'
 import {updateUserData} from '../actions/login'
 
+const MAX_RADIUS = 25 //units: km
+
 
 let _firestore
 let _imageStoreRef
@@ -185,8 +187,11 @@ export const getNearbyCheckins = (region={}, onQueryData=()=>{}) => {
   const mainDelta = Math.max(latitudeDelta, longitudeDelta)
   const radius = ((mainDelta * 40008000 / 360) / 2) / 1000//not sure if I need to divide by 2
   const maxDocs = 10
-  // console.log("radius: ", radius)
 
+  if (radius > MAX_RADIUS) {
+    console.warn("search area too big, skipping getNearbyCheckins")
+    return
+  }
   // console.log("calling getNearbyCheckins, region latitude: ",latitude, ", longitude: ", longitude)
 
   //validation

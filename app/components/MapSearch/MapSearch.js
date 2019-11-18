@@ -577,7 +577,7 @@ class MapSearch extends Component<Props> {
             showsCompass={true}
             showsScale={true}
             mapPadding={{
-              top: 0,
+              top: 100,
               left: 0,
               right: 0,
               bottom: PHOTO_SIZE
