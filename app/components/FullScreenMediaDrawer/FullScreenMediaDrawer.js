@@ -9,7 +9,8 @@ import {
   FlatList,
   Dimensions,
   Animated,
-  ScrollView
+  ScrollView,
+  Modal
 } from 'react-native';
 import { withNavigation } from 'react-navigation';
 import {
@@ -44,11 +45,8 @@ import {
 } from '../../actions/login'
 import {toggleFullScreen} from '../../actions/search'
 
+
 const {width, height} = Dimensions.get('window')
-
-
-const PHOTO_SIZE = 140
-const PHOTO_SCALE = 2
 
 const stateToProps = ({
   // checkins: {
@@ -62,8 +60,8 @@ const stateToProps = ({
     }={}
   }={},
   search: {
-    fullScreen,
-    scrollToIndex
+    fullScreen=false,
+    scrollToIndex=0
   }={}
 }) => ({
   userData,
@@ -77,16 +75,11 @@ function getKey (media) {
   return media.docKey || media.photo_reference
 }
 
-class DrawerTest extends Component {
-  state = {
-    // fullScreen: false,
-    allMedia: [],
-    mediaToDelete: []
-  }
-
+class FullScreenMediaDrawer extends Component {
   componentDidUpdate({
-    allMedia: prevMedia=[],
+    // allMedia: prevMedia=[],
     selectedCheckin: oldSelectedCheckin,
+    scrollToIndex: oldScrollToIndex,
     fullScreen: oldFullScreen
   }) {
     const {
@@ -95,64 +88,10 @@ class DrawerTest extends Component {
       fullScreen,
       scrollToIndex
     } = this.props
-    const {
-      mediaToDelete: toDelete=[],
-      allMedia: allMediaState=[]
-    } = this.state
-
-    //Get list of docKeys to be removed after exit animation
-    const mediaToDelete = prevMedia.filter((prevMedia, index) => {
-      const prevKey = getKey(prevMedia)
-
-      //return true if did exist but now it does not
-      return !allMedia.some(media => {
-        const key = getKey(media)
-        return prevKey === key
-      })
-    }).map(getKey)
-
-
-    if (mediaToDelete.length > 0) {
-      // console.log("mediaToDelete: ", mediaToDelete, ", setting to: ", [...toDelete, ...mediaToDelete])
-
-      this.setState({
-        mediaToDelete: [...toDelete, ...mediaToDelete]
-      })
-    }
-
-    //TODO: add new items in allMedia props to state
-    //get mediaToAdd that also outputs their index
-    const mediaToAdd = allMedia.reduce((mToAdd=[], media, index) => {
-      const key = getKey(media)
-      const isNew = !prevMedia.some(pMedia => {
-        const prevKey = getKey(pMedia)
-
-        return prevKey === key
-      })
-      if (isNew) {
-        return [
-          ...mToAdd,
-          [media, index]
-        ]
-      }
-
-      return mToAdd
-    }, [])
-
-    //TODO: if filter is done after the fact, should just append to the end of the list
-    if (mediaToAdd.length > 0) {
-      let nextAllMedia = [...allMediaState]
-
-      mediaToAdd.forEach(([media, index]) => {
-        //problem is here
-        nextAllMedia.splice(index, 0, media)
-      })
-
-
-      this.setState({
-        allMedia: nextAllMedia
-      })
-    }
+    // const {
+    //   mediaToDelete: toDelete=[],
+    //   // allMedia: allMediaState=[]
+    // } = this.state
 
     if ((!!selectedCheckin || Number.isInteger(selectedCheckin)) && oldSelectedCheckin !== selectedCheckin) {
       const selectedIndex = allMedia.findIndex(media => {
@@ -183,41 +122,24 @@ class DrawerTest extends Component {
       }
     }
 
-    if (oldFullScreen && !fullScreen) {
-      this.scrollToMedia(scrollToIndex)
+    // if (oldSelectedCheckin !== scrollToIndex)
+    if (!oldFullScreen && fullScreen) {
+      console.log("calling scrollToMedia of scrollToIndex: ", scrollToIndex)
+      setTimeout(() => this.scrollToMedia(scrollToIndex), 0)
     }
   }
 
   scrollToMedia = (selectedIndex) => {
     const {fullScreen} = this.props
 
-    this.scrollViewRef.scrollTo({
-      animated: true,
-      x: selectedIndex * (PHOTO_SIZE + 1) - (width - PHOTO_SIZE * PHOTO_SCALE) / 2, //assuming always scrolling to selected
-      // y: fullScreen ? height * selectedIndex : 0
-    })
-  }
-
-  removeMedia = (mediaToRemove) => {
-    const {mediaToDelete=[], allMedia=[]} = this.state
-    const keyToRemove = getKey(mediaToRemove)
-
-    // console.log("removeMedia called keyToRemove: ", keyToRemove)
-    this.setState({
-      mediaToDelete: mediaToDelete.filter(key => {
-        // const key = getKey(media)
-
-        //remove key from mediaToDelete list in state
-        return keyToRemove !== key
-      }),
-      allMedia: allMedia.filter(media => {
-        const key = getKey(media)
-
-        return keyToRemove !== key
+    if (fullScreen && !!this.scrollViewRef) {
+      console.log("calling scrollTo!")
+      this.scrollViewRef.scrollTo({
+        animated: false,
+        // x: !fullScreen ? selectedIndex * (PHOTO_SIZE + 1) - (width - PHOTO_SIZE * PHOTO_SCALE) / 2 : 0, //assuming always scrolling to selected
+        y: height * selectedIndex
       })
-    }, () => {
-      const {allMedia, mediaToDelete} = this.state
-    })
+    }
   }
 
   _renderMedia = (media={}) => {
@@ -248,10 +170,10 @@ class DrawerTest extends Component {
       },
       index
     } = media
-    const {mediaToDelete=[]} = this.state
+    // const {mediaToDelete=[]} = this.state
     const key = getKey(item)
     const user = getUser() || {}
-    const toRemove = mediaToDelete.some(keyToRemove => keyToRemove === key)
+    // const toRemove = mediaToDelete.some(keyToRemove => keyToRemove === key)
 
 
     // console.log("_renderMedia media: ", media)
@@ -260,8 +182,8 @@ class DrawerTest extends Component {
       {...media}
       key={docKey || photo_reference || index}
       fullScreen={fullScreen}
-      size={PHOTO_SIZE}
-      scale={PHOTO_SCALE}
+      // size={PHOTO_SIZE}
+      // scale={PHOTO_SCALE}
       userUid={user.uid}
       liked={liked}
       flagged={flagged}
@@ -277,7 +199,7 @@ class DrawerTest extends Component {
       trackLiked={trackLiked}
       updateLikeCount={updateLikeCount}
       isSelected={selectedCheckin === (docKey || photo_reference || index)}
-      toRemove={toRemove}
+      // toRemove={toRemove}
       removeMedia={this.removeMedia}
       deleteCheckinFromState={deleteCheckinFromState}
     />
@@ -290,7 +212,7 @@ class DrawerTest extends Component {
     } = this.props
     // const nextFullScreen = !this.state.fullScreen
     // this.setState({fullScreen: nextFullScreen})
-    toggleFullScreen(true, index)
+    toggleFullScreen(false, index)
 
     // if (!!this.scrollViewRef && !isNaN(index)) {
     //   // console.log("toggleFullScreen calling scrollToIndex: ", index)
@@ -305,70 +227,25 @@ class DrawerTest extends Component {
     // }
   }
 
-  selectedCheckinIsVisible = (viewableItems=[]) => {
-    const {selectedCheckin} = this.props
-
-    return viewableItems.some(({
-      item: {
-        docKey,
-        photo_reference
-      }={}
-    }) => {
-      return !!docKey  && docKey === selectedCheckin ||
-         !!photo_reference && photo_reference === selectedCheckin
-    })
-  }
-
-  handleListChange = debounce(
-    ({
-      viewableItems=[],
-      changed=[]
-    }) => {
-      const {selectCheckin} = this.props
-      const {fullScreen} = this.state
-      const checkinIsVisible = this.selectedCheckinIsVisible(viewableItems)
-
-      //TODO: Remove SelectedCheckin if offscreen
-      if (!checkinIsVisible) {
-        selectCheckin(null)
-      }
-    }, 600
-  )
-
-
   render() {
     const {
-      // allMedia=[],
-      selectedCheckin,
-      selectCheckin=()=>{},
-      // toggleMediaUpload=()=>{}
-      navigation: {
-        navigate
-      }={}
+      fullScreen,
+      allMedia
     } = this.props
-    const {fullScreen, allMedia=[]} = this.state
 
-    return <View style={{
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      zIndex: 2,
-      height: fullScreen ? height : null,
-      width,
-      shadowColor: 'rgb(0,0,0)',
-      shadowOffset: {width: 0, height: -1},
-      shadowRadius: 6,
-      shadowOpacity: 0.4
-    }}>
-      <View style={{
-        position: 'relative',
-        flex: 1
-      }}>
+    //TODO: consider turnning ScrollView into FlatList
+    return (
+      <Modal
+        visible={fullScreen}
+        animationType="slide"
+        hardwareAccelerated={true}
+        presentationStyle="fullScreen"
+      >
         <ScrollView
           ref={(ref) => {this.scrollViewRef = ref}}
-          horizontal={!fullScreen}
-          decelerationRate={fullScreen ? 0 : 'normal'}
-          snapToInterval={fullScreen ? height : PHOTO_SIZE + 1} //your element width
+          horizontal={false}
+          decelerationRate={0}
+          snapToInterval={height} //your element width
           snapToAlignment={"start"}
           style={styles.swiperWrapper}
           contentContainerStyle={styles.contentContainer}
@@ -377,9 +254,10 @@ class DrawerTest extends Component {
             return this._renderMedia({item: media, index})
           })}
         </ScrollView>
-      </View>
-    </View>
+      </Modal>
+    )
   }
+
 }
 
 export default withNavigation(connect(stateToProps, {
@@ -390,16 +268,16 @@ export default withNavigation(connect(stateToProps, {
   updateLikeCount,
   deleteCheckinFromState,
   toggleFullScreen
-})(DrawerTest))
+})(FullScreenMediaDrawer))
 
 const styles = StyleSheet.create({
   swiperWrapper: {
     width,
-    minHeight: PHOTO_SIZE,
+    // minHeight: PHOTO_SIZE,
     backgroundColor: 'rgba(0,0,0,0.2)',
   },
   contentContainer: {
-    alignItems: 'flex-end',
+    alignItems: 'stretch',
   }
   // swiperContainer: {
   //   alignItems: 'flex-end',

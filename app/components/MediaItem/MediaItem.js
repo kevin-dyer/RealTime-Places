@@ -91,7 +91,7 @@ export default class MediaItem extends Component {
     }={},
     toRemove: wasToRemove,
     isSelected: wasSelected,
-    fullScreen: wasFullScreen
+    // fullScreen: wasFullScreen
   }, {
     paused: wasPaused
   }) {
@@ -104,7 +104,7 @@ export default class MediaItem extends Component {
       // }={}
       isSelected,
       toRemove,
-      fullScreen
+      // fullScreen
     } = this.props
     // const wasSelected = this.isSelected(oldCheckin)
     // const isSelected = this.isSelected(selectedCheckin)
@@ -122,7 +122,8 @@ export default class MediaItem extends Component {
 
     //TODO: call animateScale when isSelected or fullScreen changes
     // console.log("wasFullScreen: ", wasFullScreen, ", fullScreen: ", fullScreen)
-    if (wasSelected !== isSelected || wasFullScreen !== fullScreen) {
+    // if (wasSelected !== isSelected || wasFullScreen !== fullScreen) {
+    if (wasSelected !== isSelected) {
       this.animateScale()
     }
 
@@ -180,16 +181,12 @@ export default class MediaItem extends Component {
   animateScale = () => {
     const {
       isSelected,
-      fullScreen
+      // fullScreen
     } = this.props
     // const {fullScreen} = this.state
 
     //TODO: assign animated value 0, 1(selected), 2(fullScreen)
-    const scale = fullScreen
-      ? 3
-      : isSelected
-        ? 2
-        : 1
+    const scale = isSelected ? 2 : 1
 
     console.log("AnimateScale setting to: ", scale)
     Animated.spring(this.state.scale, {
@@ -563,12 +560,12 @@ export default class MediaItem extends Component {
     // })
     const mediaScale = Animated.multiply(mediaWidth, scaleVal)
     const sizeWidth = mediaScale.interpolate({
-      inputRange: [0, 1, 2, 3],
-      outputRange: [0, size, size * scale, screenWidth]
+      inputRange: [0, 1, 2],
+      outputRange: [0, size, size * scale]
     })
     const sizeHeight = mediaScale.interpolate({
-      inputRange: [0,1,2,3],
-      outputRange: [0, size, size * scale, screenHeight]
+      inputRange: [0,1,2],
+      outputRange: [0, size, size * scale]
     })
     const trueLikeCount = likeCount + (isLiked && didLike ? 1 : 0)
 
@@ -582,8 +579,8 @@ export default class MediaItem extends Component {
         // width: size,
         // width: sizeVal,
         // height: containerHeight,
-        width: sizeWidth,
-        height: sizeHeight,
+        width: fullScreen ? screenWidth : sizeWidth,
+        height: fullScreen ? screenHeight : sizeHeight,
         overflow: 'hidden',
         // marginLeft: fullScreen ? 0 : marginLeft + sideMargin,
       }}>

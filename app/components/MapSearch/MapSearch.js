@@ -21,6 +21,8 @@ import MapView, {
 } from 'react-native-maps';
 // import MediaDrawer from '../MediaDrawer/MediaDrawer'
 import DrawerTest from '../MediaDrawer/DrawerTest'
+import FullScreenMediaDrawer from '../FullScreenMediaDrawer/FullScreenMediaDrawer'
+
 
 import Geolocation from '@react-native-community/geolocation'
 import { throttle, debounce } from 'throttle-debounce'
@@ -624,6 +626,11 @@ class MapSearch extends Component<Props> {
         />
 
         <DrawerTest
+          allMedia={allPhotos}
+          selectedCheckin={selectedCheckin}
+        />
+
+        <FullScreenMediaDrawer
           allMedia={allPhotos}
           selectedCheckin={selectedCheckin}
         />
