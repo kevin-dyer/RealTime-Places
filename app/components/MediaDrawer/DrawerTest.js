@@ -154,8 +154,16 @@ class DrawerTest extends Component {
       })
     }
 
+
+    //BIG NOTE: if there is mediaToAdd or mediaToDelete, those should be considered before scrolling
+    //NOTE: even if mediaToDelete has been filtered out, could still get messed up if media has been added.
+    //        Would need to wait until enter animation is complete
     if ((!!selectedCheckin || Number.isInteger(selectedCheckin)) && oldSelectedCheckin !== selectedCheckin) {
-      const selectedIndex = allMedia.findIndex(media => {
+      
+      const remainingMedia = allMedia.filter(media =>
+        !mediaToDelete.some(mtd => mtd.docKey === media.docKey)
+      )
+      const selectedIndex = remainingMedia.findIndex(media => {
         const key = getKey(media)
 
         return key === selectedCheckin

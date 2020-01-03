@@ -39,8 +39,8 @@ import {
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window')
 const isX = isIphoneX()
-const HEADER_HEIGHT = isX ? 150 : 100
-const HEADER_OFFSET = isX ? 80 : 30
+const HEADER_HEIGHT = isX ? 100 : 100
+const HEADER_OFFSET = isX ? 30 : 30
 const ANIMATION_TIME = 300
 
 
@@ -602,7 +602,9 @@ export default class MediaItem extends Component {
           <View style={{
             width: screenWidth,
             height: HEADER_HEIGHT,
-            backgroundColor: '#000'
+            backgroundColor: '#000',
+            // borderColor: "white",
+            // borderWidth: 1
             }}
           >
 
@@ -776,16 +778,16 @@ export default class MediaItem extends Component {
               flexDirection: 'row',
               alignItems: 'center'
             }}>
-              <Icon
-                name='ios-clock'
-                color={"#000"}
-                size={16}
-              />
+              {/* <Icon */}
+              {/*   name='ios-clock' */}
+              {/*   color={"#000"} */}
+              {/*   size={16} */}
+              {/* /> */}
               <Text style={{
                 color: '#404040',
                 // marginLeft: 20,
                 fontSize: 14,
-                marginLeft: 12
+                marginLeft: -4
               }}>
                 {fullDateLabel}
               </Text>
